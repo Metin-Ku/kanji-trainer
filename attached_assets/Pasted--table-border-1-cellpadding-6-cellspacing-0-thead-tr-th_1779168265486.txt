@@ -1,0 +1,114 @@
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th class="kanji">Kelime</th>
+      <th class="pronunciation">Okunuşu</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="kanji">工事</td>
+      <td class="pronunciation">こうじ (kouji)</td>
+    </tr>
+    <tr>
+      <td class="kanji">招待</td>
+      <td class="pronunciation">しょうたい (shoutai)</td>
+    </tr>
+    <tr>
+      <td class="kanji">会計</td>
+      <td class="pronunciation">かいけい (kaikei)</td>
+    </tr>
+    <tr>
+      <td class="kanji">休憩</td>
+      <td class="pronunciation">きゅうけい (kyuukei)</td>
+    </tr>
+    <tr>
+      <td class="kanji">残業</td>
+      <td class="pronunciation">ざんぎょう (zangyou)</td>
+    </tr>
+    <tr>
+      <td class="kanji">移す</td>
+      <td class="pronunciation">うつす (utsusu)</td>
+    </tr>
+    <tr>
+      <td class="kanji">地面</td>
+      <td class="pronunciation">じめん (jimen)</td>
+    </tr>
+    <tr>
+      <td class="kanji">涙を流す</td>
+      <td class="pronunciation">なみだをながす (namida o nagasu)</td>
+    </tr>
+    <tr>
+      <td class="kanji">本能</td>
+      <td class="pronunciation">ほんのう (honnou)</td>
+    </tr>
+    <tr>
+      <td class="kanji">ようこそ</td>
+      <td class="pronunciation">ようこそ (youkoso)</td>
+    </tr>
+    <tr>
+      <td class="kanji">行列</td>
+      <td class="pronunciation">ぎょうれつ (gyouretsu)</td>
+    </tr>
+    <tr>
+      <td class="kanji">台本</td>
+      <td class="pronunciation">だいほん (daihon)</td>
+    </tr>
+    <tr>
+      <td class="kanji">訪問</td>
+      <td class="pronunciation">ほうもん (houmon)</td>
+    </tr>
+    <tr>
+      <td class="kanji">お邪魔します</td>
+      <td class="pronunciation">おじゃまします (ojama shimasu)</td>
+    </tr>
+    <tr>
+      <td class="kanji">配達</td>
+      <td class="pronunciation">はいたつ (haitatsu)</td>
+    </tr>
+    <tr>
+      <td class="kanji">格好</td>
+      <td class="pronunciation">かっこう (kakkou)</td>
+    </tr>
+    <tr>
+      <td class="kanji">送信</td>
+      <td class="pronunciation">そうしん (soushin)</td>
+    </tr>
+    <tr>
+      <td class="kanji">嘘</td>
+      <td class="pronunciation">うそ (uso)</td>
+    </tr>
+    <tr>
+      <td class="kanji">務める</td>
+      <td class="pronunciation">つとめる (tsutomeru)</td>
+    </tr>
+    <tr>
+      <td class="kanji">区役所</td>
+      <td class="pronunciation">くやくしょ (kuyakusho)</td>
+    </tr>
+    <tr>
+      <td class="kanji">お代わり</td>
+      <td class="pronunciation">おかわり (okawari)</td>
+    </tr>
+    <tr>
+      <td class="kanji">遅刻</td>
+      <td class="pronunciation">ちこく (chikoku)</td>
+    </tr>
+    <tr>
+      <td class="kanji">明らか</td>
+      <td class="pronunciation">あきらか (akiraka)</td>
+    </tr>
+    <tr>
+      <td class="kanji">失業</td>
+      <td class="pronunciation">しつぎょう (shitsugyou)</td>
+    </tr>
+    <tr>
+      <td class="kanji">頭痛</td>
+      <td class="pronunciation">ずつう (zutsuu)</td>
+    </tr>
+    <tr>
+      <td class="kanji">腹痛</td>
+      <td class="pronunciation">ふくつう (fukutsuu)</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,93 @@
+<table>
+  <tr>
+    <th>Word</th>
+    <th>Pronunciation</th>
+    <th>Meaning</th>
+    <th>Description</th>
+  </tr>
+
+  <tr>
+    <td class="word">存在</td>
+    <td class="pronunciation">そんざい (sonzai)</td>
+    <td class="meaning">TR: Varlık, mevcudiyet | EN: Existence</td>
+    <td class="description">
+      私にとって家族は大切な<strong>存在</strong>です。<br>
+      --> Watashi ni totte kazoku wa taisetsu na <strong>sonzai</strong> desu.<br>
+      --> Benim için aile önemli bir <strong>varlıktır</strong>.<br>
+      --> Family is an important <strong>existence</strong> to me.
+    </td>
+  </tr>
+
+  <tr>
+    <td class="word">幼稚</td>
+    <td class="pronunciation">ようち (youchi)</td>
+    <td class="meaning">TR: Çocukça, olgunlaşmamış | EN: Childish, immature</td>
+    <td class="description">
+      <strong>幼稚</strong>な考え方をやめたほうがいい。<br>
+      --> <strong>Youchi</strong> na kangaekata o yameta hou ga ii.<br>
+      --> <strong>Çocukça</strong> düşünmeyi bırakman daha iyi olur.<br>
+      --> You should stop thinking <strong>childishly</strong>.
+    </td>
+  </tr>
+
+  <tr>
+    <td class="word">費用</td>
+    <td class="pronunciation">ひよう (hiyou)</td>
+    <td class="meaning">TR: Masraf, maliyet | EN: Expense, cost</td>
+    <td class="description">
+      旅行の<strong>費用</strong>は高かった。<br>
+      --> Ryokou no <strong>hiyou</strong> wa takakatta.<br>
+      --> Seyahatin <strong>masrafı</strong> yüksekti.<br>
+      --> The travel <strong>expenses</strong> were high.
+    </td>
+  </tr>
+
+  <tr>
+    <td class="word">労働</td>
+    <td class="pronunciation">ろうどう (roudou)</td>
+    <td class="meaning">TR: Emek, iş gücü | EN: Labor, work</td>
+    <td class="description">
+      毎日の<strong>労働</strong>でとても疲れた。<br>
+      --> Mainichi no <strong>roudou</strong> de totemo tsukareta.<br>
+      --> Her günkü <strong>çalışmadan</strong> çok yoruldum.<br>
+      --> I became very tired from daily <strong>labor</strong>.
+    </td>
+  </tr>
+
+  <tr>
+    <td class="word">診断</td>
+    <td class="pronunciation">しんだん (shindan)</td>
+    <td class="meaning">TR: Teşhis | EN: Diagnosis</td>
+    <td class="description">
+      医者に風邪だと<strong>診断</strong>された。<br>
+      --> Isha ni kaze da to <strong>shindan</strong> sareta.<br>
+      --> Doktor bana soğuk algınlığı <strong>teşhisi</strong> koydu.<br>
+      --> The doctor gave a <strong>diagnosis</strong> of a cold.
+    </td>
+  </tr>
+
+  <tr>
+    <td class="word">筋肉</td>
+    <td class="pronunciation">きんにく (kinniku)</td>
+    <td class="meaning">TR: Kas | EN: Muscle</td>
+    <td class="description">
+      毎日運動して<strong>筋肉</strong>を鍛えている。<br>
+      --> Mainichi undou shite <strong>kinniku</strong> o kitaete iru.<br>
+      --> Her gün egzersiz yapıp <strong>kaslarımı</strong> çalıştırıyorum.<br>
+      --> I exercise every day to build <strong>muscle</strong>.
+    </td>
+  </tr>
+
+  <tr>
+    <td class="word">満点</td>
+    <td class="pronunciation">まんてん (manten)</td>
+    <td class="meaning">TR: Tam puan | EN: Perfect score</td>
+    <td class="description">
+      テストで<strong>満点</strong>を取った。<br>
+      --> Tesuto de <strong>manten</strong> o totta.<br>
+      --> Sınavdan <strong>tam puan</strong> aldım.<br>
+      --> I got a <strong>perfect score</strong> on the test.
+    </td>
+  </tr>
+
+</table>

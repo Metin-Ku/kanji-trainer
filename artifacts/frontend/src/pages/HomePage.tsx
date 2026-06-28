@@ -1,0 +1,248 @@
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { BookOpen, Waves, Languages, Pencil, Trash2 } from "lucide-react";
+import { SearchBar } from "../components/SearchBar";
+import { useWords } from "../hooks/useWords";
+import { filterWords } from "../utils/filterWords";
+import { RelatedWordsList, RelatedWordsButton } from "../components/RelatedWordsList";
+import { WordFormModal } from "../components/WordFormModal";
+import type { Word, WordUpdate } from "../types";
+
+const TURKISH_MONTHS = [
+  "Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
+  "Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık",
+];
+const TURKISH_DAYS = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+
+function formatTodayTurkish(): string {
+  const now = new Date();
+  return `${TURKISH_DAYS[now.getDay()]}, ${now.getDate()} ${TURKISH_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+const SHADOW = "0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)";
+const ICON_BG = "linear-gradient(135deg, rgba(255,150,30,0.13), rgba(255,90,10,0.08))";
+
+export function HomePage() {
+  const [, navigate] = useLocation();
+  const { words, updateWord, deleteWord } = useWords();
+  const [query, setQuery] = useState("");
+  const [openIds, setOpenIds] = useState<Set<number>>(new Set());
+  const [relatedOpenIds, setRelatedOpenIds] = useState<Set<number>>(new Set());
+  const [editingWord, setEditingWord] = useState<Word | undefined>(undefined);
+  const [showForm, setShowForm] = useState(false);
+
+  function handleSave(data: WordUpdate & { relatedWordIds: number[] }) {
+    if (editingWord) updateWord(editingWord.id, data);
+    setShowForm(false);
+    setEditingWord(undefined);
+  }
+
+  const results = filterWords(words, query);
+  const isSearching = query.trim().length > 0;
+
+  const starredCount = words.filter((w) => w.starred).length;
+  const nonStarredCount = words.filter((w) => !w.starred).length;
+
+  function toggleOpen(id: number) {
+    setOpenIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+        setRelatedOpenIds((r) => { const n = new Set(r); n.delete(id); return n; });
+      } else next.add(id);
+      return next;
+    });
+  }
+
+  return (
+    <div className="min-h-dvh bg-gray-50 flex flex-col">
+      <div className="bg-white border-b border-gray-100 px-5 pt-5 pb-3 shrink-0">
+        <p className="text-[11px] font-semibold text-orange-400 uppercase tracking-widest mb-0.5">
+          Japonca Kelime Defteri
+        </p>
+        <h1 className="text-xl font-bold text-gray-900 mb-3">{formatTodayTurkish()}</h1>
+        <SearchBar value={query} onChange={setQuery} placeholder="Kelime, okunuş veya anlam ara…" />
+      </div>
+
+      {isSearching ? (
+        <div className="flex-1 overflow-y-auto bg-white">
+          {results.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center px-8">
+              <p className="text-4xl text-gray-200 mb-3">?</p>
+              <p className="text-gray-400 text-sm">"{query}" için sonuç bulunamadı</p>
+            </div>
+          ) : (
+            <div>
+              <p className="px-5 pt-3 pb-1 text-xs text-gray-400 font-medium">{results.length} sonuç</p>
+              {results.map((word) => {
+                const isOpen = openIds.has(word.id);
+                const isRelatedOpen = relatedOpenIds.has(word.id);
+                const hasDetail = !!(word.pronunciation || word.meaning || word.description);
+                return (
+                  <div key={word.id} className="border-b border-gray-100 last:border-b-0">
+                    <div
+                      className="flex items-center gap-3 px-5 py-3 select-none cursor-pointer"
+                      onClick={() => hasDetail && toggleOpen(word.id)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-base font-bold text-gray-800 leading-none">{word.kanji}</p>
+                        {word.pronunciation && <p className="text-xs text-gray-500 mt-0.5">{word.pronunciation}</p>}
+                        {word.meaning && <p className="text-xs text-gray-400 mt-0.5 truncate">{word.meaning}</p>}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {word.jlptLevel && (
+                          <span className="text-[11px] font-semibold px-2 py-1 rounded-full" style={{ background: "#f3f4f6", color: "rgb(107,114,128)" }}>
+                            {word.jlptLevel}
+                          </span>
+                        )}
+                        <div className="flex flex-row gap-1">
+                          {(
+                            [
+                              { Icon: Languages, starred: word.starred,        level: word.level        },
+                              { Icon: Waves,     starred: word.pronStarred,    level: word.pronLevel    },
+                              { Icon: BookOpen,  starred: word.meaningStarred, level: word.meaningLevel },
+                            ] as const
+                          ).map(({ Icon, starred, level }, i) => (
+                            <div key={i} className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: "#f3f4f6" }}>
+                              <Icon size={13} strokeWidth={2} style={{ color: "rgb(107,114,128)", flexShrink: 0 }} />
+                              {starred ? (
+                                <div className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "rgb(255,215,0)", color: "rgb(255,255,255)" }}>★</div>
+                              ) : (
+                                <div className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: ["rgb(255,165,0)","rgb(247,150,18)","rgb(238,135,35)","rgb(242,118,28)","rgb(246,100,18)"][level - 1] ?? "rgb(246,100,18)" }}>{level}</div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setEditingWord(word); setShowForm(true); }}
+                          className="p-1.5 rounded-lg active:opacity-60 transition-opacity"
+                          style={{ background: "#f3f4f6" }}
+                        >
+                          <Pencil size={13} strokeWidth={2} style={{ color: "rgb(107,114,128)" }} />
+                        </button>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); if (confirm(`"${word.kanji}" silinsin mi?`)) deleteWord(word.id); }}
+                          className="p-1.5 rounded-lg active:opacity-60 transition-opacity"
+                          style={{ background: "#f3f4f6" }}
+                        >
+                          <Trash2 size={13} strokeWidth={2} style={{ color: "rgb(239,68,68)" }} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {(word.description || word.meaning) && (
+                      <div className={`word-detail ${isOpen ? "open" : ""}`}>
+                        <div className="px-5 pb-4 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span />
+                            {word.meaning && (
+                              <RelatedWordsButton
+                                active={isRelatedOpen}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setRelatedOpenIds((prev) => {
+                                    const n = new Set(prev);
+                                    n.has(word.id) ? n.delete(word.id) : n.add(word.id);
+                                    return n;
+                                  });
+                                }}
+                              />
+                            )}
+                          </div>
+                          {isRelatedOpen && word.meaning ? (
+                            <RelatedWordsList word={word} allWords={words} />
+                          ) : (
+                            word.description && (
+                              <div className="whitespace-pre-wrap text-[14px] text-gray-700 leading-relaxed font-[inherit]">
+                                {word.description}
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col gap-2.5 p-3 overflow-hidden">
+          <div className="flex-[2] flex flex-col gap-2.5 min-h-0">
+            {/* Kelimeler — centered */}
+            <button
+              onClick={() => navigate("/words")}
+              className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
+              style={{ boxShadow: SHADOW }}
+            >
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: ICON_BG }}>
+                <Languages size={22} className="text-orange-400" strokeWidth={1.8} />
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Word</p>
+                <p className="text-xl font-bold text-gray-900 leading-tight">Kelimeler</p>
+                <p className="text-xs text-gray-400 mt-0.5">{nonStarredCount} kelime</p>
+              </div>
+            </button>
+
+            <div className="flex-1 flex gap-2.5 min-h-0">
+              <button
+                onClick={() => navigate("/pronunciation")}
+                className="flex-1 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
+                style={{ boxShadow: SHADOW }}
+              >
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ICON_BG }}>
+                  <Waves size={20} className="text-orange-400" strokeWidth={1.8} />
+                </div>
+                <div className="text-center">
+                  <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pronunciation</p>
+                  <p className="text-base font-bold text-gray-900 leading-tight">Okunuş</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => navigate("/meaning")}
+                className="flex-1 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
+                style={{ boxShadow: SHADOW }}
+              >
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ICON_BG }}>
+                  <BookOpen size={20} className="text-orange-400" strokeWidth={1.8} />
+                </div>
+                <div className="text-center">
+                  <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Meaning</p>
+                  <p className="text-base font-bold text-gray-900 leading-tight">Anlam</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Öğrenilenler — centered */}
+          <button
+            onClick={() => navigate("/learned")}
+            className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
+            style={{ boxShadow: SHADOW }}
+          >
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: ICON_BG }}>
+              <span style={{ color: "rgb(255,165,0)", fontSize: 20 }}>★</span>
+            </div>
+            <div className="text-center">
+              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Learned</p>
+              <p className="text-xl font-bold text-gray-900 leading-tight">Öğrenilenler</p>
+              <p className="text-xs text-gray-400 mt-0.5">{starredCount} kelime</p>
+            </div>
+          </button>
+        </div>
+      )}
+
+      {showForm && (
+        <WordFormModal
+          initial={editingWord}
+          allWords={words}
+          onSave={handleSave}
+          onClose={() => { setShowForm(false); setEditingWord(undefined); }}
+        />
+      )}
+    </div>
+  );
+}

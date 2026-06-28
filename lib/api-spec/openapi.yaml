@@ -1,0 +1,268 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: words
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /words:
+    get:
+      operationId: listWords
+      tags: [words]
+      responses:
+        "200":
+          description: List of words
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VocabWord"
+    post:
+      operationId: createWord
+      tags: [words]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WordInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VocabWord"
+        "400":
+          description: Bad request
+
+  /words/bulk:
+    post:
+      operationId: bulkCreateWords
+      tags: [words]
+      summary: Bulk create words, skipping duplicates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WordBulkInput"
+      responses:
+        "200":
+          description: Bulk import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkImportResult"
+        "400":
+          description: Bad request
+
+  /words/{id}:
+    patch:
+      operationId: updateWord
+      tags: [words]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WordUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VocabWord"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteWord
+      tags: [words]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+
+    VocabWord:
+      type: object
+      required: [id, kanji, pronunciation, meaning, description, level, starred, pronLevel, pronStarred, meaningLevel, meaningStarred, date, createdAt, relatedWordIds]
+      properties:
+        id:
+          type: integer
+        kanji:
+          type: string
+        pronunciation:
+          type: string
+        meaning:
+          type: string
+        description:
+          type: string
+        level:
+          type: integer
+        starred:
+          type: boolean
+        pronLevel:
+          type: integer
+        pronStarred:
+          type: boolean
+        meaningLevel:
+          type: integer
+        meaningStarred:
+          type: boolean
+        jlptLevel:
+          type: ["string", "null"]
+        date:
+          type: string
+        createdAt:
+          type: string
+        relatedWordIds:
+          type: array
+          items:
+            type: integer
+
+    WordInput:
+      type: object
+      required: [kanji, date]
+      properties:
+        kanji:
+          type: string
+          minLength: 1
+        pronunciation:
+          type: string
+        meaning:
+          type: string
+        description:
+          type: string
+        level:
+          type: integer
+          minimum: 1
+          maximum: 5
+        jlptLevel:
+          type: string
+        date:
+          type: string
+        relatedWordIds:
+          type: array
+          items:
+            type: integer
+
+    WordUpdate:
+      type: object
+      properties:
+        kanji:
+          type: string
+          minLength: 1
+        pronunciation:
+          type: string
+        meaning:
+          type: string
+        description:
+          type: string
+        level:
+          type: integer
+          minimum: 1
+          maximum: 5
+        starred:
+          type: boolean
+        pronLevel:
+          type: integer
+          minimum: 1
+          maximum: 5
+        pronStarred:
+          type: boolean
+        meaningLevel:
+          type: integer
+          minimum: 1
+          maximum: 5
+        meaningStarred:
+          type: boolean
+        jlptLevel:
+          type: ["string", "null"]
+        date:
+          type: string
+        relatedWordIds:
+          type: array
+          items:
+            type: integer
+
+    WordBulkInput:
+      type: object
+      required: [words]
+      properties:
+        words:
+          type: array
+          items:
+            $ref: "#/components/schemas/BulkWordItem"
+
+    BulkWordItem:
+      type: object
+      required: [kanji]
+      properties:
+        kanji:
+          type: string
+          minLength: 1
+        pronunciation:
+          type: string
+        meaning:
+          type: string
+        description:
+          type: string
+        jlptLevel:
+          type: string
+
+    BulkImportResult:
+      type: object
+      required: [total, added, skipped, skippedWords]
+      properties:
+        total:
+          type: integer
+        added:
+          type: integer
+        skipped:
+          type: integer
+        skippedWords:
+          type: array
+          items:
+            type: string

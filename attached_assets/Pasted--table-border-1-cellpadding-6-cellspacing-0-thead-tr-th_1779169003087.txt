@@ -1,0 +1,141 @@
+<table border="1" cellpadding="6" cellspacing="0">
+  <thead>
+    <tr>
+      <th class="word">Kelime</th>
+      <th class="pronunciation">Okunuşu</th>
+      <th class="meaning">Anlamı</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="word">工事</td>
+      <td class="pronunciation">こうじ (kouji)</td>
+      <td class="meaning">TR: İnşaat, çalışma | EN: Construction, engineering work</td>
+    </tr>
+    <tr>
+      <td class="word">招待</td>
+      <td class="pronunciation">しょうたい (shoutai)</td>
+      <td class="meaning">TR: Davet | EN: Invitation</td>
+    </tr>
+    <tr>
+      <td class="word">会計</td>
+      <td class="pronunciation">かいけい (kaikei)</td>
+      <td class="meaning">TR: Hesap, muhasebe | EN: Bill, accounting</td>
+    </tr>
+    <tr>
+      <td class="word">休憩</td>
+      <td class="pronunciation">きゅうけい (kyuukei)</td>
+      <td class="meaning">TR: Mola, dinlenme | EN: Break, rest</td>
+    </tr>
+    <tr>
+      <td class="word">残業</td>
+      <td class="pronunciation">ざんぎょう (zangyou)</td>
+      <td class="meaning">TR: Fazla mesai | EN: Overtime work</td>
+    </tr>
+    <tr>
+      <td class="word">移す</td>
+      <td class="pronunciation">うつす (utsusu)</td>
+      <td class="meaning">TR: Taşımak, aktarmak | EN: To move, transfer</td>
+    </tr>
+    <tr>
+      <td class="word">地面</td>
+      <td class="pronunciation">じめん (jimen)</td>
+      <td class="meaning">TR: Yer, zemin | EN: Ground, surface</td>
+    </tr>
+    <tr>
+      <td class="word">涙を流す</td>
+      <td class="pronunciation">なみだをながす (namida o nagasu)</td>
+      <td class="meaning">TR: Gözyaşı dökmek | EN: To shed tears</td>
+    </tr>
+    <tr>
+      <td class="word">本能</td>
+      <td class="pronunciation">ほんのう (honnou)</td>
+      <td class="meaning">TR: İçgüdü | EN: Instinct</td>
+    </tr>
+    <tr>
+      <td class="word">ようこそ</td>
+      <td class="pronunciation">ようこそ (youkoso)</td>
+      <td class="meaning">TR: Hoş geldiniz | EN: Welcome</td>
+    </tr>
+    <tr>
+      <td class="word">行列</td>
+      <td class="pronunciation">ぎょうれつ (gyouretsu)</td>
+      <td class="meaning">TR: Sıra, kuyruk | EN: Line, queue</td>
+    </tr>
+    <tr>
+      <td class="word">台本</td>
+      <td class="pronunciation">だいほん (daihon)</td>
+      <td class="meaning">TR: Senaryo | EN: Script</td>
+    </tr>
+    <tr>
+      <td class="word">訪問</td>
+      <td class="pronunciation">ほうもん (houmon)</td>
+      <td class="meaning">TR: Ziyaret | EN: Visit</td>
+    </tr>
+    <tr>
+      <td class="word">お邪魔します</td>
+      <td class="pronunciation">おじゃまします (ojama shimasu)</td>
+      <td class="meaning">TR: Rahatsız ediyorum (eve girerken) | EN: Excuse me for disturbing you</td>
+    </tr>
+    <tr>
+      <td class="word">配達</td>
+      <td class="pronunciation">はいたつ (haitatsu)</td>
+      <td class="meaning">TR: Teslimat | EN: Delivery</td>
+    </tr>
+    <tr>
+      <td class="word">格好</td>
+      <td class="pronunciation">かっこう (kakkou)</td>
+      <td class="meaning">TR: Görünüş, tarz | EN: Appearance, style</td>
+    </tr>
+    <tr>
+      <td class="word">送信</td>
+      <td class="pronunciation">そうしん (soushin)</td>
+      <td class="meaning">TR: Gönderme, iletim | EN: Transmission, sending</td>
+    </tr>
+    <tr>
+      <td class="word">嘘</td>
+      <td class="pronunciation">うそ (uso)</td>
+      <td class="meaning">TR: Yalan | EN: Lie</td>
+    </tr>
+    <tr>
+      <td class="word">務める</td>
+      <td class="pronunciation">つとめる (tsutomeru)</td>
+      <td class="meaning">TR: Görev yapmak, çalışmak | EN: To serve, work</td>
+    </tr>
+    <tr>
+      <td class="word">区役所</td>
+      <td class="pronunciation">くやくしょ (kuyakusho)</td>
+      <td class="meaning">TR: İlçe belediyesi | EN: Ward office</td>
+    </tr>
+    <tr>
+      <td class="word">お代わり</td>
+      <td class="pronunciation">おかわり (okawari)</td>
+      <td class="meaning">TR: Bir porsiyon daha | EN: Another serving</td>
+    </tr>
+    <tr>
+      <td class="word">遅刻</td>
+      <td class="pronunciation">ちこく (chikoku)</td>
+      <td class="meaning">TR: Geç kalma | EN: Lateness</td>
+    </tr>
+    <tr>
+      <td class="word">明らか</td>
+      <td class="pronunciation">あきらか (akiraka)</td>
+      <td class="meaning">TR: Açık, belli | EN: Clear, obvious</td>
+    </tr>
+    <tr>
+      <td class="word">失業</td>
+      <td class="pronunciation">しつぎょう (shitsugyou)</td>
+      <td class="meaning">TR: İşsizlik | EN: Unemployment</td>
+    </tr>
+    <tr>
+      <td class="word">頭痛</td>
+      <td class="pronunciation">ずつう (zutsuu)</td>
+      <td class="meaning">TR: Baş ağrısı | EN: Headache</td>
+    </tr>
+    <tr>
+      <td class="word">腹痛</td>
+      <td class="pronunciation">ふくつう (fukutsuu)</td>
+      <td class="meaning">TR: Karın ağrısı | EN: Stomachache</td>
+    </tr>
+  </tbody>
+</table>

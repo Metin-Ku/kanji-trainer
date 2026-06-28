@@ -1,0 +1,52 @@
+import { useRef, useState } from "react";
+import { Search, X } from "lucide-react";
+
+interface Props {
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+}
+
+export function SearchBar({ value, onChange, placeholder = "" }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [focused, setFocused] = useState(false);
+
+  return (
+    <div className="relative flex items-center">
+      <Search
+        size={17}
+        strokeWidth={2}
+        className="absolute left-2.5 pointer-events-none shrink-0"
+        style={{
+          color: focused ? "rgb(251,146,60)" : "rgb(209,213,219)",
+          transition: "color 0.12s ease",
+        }}
+      />
+      <input
+        ref={inputRef}
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        className="w-full pl-8 pr-7 py-1.5 border border-gray-200 bg-gray-50 text-sm text-gray-700 placeholder-gray-300 focus:outline-none"
+        style={{
+          borderRadius: "0.5rem",
+          boxShadow: focused ? "inset 0 0 0 2px rgb(251,146,60)" : "none",
+          borderColor: focused ? "transparent" : undefined,
+          transition: "box-shadow 0.12s ease, border-color 0.12s ease",
+        }}
+      />
+      {value && (
+        <button
+          onClick={() => { onChange(""); inputRef.current?.focus(); }}
+          className="absolute right-1.5 flex items-center justify-center text-white active:opacity-80"
+          style={{ width: "2.6rem", height: "1.45rem", background: "rgb(248,113,113)", borderRadius: "9999px", flexShrink: 0 }}
+        >
+          <X size={11} strokeWidth={3} />
+        </button>
+      )}
+    </div>
+  );
+}

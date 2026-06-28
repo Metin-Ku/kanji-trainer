@@ -1,0 +1,267 @@
+import { useState, useRef, useEffect, useCallback } from "react";
+import { ArrowLeft, Trash2, ArrowUpDown, CheckSquare, Square, Dices } from "lucide-react";
+import { useLocation } from "wouter";
+import { useWords } from "../hooks/useWords";
+import { Word, WordUpdate } from "../types";
+import { LevelChart } from "../components/LevelChart";
+import { RelatedWordsList, RelatedWordsButton } from "../components/RelatedWordsList";
+import { SearchBar } from "../components/SearchBar";
+import { filterWords } from "../utils/filterWords";
+import { clusterByKanji } from "../utils/kanjiCluster";
+import { startStudy } from "../store/studyStore";
+
+type SortMode = "level-asc" | "level-desc" | "date-asc" | "date-desc" | "jlpt-asc" | "jlpt-desc" | "kanji-cluster";
+type SortGroup = "jlpt" | "level" | "date" | "kanji";
+
+const SORT_OPTIONS: { value: SortMode; label: string; group: SortGroup }[] = [
+  { value: "jlpt-asc",      label: "N5 → N1 (Kolay → Zor)", group: "jlpt"  },
+  { value: "jlpt-desc",     label: "N1 → N5 (Zor → Kolay)", group: "jlpt"  },
+  { value: "level-asc",     label: "Seviye ↑",              group: "level" },
+  { value: "level-desc",    label: "Seviye ↓",              group: "level" },
+  { value: "date-asc",      label: "Tarih: Eski → Yeni",    group: "date"  },
+  { value: "date-desc",     label: "Tarih: Yeni → Eski",    group: "date"  },
+  { value: "kanji-cluster", label: "Ortak Kanji Kümeleme",  group: "kanji" },
+];
+
+const JLPT_RANK: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
+function jlptRank(w: Word): number { return w.jlptLevel ? (JLPT_RANK[w.jlptLevel] ?? 99) : 99; }
+
+function sortWords(words: Word[], sort: SortMode): Word[] {
+  const arr = [...words];
+  if (sort === "jlpt-asc")   return arr.sort((a, b) => jlptRank(a) - jlptRank(b) || a.meaningLevel - b.meaningLevel);
+  if (sort === "jlpt-desc")  return arr.sort((a, b) => jlptRank(b) - jlptRank(a) || a.meaningLevel - b.meaningLevel);
+  if (sort === "level-asc")  return arr.sort((a, b) => a.meaningLevel - b.meaningLevel || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  if (sort === "level-desc") return arr.sort((a, b) => b.meaningLevel - a.meaningLevel || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  if (sort === "date-asc")   return arr.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  if (sort === "date-desc")  return arr.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  if (sort === "kanji-cluster") return clusterByKanji(arr);
+  return arr;
+}
+
+const GROUPS: { key: SortGroup; label: string }[] = [
+  { key: "jlpt",  label: "JLPT"     },
+  { key: "level", label: "Seviye"   },
+  { key: "date",  label: "Tarih"    },
+  { key: "kanji", label: "Kümeleme" },
+];
+
+function MeaningCard({
+  word, index, isOpen, onToggle, onUpdate, selectMode, isSelected, onSelect, cardRef, allWords,
+}: {
+  word: Word; index: number; isOpen: boolean;
+  onToggle: () => void; onUpdate: (id: number, patch: WordUpdate) => void;
+  selectMode: boolean; isSelected: boolean; onSelect: () => void;
+  cardRef?: (el: HTMLDivElement | null) => void;
+  allWords?: Word[];
+}) {
+  const [showRelated, setShowRelated] = useState(false);
+  useEffect(() => { if (!isOpen) setShowRelated(false); }, [isOpen]);
+  return (
+    <div ref={cardRef} className="border-b border-gray-100 last:border-b-0">
+      <div className="flex items-center gap-2.5 px-4 py-3 cursor-pointer select-none" onClick={selectMode ? onSelect : onToggle}>
+        {selectMode ? (
+          <div
+            className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
+            style={{ borderColor: isSelected ? "rgb(251,146,60)" : "#d1d5db", background: isSelected ? "rgb(251,146,60)" : "transparent" }}
+          >
+            {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+          </div>
+        ) : (
+          <span className="text-gray-300 font-medium text-sm w-5 text-right shrink-0 tabular-nums">{index}</span>
+        )}
+        <LevelChart
+          level={word.meaningLevel}
+          starred={word.meaningStarred}
+          onChangeLevel={(l) => !selectMode && onUpdate(word.id, { meaningLevel: l })}
+          onToggleStar={() => !selectMode && onUpdate(word.id, { meaningStarred: !word.meaningStarred })}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-gray-700 leading-snug line-clamp-2">
+            {word.meaning || <span className="text-gray-300 italic">Anlam yok</span>}
+          </p>
+        </div>
+        {word.jlptLevel && !selectMode && (
+          <span className="text-[10px] font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0" style={{ background: "#f3f4f6", color: "#6b7280" }}>
+            {word.jlptLevel}
+          </span>
+        )}
+      </div>
+      {!selectMode && (
+        <div className={`word-detail ${isOpen ? "open" : ""}`}>
+          <div className="px-5 pb-4 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                {!showRelated && word.kanji && <p className="text-2xl font-bold text-gray-800">{word.kanji}</p>}
+                {!showRelated && word.pronunciation && <p className="text-sm text-gray-500 mt-0.5">{word.pronunciation}</p>}
+              </div>
+              {word.meaning && allWords && (
+                <RelatedWordsButton
+                  active={showRelated}
+                  onClick={(e) => { e.stopPropagation(); setShowRelated((v) => !v); }}
+                />
+              )}
+            </div>
+            {showRelated && word.meaning && allWords ? (
+              <RelatedWordsList word={word} allWords={allWords} />
+            ) : (
+              word.description && (
+                <div className="pt-1.5 border-t border-gray-100">
+                  <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">{word.description}</p>
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function MeaningPage() {
+  const [, navigate] = useLocation();
+  const { words, isLoading, updateWord, deleteWords } = useWords();
+  const [openIds, setOpenIds] = useState<Set<number>>(new Set());
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortMode>("level-asc");
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const headerRef = useRef<HTMLDivElement>(null);
+  const sortMenuRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    if (!showSortMenu) return;
+    function handler(e: MouseEvent | TouchEvent) {
+      if (sortMenuRef.current && !sortMenuRef.current.contains(e.target as Node)) setShowSortMenu(false);
+    }
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => { document.removeEventListener("mousedown", handler); document.removeEventListener("touchstart", handler); };
+  }, [showSortMenu]);
+
+  const handleScroll = useCallback(() => {
+    if (!headerRef.current || selectMode) return;
+    const headerBottom = headerRef.current.getBoundingClientRect().bottom;
+    setOpenIds((prev) => {
+      if (prev.size === 0) return prev;
+      let changed = false;
+      const next = new Set(prev);
+      for (const id of prev) {
+        const el = cardRefs.current.get(id);
+        if (el && el.getBoundingClientRect().bottom <= headerBottom) { next.delete(id); changed = true; }
+      }
+      return changed ? next : prev;
+    });
+  }, [selectMode]);
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  function exitSelectMode() { setSelectMode(false); setSelectedIds(new Set()); }
+
+  async function handleBulkDelete() {
+    if (!window.confirm(`${selectedIds.size} kelimeyi silmek istediğinizden emin misiniz?`)) return;
+    await deleteWords(Array.from(selectedIds));
+    setSelectedIds(new Set());
+    setSelectMode(false);
+  }
+
+  const nonStarred = words.filter((w) => !w.meaningStarred);
+  const displayed = filterWords(sortWords(nonStarred, sort), query);
+
+  return (
+    <div className="min-h-dvh bg-white">
+      <div className="max-w-2xl mx-auto pb-8">
+        <div ref={headerRef} className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 pt-4 pb-3 space-y-2">
+          <div className="flex items-center justify-between">
+            <button onClick={() => navigate("/")} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors">
+              <ArrowLeft size={18} />
+              <span className="text-[11px] font-semibold text-orange-400 uppercase tracking-widest">Anlam</span>
+            </button>
+            <button
+              onClick={() => { if (displayed.length === 0) return; startStudy(displayed, "anlam", "Anlam", "/meaning"); navigate("/study"); }}
+              disabled={displayed.length === 0}
+              className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-30"
+            >
+              <Dices size={17} strokeWidth={2} />
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="text-sm text-gray-400 shrink-0">{isLoading ? "…" : `${displayed.length} kelime`}</p>
+            <div className="flex-1"><SearchBar value={query} onChange={setQuery} /></div>
+
+            <div className="relative shrink-0" ref={sortMenuRef}>
+              <button
+                onClick={() => setShowSortMenu((v) => !v)}
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-orange-400 bg-orange-50 hover:bg-orange-100 transition-colors"
+              >
+                <ArrowUpDown size={14} strokeWidth={2} />
+                <span className="text-xs font-medium">Sırala</span>
+              </button>
+              {showSortMenu && (
+                <div className="absolute right-0 top-full mt-1.5 z-50 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden w-56">
+                  {GROUPS.map((group, gi) => (
+                    <div key={group.key}>
+                      {gi > 0 && <div className="mx-3 my-1.5 border-t border-gray-100" />}
+                      <div className="px-3 pt-2.5 pb-1"><p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">{group.label}</p></div>
+                      {SORT_OPTIONS.filter((o) => o.group === group.key).map((opt) => (
+                        <button key={opt.value} onClick={() => { setSort(opt.value); setShowSortMenu(false); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-gray-50">
+                          {sort === opt.value ? <CheckSquare size={15} className="text-orange-400 shrink-0" strokeWidth={2} /> : <Square size={15} className="text-gray-300 shrink-0" strokeWidth={2} />}
+                          <span className={sort === opt.value ? "text-gray-800 font-medium" : "text-gray-500"}>{opt.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                  <div className="h-2" />
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={() => selectMode ? exitSelectMode() : setSelectMode(true)}
+              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-orange-400 bg-orange-50" : "text-gray-400 hover:bg-gray-50"}`}
+            >
+              {selectMode ? "İptal" : "Seç"}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          {!isLoading && displayed.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              {query ? <p className="text-gray-400 text-sm">"{query}" için sonuç bulunamadı</p> : <p className="text-gray-400">Henüz kelime yok</p>}
+            </div>
+          ) : (
+            <div className="bg-white overflow-hidden">
+              {displayed.map((word, i) => (
+                <MeaningCard
+                  key={word.id} word={word} index={i + 1}
+                  isOpen={openIds.has(word.id)}
+                  onToggle={() => setOpenIds((prev) => { const n = new Set(prev); n.has(word.id) ? n.delete(word.id) : n.add(word.id); return n; })}
+                  onUpdate={updateWord}
+                  selectMode={selectMode} isSelected={selectedIds.has(word.id)}
+                  onSelect={() => setSelectedIds((prev) => { const n = new Set(prev); n.has(word.id) ? n.delete(word.id) : n.add(word.id); return n; })}
+                  cardRef={(el) => { if (el) cardRefs.current.set(word.id, el); else cardRefs.current.delete(word.id); }}
+                  allWords={words}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {selectMode && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3">
+          <button onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))} className="text-xs text-gray-500 shrink-0">Tümünü Seç</button>
+          <span className="flex-1 text-center text-sm text-gray-500 font-medium">{selectedIds.size > 0 ? `${selectedIds.size} seçildi` : "Satır seçin"}</span>
+          <button onClick={handleBulkDelete} disabled={selectedIds.size === 0} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40 shrink-0" style={{ background: "rgb(239,68,68)" }}>
+            <Trash2 size={14} />Sil
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
