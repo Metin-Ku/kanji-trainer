@@ -10,16 +10,25 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-const connectionString = process.env.DATABASE_URL;
-const useSsl =
-  connectionString.includes("supabase") ||
-  connectionString.includes("sslmode=require") ||
-  connectionString.includes("sslmode=verify");
+/** pg v8 treats sslmode=require in the URL as verify-full, which breaks Supabase. */
+function resolvePoolConfig(rawUrl: string): pg.PoolConfig {
+  const useSsl =
+    rawUrl.includes("supabase") ||
+    rawUrl.includes("sslmode=require") ||
+    rawUrl.includes("sslmode=verify");
 
-export const pool = new Pool({
-  connectionString,
-  ...(useSsl ? { ssl: { rejectUnauthorized: false } } : {}),
-});
+  const connectionString = rawUrl
+    .replace(/([?&])sslmode=[^&]*/g, "")
+    .replace(/\?&/, "?")
+    .replace(/\?$/, "");
+
+  return {
+    connectionString,
+    ...(useSsl ? { ssl: { rejectUnauthorized: false } } : {}),
+  };
+}
+
+export const pool = new Pool(resolvePoolConfig(process.env.DATABASE_URL));
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";

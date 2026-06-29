@@ -6,6 +6,7 @@ import {
   UpdateWordBody,
   BulkCreateWordsBody,
 } from "@workspace/api-zod";
+import { logger } from "../lib/logger";
 
 const router = Router();
 
@@ -43,7 +44,8 @@ async function setRelatedWords(wordId: number, relatedIds: number[]): Promise<vo
   }
 }
 
-router.get("/words", async (req, res) => {
+router.get("/words", async (req, res, next) => {
+  try {
   const words = await db.select().from(wordsTable).orderBy(wordsTable.createdAt);
   const relations = await db.select().from(wordRelationsTable);
 
@@ -61,6 +63,10 @@ router.get("/words", async (req, res) => {
     relatedWordIds: relMap.get(w.id) ?? [],
   }));
   res.json(result);
+  } catch (err) {
+    logger.error({ err, cause: err instanceof Error ? err.cause : undefined }, "GET /words failed");
+    next(err);
+  }
 });
 
 router.post("/words/bulk", async (req, res) => {
