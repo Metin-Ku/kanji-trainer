@@ -1,14 +1,9 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import {
-  BookOpen,
-  Waves,
-  Languages,
-  Pencil,
-  Trash2,
-  Settings,
-} from "lucide-react";
+import { Settings, Layers, BookOpen, Waves, Languages, Pencil, Trash2 } from "lucide-react";
 import { SearchBar } from "../components/SearchBar";
+import { WordAddFab } from "../components/WordAddFab";
+import { BulkImportModal } from "../components/BulkImportModal";
 import { useWords } from "../hooks/useWords";
 import { filterWords } from "../utils/filterWords";
 import {
@@ -16,7 +11,7 @@ import {
   RelatedWordsButton,
 } from "../components/RelatedWordsList";
 import { WordFormModal } from "../components/WordFormModal";
-import type { Word, WordUpdate } from "../types";
+import type { Word } from "../types";
 import { themeVars } from "../theme";
 
 const TURKISH_MONTHS = [
@@ -52,17 +47,33 @@ const SHADOW = "0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)";
 
 export function HomePage() {
   const [, navigate] = useLocation();
-  const { words, updateWord, deleteWord } = useWords();
+  const { words, updateWord, deleteWord, addWord, bulkCreate } = useWords();
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [relatedOpenIds, setRelatedOpenIds] = useState<Set<number>>(new Set());
   const [editingWord, setEditingWord] = useState<Word | undefined>(undefined);
   const [showForm, setShowForm] = useState(false);
+  const [showBulk, setShowBulk] = useState(false);
 
-  function handleSave(data: WordUpdate & { relatedWordIds: number[] }) {
+  function handleSave(data: {
+    kanji: string;
+    pronunciation: string;
+    meaning: string;
+    description: string;
+    level: number;
+    jlptLevel: string | null;
+    date: string;
+    relatedWordIds: number[];
+  }) {
     if (editingWord) updateWord(editingWord.id, data);
+    else addWord(data);
     setShowForm(false);
     setEditingWord(undefined);
+  }
+
+  function handleNewWord() {
+    setEditingWord(undefined);
+    setShowForm(true);
   }
 
   const results = filterWords(words, query);
@@ -93,13 +104,22 @@ export function HomePage() {
           <p className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
             Japonca Kelime Defteri
           </p>
-          <button
-            onClick={() => navigate("/settings")}
-            className="p-2 -mr-2 -mt-1 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
-            aria-label="Ayarlar"
-          >
-            <Settings size={20} strokeWidth={2} />
-          </button>
+          <div className="flex items-center gap-0.5 -mr-2 -mt-1">
+            <button
+              onClick={() => navigate("/srs")}
+              className="p-2 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
+              aria-label="SRS"
+            >
+              <Layers size={20} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => navigate("/settings")}
+              className="p-2 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
+              aria-label="Ayarlar"
+            >
+              <Settings size={20} strokeWidth={2} />
+            </button>
+          </div>
         </div>
         <h1 className="text-xl font-bold text-gray-900 mb-3">
           {formatTodayTurkish()}
@@ -396,6 +416,10 @@ export function HomePage() {
         </div>
       )}
 
+      {!isSearching && (
+        <WordAddFab onNewWord={handleNewWord} onBulkImport={() => setShowBulk(true)} />
+      )}
+
       {showForm && (
         <WordFormModal
           initial={editingWord}
@@ -405,6 +429,12 @@ export function HomePage() {
             setShowForm(false);
             setEditingWord(undefined);
           }}
+        />
+      )}
+      {showBulk && (
+        <BulkImportModal
+          onImport={bulkCreate}
+          onClose={() => setShowBulk(false)}
         />
       )}
     </div>

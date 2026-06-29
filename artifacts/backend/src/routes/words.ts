@@ -7,6 +7,7 @@ import {
   BulkCreateWordsBody,
 } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
+import { ensureSrsCardsForWord, ensureSrsCardsForWords } from "../lib/srsCards";
 
 const router = Router();
 
@@ -86,7 +87,7 @@ router.post("/words/bulk", async (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
 
   if (toAdd.length > 0) {
-    await db.insert(wordsTable).values(
+    const inserted = await db.insert(wordsTable).values(
       toAdd.map((w) => ({
         kanji: w.kanji,
         pronunciation: w.pronunciation ?? "",
@@ -96,7 +97,8 @@ router.post("/words/bulk", async (req, res) => {
         jlptLevel: w.jlptLevel ?? null,
         date: today,
       }))
-    );
+    ).returning({ id: wordsTable.id });
+    await ensureSrsCardsForWords(inserted.map((w) => w.id));
   }
 
   for (const w of toUpdate) {
@@ -133,6 +135,7 @@ router.post("/words", async (req, res) => {
   if (relatedWordIds && relatedWordIds.length > 0) {
     await setRelatedWords(word.id, relatedWordIds);
   }
+  await ensureSrsCardsForWord(word.id);
   res.status(201).json({ ...word, relatedWordIds: relatedWordIds ?? [] });
 });
 

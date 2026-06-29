@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
-  Plus,
   ArrowUpDown,
   ArrowLeft,
   CheckSquare,
   Square,
-  Copy,
   Trash2,
   Dices,
 } from "lucide-react";
@@ -13,7 +11,6 @@ import { useLocation } from "wouter";
 import { useWords } from "../hooks/useWords";
 import { WordCard } from "../components/WordCard";
 import { WordFormModal } from "../components/WordFormModal";
-import { BulkImportModal } from "../components/BulkImportModal";
 import { SearchBar } from "../components/SearchBar";
 import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
@@ -118,14 +115,11 @@ export function WordListPage() {
     words,
     isLoading,
     isError,
-    addWord,
     updateWord,
     deleteWord,
     deleteWords,
-    bulkCreate,
   } = useWords();
   const [showForm, setShowForm] = useState(false);
-  const [showBulk, setShowBulk] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | undefined>(undefined);
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [activeSorts, setActiveSorts] = useState<Set<SortMode>>(
@@ -133,13 +127,11 @@ export function WordListPage() {
   );
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [query, setQuery] = useState("");
-  const [fabOpen, setFabOpen] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   const headerRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
-  const fabRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
@@ -158,20 +150,6 @@ export function WordListPage() {
       document.removeEventListener("touchstart", handler);
     };
   }, [showSortMenu]);
-
-  useEffect(() => {
-    if (!fabOpen) return;
-    function handler(e: MouseEvent | TouchEvent) {
-      if (fabRef.current && !fabRef.current.contains(e.target as Node))
-        setFabOpen(false);
-    }
-    document.addEventListener("mousedown", handler);
-    document.addEventListener("touchstart", handler);
-    return () => {
-      document.removeEventListener("mousedown", handler);
-      document.removeEventListener("touchstart", handler);
-    };
-  }, [fabOpen]);
 
   const handleScroll = useCallback(() => {
     if (!headerRef.current || selectMode) return;
@@ -224,7 +202,6 @@ export function WordListPage() {
     relatedWordIds: number[];
   }) {
     if (editingWord) updateWord(editingWord.id, data);
-    else addWord(data);
     setEditingWord(undefined);
   }
 
@@ -455,68 +432,7 @@ export function WordListPage() {
         </div>
       )}
 
-      {!selectMode && (
-        <div ref={fabRef} className="fixed right-5 z-40" style={{ bottom: 32 }}>
-          <div
-            className={`flex items-center rounded-full w-[52px] transition-[height] duration-140 ease-in-out overflow-hidden 
-            shadow-[0_4px_20px] shadow-main-200 bg-linear-to-b 160deg from-main-400 to-main-600 flex-col-reverse ${fabOpen ? "h-[158px]" : "h-[52px]"}`}
-          >
-            <button
-              onClick={() => setFabOpen((v) => !v)}
-              className="flex items-center justify-center active:opacity-70 transition-opacity"
-              style={{ width: 52, height: 52, flexShrink: 0 }}
-            >
-              <div
-                style={{
-                  transform: fabOpen ? "rotate(45deg)" : "rotate(0deg)",
-                  transition: "transform 0.12s ease",
-                }}
-              >
-                <Plus size={22} strokeWidth={2.5} className="text-white" />
-              </div>
-            </button>
-            <div
-              style={{
-                width: 28,
-                height: 1,
-                background: "rgba(255,255,255,0.3)",
-                flexShrink: 0,
-              }}
-            />
-            <button
-              onClick={() => {
-                setFabOpen(false);
-                setEditingWord(undefined);
-                setShowForm(true);
-              }}
-              className="flex items-center justify-center active:opacity-70 transition-opacity"
-              style={{ width: 52, height: 52, flexShrink: 0 }}
-            >
-              <Plus size={22} strokeWidth={2.5} className="text-white" />
-            </button>
-            <div
-              style={{
-                width: 28,
-                height: 1,
-                background: "rgba(255,255,255,0.3)",
-                flexShrink: 0,
-              }}
-            />
-            <button
-              onClick={() => {
-                setFabOpen(false);
-                setShowBulk(true);
-              }}
-              className="flex items-center justify-center active:opacity-70 transition-opacity"
-              style={{ width: 52, height: 52, flexShrink: 0 }}
-            >
-              <Copy size={19} strokeWidth={2} className="text-white" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {showForm && (
+      {showForm && editingWord && (
         <WordFormModal
           initial={editingWord}
           allWords={words}
@@ -525,12 +441,6 @@ export function WordListPage() {
             setShowForm(false);
             setEditingWord(undefined);
           }}
-        />
-      )}
-      {showBulk && (
-        <BulkImportModal
-          onImport={bulkCreate}
-          onClose={() => setShowBulk(false)}
         />
       )}
     </div>

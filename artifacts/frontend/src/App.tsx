@@ -9,6 +9,8 @@ import { LearnedPronPage } from "@/pages/LearnedPronPage";
 import { LearnedMeaningPage } from "@/pages/LearnedMeaningPage";
 import { StudyPage } from "@/pages/StudyPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { SrsHubPage } from "@/pages/SrsHubPage";
+import { SrsStudyPage } from "@/pages/SrsStudyPage";
 
 function App() {
   return (
@@ -16,6 +18,8 @@ function App() {
       <Switch>
         <Route path="/" component={HomePage} />
         <Route path="/settings" component={SettingsPage} />
+        <Route path="/srs/study" component={SrsStudyPage} />
+        <Route path="/srs" component={SrsHubPage} />
         <Route path="/words" component={WordListPage} />
         <Route path="/pronunciation" component={PronunciationPage} />
         <Route path="/meaning" component={MeaningPage} />
