@@ -8,12 +8,14 @@ import { LearnedPage } from "@/pages/LearnedPage";
 import { LearnedPronPage } from "@/pages/LearnedPronPage";
 import { LearnedMeaningPage } from "@/pages/LearnedMeaningPage";
 import { StudyPage } from "@/pages/StudyPage";
+import { SettingsPage } from "@/pages/SettingsPage";
 
 function App() {
   return (
     <Router>
       <Switch>
         <Route path="/" component={HomePage} />
+        <Route path="/settings" component={SettingsPage} />
         <Route path="/words" component={WordListPage} />
         <Route path="/pronunciation" component={PronunciationPage} />
         <Route path="/meaning" component={MeaningPage} />

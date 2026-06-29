@@ -4,15 +4,7 @@ import { KanjiStrokeModal } from "../components/KanjiStrokeModal";
 import { useLocation } from "wouter";
 import { getStudySession, StudyMode } from "../store/studyStore";
 import { Word } from "../types";
-
-const LEVEL_COLORS = [
-  "rgb(255,165,0)",
-  "rgb(247,150,18)",
-  "rgb(238,135,35)",
-  "rgb(242,118,28)",
-  "rgb(246,100,18)",
-];
-const STAR_COLOR = "rgb(255,215,0)";
+import { themeVars } from "../theme";
 const MONTHS = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
 const LONG_PRESS_MS = 320;
 const LEVEL_STEP_PX = 30;
@@ -287,7 +279,7 @@ export function StudyPage() {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center bg-white">
         <p className="text-gray-400">Kelime bulunamadı</p>
-        <button onClick={() => navigate(backPath)} className="mt-4 text-orange-400 text-sm">Geri Dön</button>
+        <button onClick={() => navigate(backPath)} className="mt-4 text-main-400 text-sm">Geri Dön</button>
       </div>
     );
   }
@@ -298,11 +290,11 @@ export function StudyPage() {
         <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center">
           <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400">
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-orange-400 uppercase tracking-widest">{title}</span>
+            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
           </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl" style={{ background: STAR_COLOR }}>★</div>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl" style={{ background: themeVars.star }}>★</div>
           <div>
             <p className="text-2xl font-bold text-gray-900 mb-1">Tamamlandı!</p>
             <p className="text-sm text-gray-400">{words.length} kelimeyi bitirdin</p>
@@ -311,7 +303,7 @@ export function StudyPage() {
             <button
               onClick={handleRestart}
               className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-white text-sm"
-              style={{ background: LEVEL_COLORS[0] }}
+              style={{ background: themeVars.level(1) }}
             >
               <Dices size={16} strokeWidth={2} />
               Yeniden Karıştır
@@ -331,7 +323,7 @@ export function StudyPage() {
   const { level, starred } = getLevelInfo(word, mode);
   const displayLevel = isLevelMode ? liveLevel : level;
   const displayStarred = isLevelMode ? liveStarred : starred;
-  const displayColor = displayStarred ? STAR_COLOR : (LEVEL_COLORS[displayLevel - 1] ?? LEVEL_COLORS[4]);
+  const displayColor = displayStarred ? themeVars.star : themeVars.level(displayLevel);
 
   const isAnimating = isFlying || dragX !== 0;
   const cardTransform = isFlying
@@ -348,7 +340,7 @@ export function StudyPage() {
       <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center justify-between shrink-0">
         <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400">
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-orange-400 uppercase tracking-widest">{title}</span>
+          <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
         </button>
         <span className="text-sm text-gray-400 font-medium tabular-nums">{index + 1} / {words.length}</span>
       </div>

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { BookOpen, Waves, Languages, Pencil, Trash2 } from "lucide-react";
+import { BookOpen, Waves, Languages, Pencil, Trash2, Settings } from "lucide-react";
 import { SearchBar } from "../components/SearchBar";
 import { useWords } from "../hooks/useWords";
 import { filterWords } from "../utils/filterWords";
 import { RelatedWordsList, RelatedWordsButton } from "../components/RelatedWordsList";
 import { WordFormModal } from "../components/WordFormModal";
 import type { Word, WordUpdate } from "../types";
+import { themeVars } from "../theme";
 
 const TURKISH_MONTHS = [
   "Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
@@ -20,7 +21,6 @@ function formatTodayTurkish(): string {
 }
 
 const SHADOW = "0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)";
-const ICON_BG = "linear-gradient(135deg, rgba(255,150,30,0.13), rgba(255,90,10,0.08))";
 
 export function HomePage() {
   const [, navigate] = useLocation();
@@ -57,9 +57,18 @@ export function HomePage() {
   return (
     <div className="min-h-dvh bg-gray-50 flex flex-col">
       <div className="bg-white border-b border-gray-100 px-5 pt-5 pb-3 shrink-0">
-        <p className="text-[11px] font-semibold text-orange-400 uppercase tracking-widest mb-0.5">
-          Japonca Kelime Defteri
-        </p>
+        <div className="flex items-start justify-between gap-3 mb-0.5">
+          <p className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
+            Japonca Kelime Defteri
+          </p>
+          <button
+            onClick={() => navigate("/settings")}
+            className="p-2 -mr-2 -mt-1 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
+            aria-label="Ayarlar"
+          >
+            <Settings size={20} strokeWidth={2} />
+          </button>
+        </div>
         <h1 className="text-xl font-bold text-gray-900 mb-3">{formatTodayTurkish()}</h1>
         <SearchBar value={query} onChange={setQuery} placeholder="Kelime, okunuş veya anlam ara…" />
       </div>
@@ -106,9 +115,9 @@ export function HomePage() {
                             <div key={i} className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: "#f3f4f6" }}>
                               <Icon size={13} strokeWidth={2} style={{ color: "rgb(107,114,128)", flexShrink: 0 }} />
                               {starred ? (
-                                <div className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: "rgb(255,215,0)", color: "rgb(255,255,255)" }}>★</div>
+                                <div className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: themeVars.star, color: "rgb(255,255,255)" }}>★</div>
                               ) : (
-                                <div className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: ["rgb(255,165,0)","rgb(247,150,18)","rgb(238,135,35)","rgb(242,118,28)","rgb(246,100,18)"][level - 1] ?? "rgb(246,100,18)" }}>{level}</div>
+                                <div className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: themeVars.level(level) }}>{level}</div>
                               )}
                             </div>
                           ))}
@@ -176,8 +185,8 @@ export function HomePage() {
               className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
               style={{ boxShadow: SHADOW }}
             >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: ICON_BG }}>
-                <Languages size={22} className="text-orange-400" strokeWidth={1.8} />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: themeVars.iconBg }}>
+                <Languages size={22} className="text-main-400" strokeWidth={1.8} />
               </div>
               <div className="text-center">
                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Word</p>
@@ -192,8 +201,8 @@ export function HomePage() {
                 className="flex-1 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
                 style={{ boxShadow: SHADOW }}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ICON_BG }}>
-                  <Waves size={20} className="text-orange-400" strokeWidth={1.8} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: themeVars.iconBg }}>
+                  <Waves size={20} className="text-main-400" strokeWidth={1.8} />
                 </div>
                 <div className="text-center">
                   <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pronunciation</p>
@@ -206,8 +215,8 @@ export function HomePage() {
                 className="flex-1 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
                 style={{ boxShadow: SHADOW }}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: ICON_BG }}>
-                  <BookOpen size={20} className="text-orange-400" strokeWidth={1.8} />
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: themeVars.iconBg }}>
+                  <BookOpen size={20} className="text-main-400" strokeWidth={1.8} />
                 </div>
                 <div className="text-center">
                   <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Meaning</p>
@@ -223,8 +232,8 @@ export function HomePage() {
             className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
             style={{ boxShadow: SHADOW }}
           >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: ICON_BG }}>
-              <span style={{ color: "rgb(255,165,0)", fontSize: 20 }}>★</span>
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: themeVars.iconBg }}>
+              <span style={{ color: themeVars.level(1), fontSize: 20 }}>★</span>
             </div>
             <div className="text-center">
               <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Learned</p>

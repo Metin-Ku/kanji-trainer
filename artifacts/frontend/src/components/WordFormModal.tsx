@@ -77,7 +77,7 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
               value={kanji}
               onChange={(e) => setKanji(e.target.value)}
               placeholder="例: 工事"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xl text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xl text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
               required
             />
           </div>
@@ -89,7 +89,7 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
               value={pronunciation}
               onChange={(e) => setPronunciation(e.target.value)}
               placeholder="こうじ (kouji)"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
             />
           </div>
 
@@ -100,7 +100,7 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
               value={meaning}
               onChange={(e) => setMeaning(e.target.value)}
               placeholder="TR: İnşaat | EN: Construction"
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
             />
           </div>
 
@@ -111,7 +111,7 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
               onChange={(e) => setDescription(e.target.value)}
               placeholder={"工事中です。\n--> Kouji-chuu desu.\n--> İnşaat çalışması var."}
               rows={5}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all font-mono"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-main-300 transition-all font-mono"
             />
           </div>
 
@@ -163,7 +163,7 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
               />
             </div>
             <div>

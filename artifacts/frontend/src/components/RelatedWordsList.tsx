@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { BookOpen, Languages, Waves } from "lucide-react";
 import type { Word } from "../types";
-
-const LEVEL_COLORS = ["rgb(255,165,0)","rgb(247,150,18)","rgb(238,135,35)","rgb(242,118,28)","rgb(246,100,18)"];
-const STAR_COLOR = "rgb(255,215,0)";
+import { themeVars } from "../theme";
 
 export function getRelatedWords(word: Word, allWords: Word[]): Word[] {
   if (!word.meaning) return [];
@@ -91,10 +89,7 @@ export function RelatedWordsList({ word, allWords }: Props) {
                 <div className="flex items-center gap-1.5 leading-none">
                   <p className="text-sm font-bold text-gray-800">{w.kanji}</p>
                   {isManual && (
-                    <span
-                      className="text-[9px] font-bold px-1 py-0.5 rounded"
-                      style={{ background: "rgb(255,237,213)", color: "rgb(234,88,12)" }}
-                    >≡</span>
+                    <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-main-100 text-main-600">≡</span>
                   )}
                 </div>
                 {w.pronunciation && (
@@ -130,12 +125,12 @@ export function RelatedWordsList({ word, allWords }: Props) {
                       {starred ? (
                         <div
                           className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold"
-                          style={{ background: STAR_COLOR, color: "white" }}
+                          style={{ background: themeVars.star, color: "white" }}
                         >★</div>
                       ) : (
                         <div
                           className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold text-white"
-                          style={{ background: LEVEL_COLORS[level - 1] ?? LEVEL_COLORS[4] }}
+                          style={{ background: themeVars.level(level) }}
                         >{level}</div>
                       )}
                     </div>
@@ -163,11 +158,9 @@ export function RelatedWordsButton({ active, onClick }: { active: boolean; onCli
   return (
     <button
       onClick={onClick}
-      className="shrink-0 px-2 py-0.5 rounded-md text-xs font-bold transition-colors"
-      style={{
-        background: active ? "rgb(248,113,113)" : "rgb(255,237,213)",
-        color: active ? "white" : "rgb(251,146,60)",
-      }}
+      className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold transition-colors ${
+        active ? "bg-red-400 text-white" : "bg-main-100 text-main-400"
+      }`}
       title="İlgili kelimeler"
     >
       A ≡ B

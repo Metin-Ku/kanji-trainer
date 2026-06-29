@@ -156,7 +156,7 @@ export function WordListPage() {
           <div className="flex items-center justify-between">
             <button onClick={() => navigate("/")} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors">
               <ArrowLeft size={18} />
-              <span className="text-[11px] font-semibold text-orange-400 uppercase tracking-widest">Kelimeler</span>
+              <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">Kelimeler</span>
             </button>
             <button
               onClick={() => { if (displayed.length === 0) return; startStudy(displayed, "kelime", "Kelimeler", "/words"); navigate("/study"); }}
@@ -175,7 +175,7 @@ export function WordListPage() {
             <div className="relative shrink-0" ref={sortMenuRef}>
               <button
                 onClick={() => setShowSortMenu((v) => !v)}
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors ${activeSortCount > 0 ? "text-orange-400 bg-orange-50 hover:bg-orange-100" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors ${activeSortCount > 0 ? "text-main-400 bg-main-50 hover:bg-main-100" : "text-gray-400 hover:text-gray-600 hover:bg-gray-50"}`}
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
                 <span className="text-xs font-medium">Sırala{activeSortCount > 1 ? ` (${activeSortCount})` : ""}</span>
@@ -190,7 +190,7 @@ export function WordListPage() {
                         const active = activeSorts.has(opt.value);
                         return (
                           <button key={opt.value} onClick={() => setActiveSorts((p) => toggleSort(p, opt.value))} className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-gray-50 transition-colors">
-                            {active ? <CheckSquare size={15} className="text-orange-400 shrink-0" strokeWidth={2} /> : <Square size={15} className="text-gray-300 shrink-0" strokeWidth={2} />}
+                            {active ? <CheckSquare size={15} className="text-main-400 shrink-0" strokeWidth={2} /> : <Square size={15} className="text-gray-300 shrink-0" strokeWidth={2} />}
                             <span className={active ? "text-gray-800 font-medium" : "text-gray-500"}>{opt.label}</span>
                           </button>
                         );
@@ -198,8 +198,8 @@ export function WordListPage() {
                     </div>
                   ))}
                   {activeSortCount > 1 && (
-                    <div className="mx-3 mb-2.5 mt-1.5 px-2.5 py-1.5 bg-orange-50 rounded-lg">
-                      <p className="text-[11px] text-orange-400 font-medium">
+                    <div className="mx-3 mb-2.5 mt-1.5 px-2.5 py-1.5 bg-main-50 rounded-lg">
+                      <p className="text-[11px] text-main-400 font-medium">
                         {activeSortCount} kriter uygulanıyor (önce seçilen)
                       </p>
                     </div>
@@ -210,7 +210,7 @@ export function WordListPage() {
             </div>
             <button
               onClick={() => selectMode ? exitSelectMode() : setSelectMode(true)}
-              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-orange-400 bg-orange-50" : "text-gray-400 hover:bg-gray-50"}`}
+              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50" : "text-gray-400 hover:bg-gray-50"}`}
             >
               {selectMode ? "İptal" : "Seç"}
             </button>

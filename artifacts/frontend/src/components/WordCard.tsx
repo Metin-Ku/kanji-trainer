@@ -83,7 +83,7 @@ export function WordCard({
             className={[
               "text-lg font-bold leading-none shrink-0",
               kanjiClickable
-                ? "text-gray-800 active:text-orange-400 transition-colors"
+                ? "text-gray-800 active:text-main-400 transition-colors"
                 : "text-gray-800",
             ].join(" ")}
             style={kanjiClickable ? { cursor: "zoom-in" } : {}}

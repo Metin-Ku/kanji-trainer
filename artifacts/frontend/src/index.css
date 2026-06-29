@@ -8,13 +8,24 @@
   --color-foreground: hsl(var(--foreground));
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+  --color-ring: var(--ring);
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-primary: hsl(var(--primary));
+  --color-primary: var(--primary);
   --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-main-50: var(--main-50);
+  --color-main-100: var(--main-100);
+  --color-main-200: var(--main-200);
+  --color-main-300: var(--main-300);
+  --color-main-400: var(--main-400);
+  --color-main-500: var(--main-500);
+  --color-main-600: var(--main-600);
+  --color-main-700: var(--main-700);
+  --color-main-800: var(--main-800);
+  --color-main-900: var(--main-900);
+  --color-main-950: var(--main-950);
   --font-sans: var(--app-font-sans);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -29,12 +40,33 @@
   --card-foreground: 0 0% 10%;
   --muted: 0 0% 96%;
   --muted-foreground: 0 0% 50%;
-  --primary: 24 90% 50%;
   --primary-foreground: 0 0% 100%;
   --input: 0 0% 90%;
-  --ring: 24 90% 50%;
   --app-font-sans: 'Noto Sans JP', 'Inter', sans-serif;
   --radius: 0.75rem;
+
+  /* Default main palette: Tailwind orange */
+  --main-50: oklch(98% 0.016 73.684);
+  --main-100: oklch(95.4% 0.038 75.164);
+  --main-200: oklch(90.1% 0.076 70.697);
+  --main-300: oklch(83.7% 0.128 66.29);
+  --main-400: oklch(75% 0.183 55.934);
+  --main-500: oklch(70.5% 0.213 47.604);
+  --main-600: oklch(64.6% 0.222 41.116);
+  --main-700: oklch(55.3% 0.195 38.402);
+  --main-800: oklch(47% 0.157 37.304);
+  --main-900: oklch(40.8% 0.123 38.172);
+  --main-950: oklch(26.6% 0.079 36.259);
+
+  --primary: var(--main-500);
+  --ring: var(--main-500);
+  --level-1: var(--main-300);
+  --level-2: var(--main-400);
+  --level-3: var(--main-500);
+  --level-4: var(--main-600);
+  --level-5: var(--main-700);
+  --star-color: var(--main-300);
+  --icon-bg: linear-gradient(135deg, color-mix(in oklch, var(--main-400) 13%, transparent), color-mix(in oklch, var(--main-600) 8%, transparent));
 }
 
 @layer base {

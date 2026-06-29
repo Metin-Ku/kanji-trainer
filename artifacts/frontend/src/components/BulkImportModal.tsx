@@ -115,20 +115,20 @@ export function BulkImportModal({ onImport, onClose }: Props) {
               onChange={(e) => { setHtml(e.target.value); setPreview([]); }}
               placeholder="<table>...</table>"
               rows={6}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xs text-gray-600 font-mono focus:outline-none focus:ring-2 focus:ring-orange-300 transition-all mb-3"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xs text-gray-600 font-mono focus:outline-none focus:ring-2 focus:ring-main-300 transition-all mb-3"
             />
 
             {preview.length === 0 ? (
               <button
                 onClick={handleParse}
                 disabled={!html.trim()}
-                className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 border-gray-200 text-gray-500 hover:border-orange-300 hover:text-orange-500 transition-colors disabled:opacity-40"
+                className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 border-gray-200 text-gray-500 hover:border-main-300 hover:text-main-500 transition-colors disabled:opacity-40"
               >
                 {html.trim() ? "Önizle" : "Tablo yapıştırın"}
               </button>
             ) : (
               <div className="space-y-3">
-                <div className="bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 text-sm text-gray-700">
+                <div className="bg-main-50 border border-main-100 rounded-xl px-4 py-3 text-sm text-gray-700">
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-semibold text-gray-800">{preview.length} kelime algılandı</p>
                   </div>

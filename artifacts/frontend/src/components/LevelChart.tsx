@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { themeVars } from "../theme";
 
 interface Props {
   level: number;
@@ -9,17 +10,9 @@ interface Props {
 
 const HEIGHTS = [28, 42, 56, 72, 88];
 
-const LEVEL_COLORS = [
-  "rgb(255,165,0)",
-  "rgb(247,150,18)",
-  "rgb(238,135,35)",
-  "rgb(242,118,28)",
-  "rgb(246,100,18)",
-];
-
 function getLevelColor(bar: number, level: number): string {
   if (bar > level) return "#e5e7eb";
-  return LEVEL_COLORS[bar - 1];
+  return themeVars.level(bar);
 }
 
 export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar }: Props) {
@@ -98,7 +91,6 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
               );
             })}
 
-            {/* ★ circle — only enabled when level === 5 or already starred */}
             <button
               onClick={() => {
                 if (starEnabled && onToggleStar) {
@@ -109,9 +101,9 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
               disabled={!starEnabled}
               className="w-9 h-9 rounded-full text-base border-2 flex items-center justify-center"
               style={{
-                background: starred ? "rgb(255,215,0)" : "transparent",
-                borderColor: starred ? "rgb(255,215,0)" : starEnabled ? "rgb(255,215,0)" : "#e5e7eb",
-                color: starred ? "white" : starEnabled ? "rgb(255,215,0)" : "#d1d5db",
+                background: starred ? themeVars.star : "transparent",
+                borderColor: starred ? themeVars.star : starEnabled ? themeVars.star : "#e5e7eb",
+                color: starred ? "white" : starEnabled ? themeVars.star : "#d1d5db",
                 cursor: starEnabled ? "pointer" : "not-allowed",
                 opacity: starEnabled ? 1 : 0.4,
                 transition: "none",

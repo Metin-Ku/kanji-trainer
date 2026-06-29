@@ -1,7 +1,6 @@
 import { ArrowLeft, Languages, Waves, BookOpen } from "lucide-react";
 import { useLocation } from "wouter";
-
-const ICON_BG = "linear-gradient(135deg, rgba(255,150,30,0.13), rgba(255,90,10,0.08))";
+import { themeVars } from "../theme";
 
 export function LearnedHubPage() {
   const [, navigate] = useLocation();
@@ -16,7 +15,7 @@ export function LearnedHubPage() {
             className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
           >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-orange-400 uppercase tracking-widest">Öğrenilenler</span>
+            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">Öğrenilenler</span>
           </button>
         </div>
       </div>
@@ -29,9 +28,9 @@ export function LearnedHubPage() {
         >
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center"
-            style={{ background: ICON_BG }}
+            style={{ background: themeVars.iconBg }}
           >
-            <Languages size={22} className="text-orange-400" strokeWidth={1.8} />
+            <Languages size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
             <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
@@ -47,9 +46,9 @@ export function LearnedHubPage() {
         >
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center"
-            style={{ background: ICON_BG }}
+            style={{ background: themeVars.iconBg }}
           >
-            <Waves size={22} className="text-orange-400" strokeWidth={1.8} />
+            <Waves size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
             <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
@@ -65,9 +64,9 @@ export function LearnedHubPage() {
         >
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center"
-            style={{ background: ICON_BG }}
+            style={{ background: themeVars.iconBg }}
           >
-            <BookOpen size={22} className="text-orange-400" strokeWidth={1.8} />
+            <BookOpen size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
             <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">

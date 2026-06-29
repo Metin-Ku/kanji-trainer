@@ -57,7 +57,7 @@ export function RelatedWordsSelect({ allWords, selectedIds, currentWordId, onCha
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="min-h-[44px] w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-orange-300 focus-within:border-transparent transition-all cursor-text"
+        className="min-h-[44px] w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-main-300 focus-within:border-transparent transition-all cursor-text"
         onClick={() => { setIsOpen(true); inputRef.current?.focus(); }}
       >
         {selectedWords.map((w) => (
@@ -72,7 +72,7 @@ export function RelatedWordsSelect({ allWords, selectedIds, currentWordId, onCha
               aria-label="Kaldır"
               onMouseDown={(e) => e.preventDefault()}
               onClick={(e) => { e.stopPropagation(); removeWord(w.id); }}
-              className="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-orange-200/60 transition-all active:scale-90"
+              className="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-main-200/60 transition-all active:scale-90"
             >
               <X size={14} strokeWidth={2.5} />
             </button>
@@ -106,7 +106,7 @@ export function RelatedWordsSelect({ allWords, selectedIds, currentWordId, onCha
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => addWord(w)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-orange-50 active:bg-orange-100 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-main-50 active:bg-main-100 transition-colors text-left"
               >
                 <span className="text-base font-bold text-gray-800 shrink-0">{w.kanji}</span>
                 <span className="text-xs text-gray-400 truncate flex-1">
