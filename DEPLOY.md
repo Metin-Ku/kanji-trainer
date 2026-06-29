@@ -128,5 +128,5 @@ pnpm --filter @workspace/frontend run dev
 |-------|-------|
 | API 502 / timeout | Render servisi uyuyor olabilir; 1 dk bekleyip tekrar deneyin |
 | Kelimeler yuklenmiyor | vercel.json Render URL dogru mu? Browser Network sekmesinde /api/words kontrol edin |
-| DATABASE_URL hatasi | Supabase pooler URL + sslmode=require kullanin |
+| DATABASE_URL hatasi | Supabase URL + `?sslmode=require`; kod `ssl: { rejectUnauthorized: false }` kullanir |
 | Build hatasi PORT/BASE_PATH | Vercel env: BASE_PATH=/ veya vite.config varsayilanlari kullanilir |
