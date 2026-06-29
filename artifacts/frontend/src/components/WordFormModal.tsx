@@ -29,21 +29,36 @@ function todayStr() {
   return `${y}-${m}-${d}`;
 }
 
-const levelColors = [
-  "rgb(220,180,60)", "rgb(235,158,35)", "rgb(245,135,20)", "rgb(252,110,15)", "rgb(255,90,10)",
-];
+// const levelColors = [
+//   "rgb(220,180,60)",
+//   "rgb(235,158,35)",
+//   "rgb(245,135,20)",
+//   "rgb(252,110,15)",
+//   "rgb(255,90,10)",
+// ];
 
 const JLPT_LEVELS = ["N5", "N4", "N3", "N2", "N1"] as const;
 
-export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props) {
+export function WordFormModal({
+  initial,
+  allWords = [],
+  onSave,
+  onClose,
+}: Props) {
   const [kanji, setKanji] = useState(initial?.kanji ?? "");
-  const [pronunciation, setPronunciation] = useState(initial?.pronunciation ?? "");
+  const [pronunciation, setPronunciation] = useState(
+    initial?.pronunciation ?? "",
+  );
   const [meaning, setMeaning] = useState(initial?.meaning ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [level, setLevel] = useState(initial?.level ?? 1);
-  const [jlptLevel, setJlptLevel] = useState<string | null>(initial?.jlptLevel ?? null);
+  const [jlptLevel, setJlptLevel] = useState<string | null>(
+    initial?.jlptLevel ?? null,
+  );
   const [date, setDate] = useState(initial?.date ?? todayStr());
-  const [relatedWordIds, setRelatedWordIds] = useState<number[]>(initial?.relatedWordIds ?? []);
+  const [relatedWordIds, setRelatedWordIds] = useState<number[]>(
+    initial?.relatedWordIds ?? [],
+  );
   const backdropRef = useRef<HTMLDivElement>(null);
 
   function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
@@ -53,25 +68,43 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!kanji.trim()) return;
-    onSave({ kanji: kanji.trim(), pronunciation, meaning, description, level, jlptLevel, date, relatedWordIds });
+    onSave({
+      kanji: kanji.trim(),
+      pronunciation,
+      meaning,
+      description,
+      level,
+      jlptLevel,
+      date,
+      relatedWordIds,
+    });
     onClose();
   }
 
   return (
-    <div ref={backdropRef} className="modal-backdrop" onClick={handleBackdropClick}>
+    <div
+      ref={backdropRef}
+      className="modal-backdrop"
+      onClick={handleBackdropClick}
+    >
       <div className="modal-sheet">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-gray-800">
             {initial ? "Kelimeyi Düzenle" : "Yeni Kelime Ekle"}
           </h2>
-          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400">
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400"
+          >
             <X size={18} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3.5">
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Japonca Kelime</label>
+            <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+              Japonca Kelime
+            </label>
             <input
               type="text"
               value={kanji}
@@ -83,7 +116,9 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Okunuş</label>
+            <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+              Okunuş
+            </label>
             <input
               type="text"
               value={pronunciation}
@@ -94,7 +129,9 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Anlam</label>
+            <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+              Anlam
+            </label>
             <input
               type="text"
               value={meaning}
@@ -105,11 +142,15 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Örnek Cümleler & Notlar</label>
+            <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+              Örnek Cümleler & Notlar
+            </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={"工事中です。\n--> Kouji-chuu desu.\n--> İnşaat çalışması var."}
+              placeholder={
+                "工事中です。\n--> Kouji-chuu desu.\n--> İnşaat çalışması var."
+              }
               rows={5}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-main-300 transition-all font-mono"
             />
@@ -118,7 +159,10 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
           {allWords.length > 0 && (
             <div>
               <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                İlişkili Kelimeler <span className="normal-case font-normal text-gray-300">(A ≡ B)</span>
+                İlişkili Kelimeler{" "}
+                <span className="normal-case font-normal text-gray-300">
+                  (A ≡ B)
+                </span>
               </label>
               <RelatedWordsSelect
                 allWords={allWords}
@@ -132,7 +176,10 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
           {/* JLPT Level picker */}
           <div>
             <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-              JLPT Seviyesi <span className="normal-case font-normal text-gray-300">(isteğe bağlı)</span>
+              JLPT Seviyesi{" "}
+              <span className="normal-case font-normal text-gray-300">
+                (isteğe bağlı)
+              </span>
             </label>
             <div className="flex gap-1.5">
               {JLPT_LEVELS.map((lvl) => {
@@ -142,12 +189,7 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
                     key={lvl}
                     type="button"
                     onClick={() => setJlptLevel(active ? null : lvl)}
-                    className="flex-1 h-[38px] rounded-xl font-semibold text-sm border-2 transition-all duration-150"
-                    style={{
-                      background: active ? "linear-gradient(135deg, rgb(255,150,30), rgb(255,90,10))" : "transparent",
-                      borderColor: active ? "rgb(255,120,20)" : "#e5e7eb",
-                      color: active ? "white" : "#9ca3af",
-                    }}
+                    className={`flex-1 h-[38px] rounded-xl font-semibold text-sm border-2 ${active ? "bg-main-400 border-main-400 text-white" : "bg-transparent border-gray-200 text-gray-400"}`}
                   >
                     {lvl}
                   </button>
@@ -158,7 +200,9 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
 
           <div className="flex gap-3">
             <div className="flex-1">
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Tarih</label>
+              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                Tarih
+              </label>
               <input
                 type="date"
                 value={date}
@@ -167,17 +211,21 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">Seviye</label>
+              <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                Seviye
+              </label>
               <div className="flex gap-1.5">
                 {[1, 2, 3, 4, 5].map((l) => (
                   <button
                     key={l}
                     type="button"
                     onClick={() => setLevel(l)}
-                    className="w-9 h-[42px] rounded-xl font-bold text-sm border-2 transition-all duration-150"
+                    className="w-9 h-[42px] rounded-xl font-bold text-sm border-2"
                     style={{
-                      background: level === l ? levelColors[l - 1] : "transparent",
-                      borderColor: level === l ? levelColors[l - 1] : "#e5e7eb",
+                      background:
+                        level === l ? `var(--level-${l})` : "transparent",
+                      borderColor:
+                        level === l ? `var(--level-${l})` : "#e5e7eb",
                       color: level === l ? "white" : "#9ca3af",
                     }}
                   >
@@ -190,8 +238,7 @@ export function WordFormModal({ initial, allWords = [], onSave, onClose }: Props
 
           <button
             type="submit"
-            className="w-full py-3 rounded-xl font-bold text-white text-base active:scale-[0.98] transition-all"
-            style={{ background: "linear-gradient(135deg, rgb(255,150,30), rgb(255,90,10))" }}
+            className="w-full py-3 rounded-xl font-bold text-white text-base active:scale-[0.98] transition-all bg-main-500 hover:bg-main-600"
           >
             {initial ? "Güncelle" : "Ekle"}
           </button>

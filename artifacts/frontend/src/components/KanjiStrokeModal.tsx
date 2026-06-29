@@ -17,10 +17,39 @@ function charToHex(char: string): string {
   return (char.codePointAt(0) ?? 0).toString(16).padStart(5, "0");
 }
 
-function strokeColor(i: number, total: number): string {
+function getMainOKLCH() {
+  const styles = getComputedStyle(document.documentElement);
+  const main600 = styles.getPropertyValue("--main-600").trim();
+
+  const match = main600.match(/oklch\(\s*([\d.]+)%\s+([\d.]+)\s+([\d.]+)\s*\)/);
+
+  if (!match) return null;
+
+  return {
+    l: parseFloat(match[1]),
+    c: parseFloat(match[2]),
+    h: parseFloat(match[3]),
+  };
+}
+
+function getStrokeGradientColor(
+  i: number,
+  total: number,
+  base: { l: number; c: number; h: number },
+): string {
   const t = total <= 1 ? 0 : i / (total - 1);
-  const g = Math.round(160 - t * 80);
-  return `rgb(255,${Math.max(g, 20)},${Math.round(30 - t * 25)})`;
+
+  const l = Math.min(100, base.l + (1 - t) * 22);
+  const c = Math.max(0, base.c * (0.85 + t * 0.2));
+
+  return `oklch(${l.toFixed(2)}% ${c.toFixed(4)} ${base.h})`;
+}
+
+function strokeColor(i: number, total: number) {
+  const base = getMainOKLCH();
+  if (!base) return "black";
+
+  return getStrokeGradientColor(i, total, base);
 }
 
 interface Props {
@@ -61,12 +90,14 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
     }
 
     const strokeGroup = svgRef.current.querySelector('[id*="StrokePaths"]');
-    const numGroup = svgRef.current.querySelector('[id*="StrokeNumbers"]') as SVGGElement | null;
+    const numGroup = svgRef.current.querySelector(
+      '[id*="StrokeNumbers"]',
+    ) as SVGGElement | null;
 
     if (!strokeGroup) return;
 
     const paths = Array.from(
-      strokeGroup.querySelectorAll("path")
+      strokeGroup.querySelectorAll("path"),
     ) as SVGPathElement[];
     const total = paths.length;
 
@@ -77,13 +108,19 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
 
     if (numGroup) {
       numGroup.style.display = "";
-      // Orange numbers, slightly larger
-      numGroup.setAttribute(
-        "style",
-        "font-size:9;font-family:helvetica;font-weight:bold;fill:rgb(255,120,20)"
-      );
-      textEls.forEach((t) => {
-        t.style.transition = "none";
+
+      const texts = Array.from(numGroup.querySelectorAll("text"));
+      const base = getMainOKLCH();
+      if (!base) return;
+
+      texts.forEach((t, i) => {
+        const color = getStrokeGradientColor(i, texts.length, base);
+
+        t.setAttribute("fill", color);
+
+        t.style.fontSize = "9px";
+        t.style.fontFamily = "helvetica";
+        t.style.fontWeight = "bold";
         t.style.opacity = "0";
       });
     }
@@ -118,10 +155,13 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
 
       // Show number when stroke finishes drawing
       if (textEls[i]) {
-        const tn = setTimeout(() => {
-          textEls[i].style.transition = "opacity 0.15s ease";
-          textEls[i].style.opacity = "1";
-        }, i * DELAY + DURATION);
+        const tn = setTimeout(
+          () => {
+            textEls[i].style.transition = "opacity 0.15s ease";
+            textEls[i].style.opacity = "1";
+          },
+          i * DELAY + DURATION,
+        );
         timersRef.current.push(tn);
       }
     });
@@ -177,13 +217,27 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
   return (
     <div
       ref={backdropRef}
-      className={variant === "sheet" ? "fixed inset-0 z-50 flex items-end justify-center bg-black/30" : "modal-backdrop"}
+      className={
+        variant === "sheet"
+          ? "fixed inset-0 z-50 flex items-end justify-center bg-black/30"
+          : "modal-backdrop"
+      }
       style={variant === "sheet" ? undefined : { alignItems: "center" }}
       onClick={handleBackdropClick}
     >
       <div
         className="bg-white shadow-2xl overflow-hidden"
-        style={variant === "sheet" ? { width: "100%", maxWidth: 420, borderRadius: "16px 16px 0 0", maxHeight: "70vh", overflowY: "auto" } : { width: 296, borderRadius: 16 }}
+        style={
+          variant === "sheet"
+            ? {
+                width: "100%",
+                maxWidth: 420,
+                borderRadius: "16px 16px 0 0",
+                maxHeight: "70vh",
+                overflowY: "auto",
+              }
+            : { width: 296, borderRadius: 16 }
+        }
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
@@ -228,7 +282,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
                   i === charIndex
                     ? {
                         background:
-                          "linear-gradient(135deg, rgb(255,150,30), rgb(255,90,10))",
+                          "linear-gradient(135deg, var(--main-400), var(--main-600))",
                         color: "white",
                       }
                     : { color: "#9ca3af" }
@@ -263,9 +317,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
           className="mx-4 mb-4 rounded-xl flex items-center justify-center"
           style={{ height: 248, background: "#f9f9f9" }}
         >
-          {loading && (
-            <p className="text-gray-300 text-sm">Yükleniyor…</p>
-          )}
+          {loading && <p className="text-gray-300 text-sm">Yükleniyor…</p>}
           {error && (
             <div className="text-center px-6">
               <p className="text-3xl text-gray-200 mb-2">{currentChar}</p>

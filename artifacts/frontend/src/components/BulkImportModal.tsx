@@ -21,7 +21,6 @@ interface Props {
   onClose: () => void;
 }
 
-
 function extractText(el: Element): string {
   el.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
   return el.textContent?.trim() ?? "";
@@ -89,11 +88,18 @@ export function BulkImportModal({ onImport, onClose }: Props) {
   }
 
   return (
-    <div ref={backdropRef} className="modal-backdrop" onClick={handleBackdropClick}>
+    <div
+      ref={backdropRef}
+      className="modal-backdrop"
+      onClick={handleBackdropClick}
+    >
       <div className="modal-sheet">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold text-gray-800">Toplu Kelime Ekle</h2>
-          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400">
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400"
+          >
             <X size={18} />
           </button>
         </div>
@@ -102,17 +108,34 @@ export function BulkImportModal({ onImport, onClose }: Props) {
           <>
             <p className="text-xs text-gray-400 mb-3 leading-relaxed">
               HTML tabloyu yapıştırın.{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">.word</code>,{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">.pronunciation</code>,{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">.meaning</code>,{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">.description</code> ve{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">.jlpt</code>{" "}
+              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                .word
+              </code>
+              ,{" "}
+              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                .pronunciation
+              </code>
+              ,{" "}
+              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                .meaning
+              </code>
+              ,{" "}
+              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                .description
+              </code>{" "}
+              ve{" "}
+              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                .jlpt
+              </code>{" "}
               class'larına göre ayrıştırılır.
             </p>
 
             <textarea
               value={html}
-              onChange={(e) => { setHtml(e.target.value); setPreview([]); }}
+              onChange={(e) => {
+                setHtml(e.target.value);
+                setPreview([]);
+              }}
               placeholder="<table>...</table>"
               rows={6}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xs text-gray-600 font-mono focus:outline-none focus:ring-2 focus:ring-main-300 transition-all mb-3"
@@ -130,15 +153,24 @@ export function BulkImportModal({ onImport, onClose }: Props) {
               <div className="space-y-3">
                 <div className="bg-main-50 border border-main-100 rounded-xl px-4 py-3 text-sm text-gray-700">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-gray-800">{preview.length} kelime algılandı</p>
+                    <p className="font-semibold text-gray-800">
+                      {preview.length} kelime algılandı
+                    </p>
                   </div>
                   <div className="max-h-36 overflow-y-auto space-y-1.5">
                     {preview.map((w, i) => (
                       <div key={i} className="flex gap-2 text-xs items-center">
-                        <span className="font-bold text-gray-700 w-16 shrink-0">{w.kanji}</span>
-                        <span className="text-gray-500 truncate flex-1">{w.pronunciation}</span>
+                        <span className="font-bold text-gray-700 w-16 shrink-0">
+                          {w.kanji}
+                        </span>
+                        <span className="text-gray-500 truncate flex-1">
+                          {w.pronunciation}
+                        </span>
                         {w.jlptLevel && (
-                          <span className="text-[10px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
+                          <span
+                            className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0"
+                            style={{ background: "#f3f4f6", color: "#6b7280" }}
+                          >
                             {w.jlptLevel}
                           </span>
                         )}
@@ -160,13 +192,17 @@ export function BulkImportModal({ onImport, onClose }: Props) {
                   <button
                     onClick={handleImport}
                     disabled={loading}
-                    className="flex-1 py-2.5 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                    style={{ background: "linear-gradient(135deg, rgb(255,150,30), rgb(255,90,10))" }}
+                    className="flex-1 py-2.5 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                   >
                     {loading ? (
-                      <><Loader2 size={15} className="animate-spin" /> Ekleniyor...</>
+                      <>
+                        <Loader2 size={15} className="animate-spin" />{" "}
+                        Ekleniyor...
+                      </>
                     ) : (
-                      <><Upload size={15} /> {preview.length} Kelime Ekle</>
+                      <>
+                        <Upload size={15} /> {preview.length} Kelime Ekle
+                      </>
                     )}
                   </button>
                 </div>
@@ -176,7 +212,9 @@ export function BulkImportModal({ onImport, onClose }: Props) {
         ) : (
           <div className="space-y-4">
             <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 space-y-2">
-              <p className="text-sm text-gray-500">{result.total} kelime verildi</p>
+              <p className="text-sm text-gray-500">
+                {result.total} kelime verildi
+              </p>
               <p className="text-base font-bold text-gray-800">
                 ✓ {result.added} yeni kelime eklendi
               </p>
@@ -187,7 +225,10 @@ export function BulkImportModal({ onImport, onClose }: Props) {
                   </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {result.updatedWords.map((w) => (
-                      <span key={w} className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg">
+                      <span
+                        key={w}
+                        className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg"
+                      >
                         {w}
                       </span>
                     ))}
@@ -199,7 +240,10 @@ export function BulkImportModal({ onImport, onClose }: Props) {
             <button
               onClick={onClose}
               className="w-full py-3 rounded-xl font-bold text-white text-sm active:scale-[0.98]"
-              style={{ background: "linear-gradient(135deg, rgb(255,150,30), rgb(255,90,10))" }}
+              style={{
+                background:
+                  "linear-gradient(135deg, rgb(255,150,30), rgb(255,90,10))",
+              }}
             >
               Kapat
             </button>
