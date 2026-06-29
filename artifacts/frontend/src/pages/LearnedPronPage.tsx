@@ -61,8 +61,7 @@ function PronCard({
       <div className="flex items-center gap-2.5 px-4 py-3 cursor-pointer select-none" onClick={selectMode ? onSelect : onToggle}>
         {selectMode ? (
           <div
-            className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
-            style={{ borderColor: isSelected ? "rgb(251,146,60)" : "#d1d5db", background: isSelected ? "rgb(251,146,60)" : "transparent" }}
+            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? "border-main-500 bg-main-500" : "border-gray-200 bg-transparent"}`}
           >
             {isSelected && <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L4 7L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>}
           </div>
@@ -81,7 +80,7 @@ function PronCard({
           </p>
         </div>
         {word.jlptLevel && !selectMode && (
-          <span className="text-[10px] font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0" style={{ background: "#f3f4f6", color: "#6b7280" }}>
+          <span className="text-[10px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
             {word.jlptLevel}
           </span>
         )}
@@ -174,7 +173,7 @@ export function LearnedPronPage() {
 
   return (
     <div className="min-h-dvh bg-white">
-      <div className="max-w-2xl mx-auto pb-8">
+      <div className="max-w-2xl mx-auto pb-8 sm:border-l sm:border-r sm:border-gray-100">
         <div ref={headerRef} className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 pt-4 pb-3 space-y-2">
           <div className="flex items-center justify-between">
             <button onClick={() => navigate("/learned")} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors">
@@ -258,7 +257,7 @@ export function LearnedPronPage() {
       </div>
 
       {selectMode && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3">
+        <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-gray-100 fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3">
           <button onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))} className="text-xs text-gray-500 shrink-0">Tümünü Seç</button>
           <span className="flex-1 text-center text-sm text-gray-500 font-medium">{selectedIds.size > 0 ? `${selectedIds.size} seçildi` : "Satır seçin"}</span>
           <button onClick={handleBulkDelete} disabled={selectedIds.size === 0} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40 shrink-0" style={{ background: "rgb(239,68,68)" }}>

@@ -32,16 +32,31 @@ function hasKanji(str: string): boolean {
 }
 
 export function WordCard({
-  word, index, isOpen, onToggle, onUpdate, onDelete, onEdit, cardRef,
-  selectMode = false, isSelected = false, onSelect, allWords,
+  word,
+  index,
+  isOpen,
+  onToggle,
+  onUpdate,
+  onDelete,
+  onEdit,
+  cardRef,
+  selectMode = false,
+  isSelected = false,
+  onSelect,
+  allWords,
 }: Props) {
   const [showStroke, setShowStroke] = useState(false);
   const [showRelated, setShowRelated] = useState(false);
-  useEffect(() => { if (!isOpen) setShowRelated(false); }, [isOpen]);
+  useEffect(() => {
+    if (!isOpen) setShowRelated(false);
+  }, [isOpen]);
   const kanjiClickable = hasKanji(word.kanji) && !selectMode;
 
   function handleRowClick() {
-    if (selectMode) { onSelect?.(); return; }
+    if (selectMode) {
+      onSelect?.();
+      return;
+    }
     onToggle();
   }
 
@@ -54,15 +69,17 @@ export function WordCard({
         >
           {selectMode ? (
             <div
-              className="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
-              style={{
-                borderColor: isSelected ? "rgb(251,146,60)" : "#d1d5db",
-                background: isSelected ? "rgb(251,146,60)" : "transparent",
-              }}
+              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors border-gray-200 ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
             >
               {isSelected && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                  <path d="M1 4L4 7L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path
+                    d="M1 4L4 7L9 1"
+                    stroke="white"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
                 </svg>
               )}
             </div>
@@ -75,8 +92,12 @@ export function WordCard({
           <LevelChart
             level={word.level}
             starred={word.starred}
-            onChangeLevel={(l) => { if (!selectMode) onUpdate(word.id, { level: l }); }}
-            onToggleStar={() => { if (!selectMode) onUpdate(word.id, { starred: !word.starred }); }}
+            onChangeLevel={(l) => {
+              if (!selectMode) onUpdate(word.id, { level: l });
+            }}
+            onToggleStar={() => {
+              if (!selectMode) onUpdate(word.id, { starred: !word.starred });
+            }}
           />
 
           <span
@@ -89,7 +110,10 @@ export function WordCard({
             style={kanjiClickable ? { cursor: "zoom-in" } : {}}
             onClick={
               kanjiClickable
-                ? (e) => { e.stopPropagation(); setShowStroke(true); }
+                ? (e) => {
+                    e.stopPropagation();
+                    setShowStroke(true);
+                  }
                 : undefined
             }
           >
@@ -99,8 +123,7 @@ export function WordCard({
           {/* JLPT badge inline in the row */}
           {word.jlptLevel && !selectMode && (
             <span
-              className="text-[10px] font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0"
-              style={{ background: "#f3f4f6", color: "#6b7280" }}
+              className="text-[10px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0"
             >
               {word.jlptLevel}
             </span>
@@ -109,7 +132,10 @@ export function WordCard({
           <span className="flex-1" />
 
           {!selectMode && (
-            <div className="flex gap-0.5 shrink-0" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="flex gap-0.5 shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 className="p-1.5 rounded-lg text-gray-300 hover:text-blue-400 transition-colors"
                 onClick={() => onEdit(word)}
@@ -138,7 +164,10 @@ export function WordCard({
                 {word.meaning && allWords && (
                   <RelatedWordsButton
                     active={showRelated}
-                    onClick={(e) => { e.stopPropagation(); setShowRelated((v) => !v); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowRelated((v) => !v);
+                    }}
                   />
                 )}
               </div>
@@ -148,13 +177,17 @@ export function WordCard({
                 <>
                   {word.pronunciation && (
                     <p className="text-sm text-gray-500">
-                      <span className="font-medium text-gray-400 text-xs uppercase tracking-wide mr-2">Okunuş</span>
+                      <span className="font-medium text-gray-400 text-xs uppercase tracking-wide mr-2">
+                        Okunuş
+                      </span>
                       {word.pronunciation}
                     </p>
                   )}
                   {word.meaning && (
                     <p className="text-sm text-gray-600">
-                      <span className="font-medium text-gray-400 text-xs uppercase tracking-wide mr-2">Anlam</span>
+                      <span className="font-medium text-gray-400 text-xs uppercase tracking-wide mr-2">
+                        Anlam
+                      </span>
                       {word.meaning}
                     </p>
                   )}
@@ -165,9 +198,13 @@ export function WordCard({
                       </div>
                     </div>
                   )}
-                  {!word.pronunciation && !word.meaning && !word.description && (
-                    <span className="text-gray-300 italic text-sm">Açıklama yok</span>
-                  )}
+                  {!word.pronunciation &&
+                    !word.meaning &&
+                    !word.description && (
+                      <span className="text-gray-300 italic text-sm">
+                        Açıklama yok
+                      </span>
+                    )}
                 </>
               )}
             </div>
@@ -176,7 +213,10 @@ export function WordCard({
       </div>
 
       {showStroke && (
-        <KanjiStrokeModal kanji={word.kanji} onClose={() => setShowStroke(false)} />
+        <KanjiStrokeModal
+          kanji={word.kanji}
+          onClose={() => setShowStroke(false)}
+        />
       )}
     </>
   );
@@ -185,7 +225,20 @@ export function WordCard({
 function formatDate(dateStr: string): string {
   try {
     const [y, m, d] = dateStr.split("-").map(Number);
-    const months = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+    const months = [
+      "Ocak",
+      "Şubat",
+      "Mart",
+      "Nisan",
+      "Mayıs",
+      "Haziran",
+      "Temmuz",
+      "Ağustos",
+      "Eylül",
+      "Ekim",
+      "Kasım",
+      "Aralık",
+    ];
     return `${d} ${months[m - 1]} ${y}`;
   } catch {
     return dateStr;

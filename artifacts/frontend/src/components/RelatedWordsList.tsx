@@ -101,10 +101,7 @@ export function RelatedWordsList({ word, allWords }: Props) {
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {w.jlptLevel && (
-                  <span
-                    className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
-                    style={{ background: "#f3f4f6", color: "rgb(107,114,128)" }}
-                  >
+                  <span className="text-[10px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
                     {w.jlptLevel}
                   </span>
                 )}
@@ -118,10 +115,9 @@ export function RelatedWordsList({ word, allWords }: Props) {
                   ).map(({ Icon, starred, level }, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-0.5 px-1 py-0.5 rounded-full"
-                      style={{ background: "#f3f4f6" }}
+                      className="flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-gray-100"
                     >
-                      <Icon size={10} strokeWidth={2} style={{ color: "rgb(107,114,128)", flexShrink: 0 }} />
+                      <Icon size={10} strokeWidth={2} className="text-gray-500" />
                       {starred ? (
                         <div
                           className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold"

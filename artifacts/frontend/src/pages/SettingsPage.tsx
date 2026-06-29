@@ -23,7 +23,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-gray-50 flex flex-col">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 shrink-0">
         <button
           onClick={() => navigate("/")}
@@ -52,7 +52,7 @@ export function SettingsPage() {
 
         <main className="flex-1 overflow-y-auto p-4">
           {section === "styling" && (
-            <div className="max-w-2xl">
+            <div className="max-w-2xl sm:border-l sm:border-r sm:border-gray-100">
               <h2 className="text-lg font-bold text-gray-900 mb-1">Styling</h2>
               <p className="text-sm text-gray-500 mb-5">
                 Ana tema rengini seçin. Seviye renkleri, yıldız ve vurgular buna göre güncellenir.

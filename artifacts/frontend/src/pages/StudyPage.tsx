@@ -277,7 +277,7 @@ export function StudyPage() {
 
   if (!word && !done) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center bg-white">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-white sm:border-l sm:border-r sm:border-gray-100">
         <p className="text-gray-400">Kelime bulunamadı</p>
         <button onClick={() => navigate(backPath)} className="mt-4 text-main-400 text-sm">Geri Dön</button>
       </div>
@@ -286,7 +286,7 @@ export function StudyPage() {
 
   if (done) {
     return (
-      <div className="min-h-dvh flex flex-col bg-white">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-white sm:border-l sm:border-r sm:border-gray-100">
         <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center">
           <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400">
             <ArrowLeft size={18} />
@@ -336,7 +336,7 @@ export function StudyPage() {
   const cardTransition = isFlying ? "transform 0.18s ease" : dragX !== 0 ? "none" : "transform 0.22s ease";
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col select-none">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col select-none sm:border-l sm:border-r sm:border-gray-100">
       <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center justify-between shrink-0">
         <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400">
           <ArrowLeft size={18} />
@@ -366,12 +366,12 @@ export function StudyPage() {
 
             <div className="flex items-center gap-2 flex-wrap justify-center">
               {word.date && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "#f3f4f6", color: "rgb(107,114,128)" }}>
+                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-500">
                   {formatDate(word.date)}
                 </span>
               )}
               {word.jlptLevel && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={{ background: "#f3f4f6", color: "rgb(107,114,128)" }}>
+                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-gray-100 text-gray-500">
                   {word.jlptLevel}
                 </span>
               )}

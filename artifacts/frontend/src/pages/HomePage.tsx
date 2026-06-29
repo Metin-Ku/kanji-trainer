@@ -1,19 +1,47 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { BookOpen, Waves, Languages, Pencil, Trash2, Settings } from "lucide-react";
+import {
+  BookOpen,
+  Waves,
+  Languages,
+  Pencil,
+  Trash2,
+  Settings,
+} from "lucide-react";
 import { SearchBar } from "../components/SearchBar";
 import { useWords } from "../hooks/useWords";
 import { filterWords } from "../utils/filterWords";
-import { RelatedWordsList, RelatedWordsButton } from "../components/RelatedWordsList";
+import {
+  RelatedWordsList,
+  RelatedWordsButton,
+} from "../components/RelatedWordsList";
 import { WordFormModal } from "../components/WordFormModal";
 import type { Word, WordUpdate } from "../types";
 import { themeVars } from "../theme";
 
 const TURKISH_MONTHS = [
-  "Ocak","Şubat","Mart","Nisan","Mayıs","Haziran",
-  "Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık",
+  "Ocak",
+  "Şubat",
+  "Mart",
+  "Nisan",
+  "Mayıs",
+  "Haziran",
+  "Temmuz",
+  "Ağustos",
+  "Eylül",
+  "Ekim",
+  "Kasım",
+  "Aralık",
 ];
-const TURKISH_DAYS = ["Pazar","Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi"];
+const TURKISH_DAYS = [
+  "Pazar",
+  "Pazartesi",
+  "Salı",
+  "Çarşamba",
+  "Perşembe",
+  "Cuma",
+  "Cumartesi",
+];
 
 function formatTodayTurkish(): string {
   const now = new Date();
@@ -48,14 +76,18 @@ export function HomePage() {
       const next = new Set(prev);
       if (next.has(id)) {
         next.delete(id);
-        setRelatedOpenIds((r) => { const n = new Set(r); n.delete(id); return n; });
+        setRelatedOpenIds((r) => {
+          const n = new Set(r);
+          n.delete(id);
+          return n;
+        });
       } else next.add(id);
       return next;
     });
   }
 
   return (
-    <div className="min-h-dvh bg-gray-50 flex flex-col">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
       <div className="bg-white border-b border-gray-100 px-5 pt-5 pb-3 shrink-0">
         <div className="flex items-start justify-between gap-3 mb-0.5">
           <p className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
@@ -69,8 +101,14 @@ export function HomePage() {
             <Settings size={20} strokeWidth={2} />
           </button>
         </div>
-        <h1 className="text-xl font-bold text-gray-900 mb-3">{formatTodayTurkish()}</h1>
-        <SearchBar value={query} onChange={setQuery} placeholder="Kelime, okunuş veya anlam ara…" />
+        <h1 className="text-xl font-bold text-gray-900 mb-3">
+          {formatTodayTurkish()}
+        </h1>
+        <SearchBar
+          value={query}
+          onChange={setQuery}
+          placeholder="Kelime, okunuş veya anlam ara…"
+        />
       </div>
 
       {isSearching ? (
@@ -78,63 +116,131 @@ export function HomePage() {
           {results.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center px-8">
               <p className="text-4xl text-gray-200 mb-3">?</p>
-              <p className="text-gray-400 text-sm">"{query}" için sonuç bulunamadı</p>
+              <p className="text-gray-400 text-sm">
+                "{query}" için sonuç bulunamadı
+              </p>
             </div>
           ) : (
             <div>
-              <p className="px-5 pt-3 pb-1 text-xs text-gray-400 font-medium">{results.length} sonuç</p>
+              <p className="px-5 pt-3 pb-1 text-xs text-gray-400 font-medium">
+                {results.length} sonuç
+              </p>
               {results.map((word) => {
                 const isOpen = openIds.has(word.id);
                 const isRelatedOpen = relatedOpenIds.has(word.id);
-                const hasDetail = !!(word.pronunciation || word.meaning || word.description);
+                const hasDetail = !!(
+                  word.pronunciation ||
+                  word.meaning ||
+                  word.description
+                );
                 return (
-                  <div key={word.id} className="border-b border-gray-100 last:border-b-0">
+                  <div
+                    key={word.id}
+                    className="border-b border-gray-100 last:border-b-0"
+                  >
                     <div
                       className="flex items-center gap-3 px-5 py-3 select-none cursor-pointer"
                       onClick={() => hasDetail && toggleOpen(word.id)}
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-bold text-gray-800 leading-none">{word.kanji}</p>
-                        {word.pronunciation && <p className="text-xs text-gray-500 mt-0.5">{word.pronunciation}</p>}
-                        {word.meaning && <p className="text-xs text-gray-400 mt-0.5 truncate">{word.meaning}</p>}
+                        <p className="text-base font-bold text-gray-800 leading-none">
+                          {word.kanji}
+                        </p>
+                        {word.pronunciation && (
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            {word.pronunciation}
+                          </p>
+                        )}
+                        {word.meaning && (
+                          <p className="text-xs text-gray-400 mt-0.5 truncate">
+                            {word.meaning}
+                          </p>
+                        )}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {word.jlptLevel && (
-                          <span className="text-[11px] font-semibold px-2 py-1 rounded-full" style={{ background: "#f3f4f6", color: "rgb(107,114,128)" }}>
+                          <span className="text-[11px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
                             {word.jlptLevel}
                           </span>
                         )}
                         <div className="flex flex-row gap-1">
                           {(
                             [
-                              { Icon: Languages, starred: word.starred,        level: word.level        },
-                              { Icon: Waves,     starred: word.pronStarred,    level: word.pronLevel    },
-                              { Icon: BookOpen,  starred: word.meaningStarred, level: word.meaningLevel },
+                              {
+                                Icon: Languages,
+                                starred: word.starred,
+                                level: word.level,
+                              },
+                              {
+                                Icon: Waves,
+                                starred: word.pronStarred,
+                                level: word.pronLevel,
+                              },
+                              {
+                                Icon: BookOpen,
+                                starred: word.meaningStarred,
+                                level: word.meaningLevel,
+                              },
                             ] as const
                           ).map(({ Icon, starred, level }, i) => (
-                            <div key={i} className="flex items-center gap-1.5 px-2 py-1 rounded-full" style={{ background: "#f3f4f6" }}>
-                              <Icon size={13} strokeWidth={2} style={{ color: "rgb(107,114,128)", flexShrink: 0 }} />
+                            <div
+                              key={i}
+                              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-100"
+                            >
+                              <Icon
+                                size={13}
+                                strokeWidth={2}
+                                className="text-gray-500"
+                              />
                               {starred ? (
-                                <div className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold" style={{ background: themeVars.star, color: "rgb(255,255,255)" }}>★</div>
+                                <div
+                                  className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold"
+                                  style={{
+                                    background: themeVars.star,
+                                    color: "rgb(255,255,255)",
+                                  }}
+                                >
+                                  ★
+                                </div>
                               ) : (
-                                <div className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white" style={{ background: themeVars.level(level) }}>{level}</div>
+                                <div
+                                  className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                                  style={{ background: themeVars.level(level) }}
+                                >
+                                  {level}
+                                </div>
                               )}
                             </div>
                           ))}
                         </div>
                         <button
-                          onClick={(e) => { e.stopPropagation(); setEditingWord(word); setShowForm(true); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingWord(word);
+                            setShowForm(true);
+                          }}
                           className="p-1.5 rounded-lg active:opacity-60 transition-opacity"
-                          style={{ background: "#f3f4f6" }}
+                          style={{ background: "bg-gray-100" }}
                         >
-                          <Pencil size={13} strokeWidth={2} style={{ color: "rgb(107,114,128)" }} />
+                          <Pencil
+                            size={13}
+                            strokeWidth={2}
+                            className="text-gray-500"
+                          />
                         </button>
                         <button
-                          onClick={(e) => { e.stopPropagation(); if (confirm(`"${word.kanji}" silinsin mi?`)) deleteWord(word.id); }}
-                          className="p-1.5 rounded-lg active:opacity-60 transition-opacity"
-                          style={{ background: "#f3f4f6" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(`"${word.kanji}" silinsin mi?`))
+                              deleteWord(word.id);
+                          }}
+                          className="p-1.5 rounded-lg bg-gray-100 active:opacity-60 transition-opacity"
                         >
-                          <Trash2 size={13} strokeWidth={2} style={{ color: "rgb(239,68,68)" }} />
+                          <Trash2
+                            size={13}
+                            strokeWidth={2}
+                            className="text-red-500"
+                          />
                         </button>
                       </div>
                     </div>
@@ -151,7 +257,9 @@ export function HomePage() {
                                   e.stopPropagation();
                                   setRelatedOpenIds((prev) => {
                                     const n = new Set(prev);
-                                    n.has(word.id) ? n.delete(word.id) : n.add(word.id);
+                                    n.has(word.id)
+                                      ? n.delete(word.id)
+                                      : n.add(word.id);
                                     return n;
                                   });
                                 }}
@@ -185,13 +293,26 @@ export function HomePage() {
               className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
               style={{ boxShadow: SHADOW }}
             >
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: themeVars.iconBg }}>
-                <Languages size={22} className="text-main-400" strokeWidth={1.8} />
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center"
+                style={{ background: themeVars.iconBg }}
+              >
+                <Languages
+                  size={22}
+                  className="text-main-400"
+                  strokeWidth={1.8}
+                />
               </div>
               <div className="text-center">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Word</p>
-                <p className="text-xl font-bold text-gray-900 leading-tight">Kelimeler</p>
-                <p className="text-xs text-gray-400 mt-0.5">{nonStarredCount} kelime</p>
+                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                  Word
+                </p>
+                <p className="text-xl font-bold text-gray-900 leading-tight">
+                  Kelimeler
+                </p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {nonStarredCount} kelime
+                </p>
               </div>
             </button>
 
@@ -201,12 +322,23 @@ export function HomePage() {
                 className="flex-1 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
                 style={{ boxShadow: SHADOW }}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: themeVars.iconBg }}>
-                  <Waves size={20} className="text-main-400" strokeWidth={1.8} />
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: themeVars.iconBg }}
+                >
+                  <Waves
+                    size={20}
+                    className="text-main-400"
+                    strokeWidth={1.8}
+                  />
                 </div>
                 <div className="text-center">
-                  <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Pronunciation</p>
-                  <p className="text-base font-bold text-gray-900 leading-tight">Okunuş</p>
+                  <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">
+                    Pronunciation
+                  </p>
+                  <p className="text-base font-bold text-gray-900 leading-tight">
+                    Okunuş
+                  </p>
                 </div>
               </button>
 
@@ -215,12 +347,23 @@ export function HomePage() {
                 className="flex-1 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
                 style={{ boxShadow: SHADOW }}
               >
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: themeVars.iconBg }}>
-                  <BookOpen size={20} className="text-main-400" strokeWidth={1.8} />
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center"
+                  style={{ background: themeVars.iconBg }}
+                >
+                  <BookOpen
+                    size={20}
+                    className="text-main-400"
+                    strokeWidth={1.8}
+                  />
                 </div>
                 <div className="text-center">
-                  <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">Meaning</p>
-                  <p className="text-base font-bold text-gray-900 leading-tight">Anlam</p>
+                  <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">
+                    Meaning
+                  </p>
+                  <p className="text-base font-bold text-gray-900 leading-tight">
+                    Anlam
+                  </p>
                 </div>
               </button>
             </div>
@@ -232,13 +375,22 @@ export function HomePage() {
             className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
             style={{ boxShadow: SHADOW }}
           >
-            <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: themeVars.iconBg }}>
+            <div
+              className="w-12 h-12 rounded-xl flex items-center justify-center"
+              style={{ background: themeVars.iconBg }}
+            >
               <span style={{ color: themeVars.level(1), fontSize: 20 }}>★</span>
             </div>
             <div className="text-center">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Learned</p>
-              <p className="text-xl font-bold text-gray-900 leading-tight">Öğrenilenler</p>
-              <p className="text-xs text-gray-400 mt-0.5">{starredCount} kelime</p>
+              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                Learned
+              </p>
+              <p className="text-xl font-bold text-gray-900 leading-tight">
+                Öğrenilenler
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {starredCount} kelime
+              </p>
             </div>
           </button>
         </div>
@@ -249,7 +401,10 @@ export function HomePage() {
           initial={editingWord}
           allWords={words}
           onSave={handleSave}
-          onClose={() => { setShowForm(false); setEditingWord(undefined); }}
+          onClose={() => {
+            setShowForm(false);
+            setEditingWord(undefined);
+          }}
         />
       )}
     </div>

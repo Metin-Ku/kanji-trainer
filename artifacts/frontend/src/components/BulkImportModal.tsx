@@ -138,7 +138,7 @@ export function BulkImportModal({ onImport, onClose }: Props) {
                         <span className="font-bold text-gray-700 w-16 shrink-0">{w.kanji}</span>
                         <span className="text-gray-500 truncate flex-1">{w.pronunciation}</span>
                         {w.jlptLevel && (
-                          <span className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0" style={{ background: "#f3f4f6", color: "#6b7280" }}>
+                          <span className="text-[10px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
                             {w.jlptLevel}
                           </span>
                         )}

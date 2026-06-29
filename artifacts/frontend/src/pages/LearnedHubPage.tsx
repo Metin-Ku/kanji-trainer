@@ -6,7 +6,7 @@ export function LearnedHubPage() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-dvh bg-white flex flex-col">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col sm:border-l sm:border-r sm:border-gray-100">
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 shrink-0">
         <div className="flex items-center gap-2">
