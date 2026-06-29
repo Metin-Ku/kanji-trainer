@@ -150,11 +150,13 @@ export function RelatedWordsList({ word, allWords }: Props) {
   );
 }
 
-export function RelatedWordsButton({ active, onClick }: { active: boolean; onClick: (e: React.MouseEvent) => void }) {
+export function RelatedWordsButton({ active, onClick, slideUp }: { active: boolean; onClick: (e: React.MouseEvent) => void; slideUp?: boolean }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold transition-colors ${
+      onMouseDown={slideUp ? (e) => e.stopPropagation() : undefined}
+      className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold transition-colors ${slideUp ? "h-8" : ""} ${
         active ? "bg-red-400 text-white" : "bg-main-100 text-main-400"
       }`}
       title="İlgili kelimeler"

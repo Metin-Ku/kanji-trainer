@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Settings, Layers, BookOpen, Waves, Languages, Pencil, Trash2 } from "lucide-react";
+import {
+  Settings,
+  Layers,
+  BookOpen,
+  Waves,
+  Languages,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { SearchBar } from "../components/SearchBar";
 import { WordAddFab } from "../components/WordAddFab";
 import { BulkImportModal } from "../components/BulkImportModal";
@@ -239,7 +247,7 @@ export function HomePage() {
                             setEditingWord(word);
                             setShowForm(true);
                           }}
-                          className="p-1.5 rounded-lg active:opacity-60 transition-opacity"
+                          className="p-1.5 rounded-lg bg-gray-100 active:opacity-60 transition-opacity"
                           style={{ background: "bg-gray-100" }}
                         >
                           <Pencil
@@ -417,7 +425,10 @@ export function HomePage() {
       )}
 
       {!isSearching && (
-        <WordAddFab onNewWord={handleNewWord} onBulkImport={() => setShowBulk(true)} />
+        <WordAddFab
+          onNewWord={handleNewWord}
+          onBulkImport={() => setShowBulk(true)}
+        />
       )}
 
       {showForm && (

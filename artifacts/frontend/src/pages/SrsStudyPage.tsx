@@ -2,7 +2,10 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Dices, Pencil } from "lucide-react";
 import { KanjiStrokeModal } from "../components/KanjiStrokeModal";
 import { WordFormModal } from "../components/WordFormModal";
-import { RelatedWordsList, RelatedWordsButton } from "../components/RelatedWordsList";
+import {
+  RelatedWordsList,
+  RelatedWordsButton,
+} from "../components/RelatedWordsList";
 import { useLocation } from "wouter";
 import { getSrsSession } from "../store/srsStore";
 import { reviewSrsCard } from "../hooks/useSrs";
@@ -11,7 +14,20 @@ import type { Word, WordUpdate } from "../types";
 import { themeVars } from "../theme";
 import { useWords } from "../hooks/useWords";
 
-const MONTHS = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+const MONTHS = [
+  "Oca",
+  "Şub",
+  "Mar",
+  "Nis",
+  "May",
+  "Haz",
+  "Tem",
+  "Ağu",
+  "Eyl",
+  "Eki",
+  "Kas",
+  "Ara",
+];
 
 function formatDate(dateStr: string): string {
   if (!dateStr) return "";
@@ -39,11 +55,36 @@ function queueWordToWord(item: SrsQueueItem): Word {
   };
 }
 
-const RATING_BUTTONS: { rating: ReviewRating; label: string; key: keyof SrsQueueItem["card"]["intervals"]; className: string }[] = [
-  { rating: 1, label: "Again", key: "again", className: "bg-gray-100 hover:bg-red-600" },
-  { rating: 2, label: "Hard", key: "hard", className: "bg-gray-100 hover:bg-main-800" },
-  { rating: 3, label: "Good", key: "good", className: "bg-gray-100 hover:bg-main-600" },
-  { rating: 4, label: "Easy", key: "easy", className: "bg-gray-100 hover:bg-emerald-600" },
+const RATING_BUTTONS: {
+  rating: ReviewRating;
+  label: string;
+  key: keyof SrsQueueItem["card"]["intervals"];
+  className: string;
+}[] = [
+  {
+    rating: 1,
+    label: "Again",
+    key: "again",
+    className: "bg-gray-100 hover:bg-red-600",
+  },
+  {
+    rating: 2,
+    label: "Hard",
+    key: "hard",
+    className: "bg-gray-100 hover:bg-main-800",
+  },
+  {
+    rating: 3,
+    label: "Good",
+    key: "good",
+    className: "bg-gray-100 hover:bg-main-600",
+  },
+  {
+    rating: 4,
+    label: "Easy",
+    key: "easy",
+    className: "bg-gray-100 hover:bg-emerald-600",
+  },
 ];
 
 export function SrsStudyPage() {
@@ -64,6 +105,8 @@ export function SrsStudyPage() {
   const [reviewing, setReviewing] = useState(false);
 
   const mainRef = useRef<HTMLDivElement>(null);
+  const ratingBarRef = useRef<HTMLDivElement>(null);
+  const [ratingBarHeight, setRatingBarHeight] = useState(72);
   const wordRef = useRef<HTMLParagraphElement>(null);
   const touchTargetRef = useRef<EventTarget | null>(null);
   const showStrokeRef = useRef(false);
@@ -97,7 +140,11 @@ export function SrsStudyPage() {
 
   const advanceRequeue = useCallback(() => {
     const current = itemsRef.current[indexRef.current];
-    setItems((prev) => [...prev.slice(0, indexRef.current), ...prev.slice(indexRef.current + 1), current]);
+    setItems((prev) => [
+      ...prev.slice(0, indexRef.current),
+      ...prev.slice(indexRef.current + 1),
+      current,
+    ]);
     setShowDetails(false);
     showStrokeRef.current = false;
     setShowStroke(false);
@@ -107,26 +154,29 @@ export function SrsStudyPage() {
     flyingRef.current = false;
   }, []);
 
-  const submitReview = useCallback(async (rating: ReviewRating) => {
-    if (reviewingRef.current) return;
-    const current = itemsRef.current[indexRef.current];
-    if (!current) return;
+  const submitReview = useCallback(
+    async (rating: ReviewRating) => {
+      if (reviewingRef.current) return;
+      const current = itemsRef.current[indexRef.current];
+      if (!current) return;
 
-    reviewingRef.current = true;
-    setReviewing(true);
-    try {
-      await reviewSrsCard(current.card.id, rating);
-      advanceAfterReview();
-    } catch {
-      alert("Kart kaydedilemedi. Tekrar deneyin.");
-      setDragX(0);
-      setIsFlying(false);
-      flyingRef.current = false;
-    } finally {
-      reviewingRef.current = false;
-      setReviewing(false);
-    }
-  }, [advanceAfterReview]);
+      reviewingRef.current = true;
+      setReviewing(true);
+      try {
+        await reviewSrsCard(current.card.id, rating);
+        advanceAfterReview();
+      } catch {
+        alert("Kart kaydedilemedi. Tekrar deneyin.");
+        setDragX(0);
+        setIsFlying(false);
+        flyingRef.current = false;
+      } finally {
+        reviewingRef.current = false;
+        setReviewing(false);
+      }
+    },
+    [advanceAfterReview],
+  );
 
   function handleReviewClick(rating: ReviewRating) {
     submitReview(rating);
@@ -134,6 +184,16 @@ export function SrsStudyPage() {
 
   const submitReviewRef = useRef(submitReview);
   submitReviewRef.current = submitReview;
+
+  useEffect(() => {
+    const el = ratingBarRef.current;
+    if (!el) return;
+    const update = () => setRatingBarHeight(el.getBoundingClientRect().height);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const el = mainRef.current;
@@ -148,7 +208,8 @@ export function SrsStudyPage() {
     }
 
     function onTouchMove(e: TouchEvent) {
-      if (flyingRef.current || !touchStart.current || reviewingRef.current) return;
+      if (flyingRef.current || !touchStart.current || reviewingRef.current)
+        return;
       const t = e.touches[0];
       const dx = t.clientX - touchStart.current.x;
       const dy = t.clientY - touchStart.current.y;
@@ -167,7 +228,8 @@ export function SrsStudyPage() {
     }
 
     function onTouchEnd(e: TouchEvent) {
-      if (flyingRef.current || !touchStart.current || reviewingRef.current) return;
+      if (flyingRef.current || !touchStart.current || reviewingRef.current)
+        return;
 
       const t = e.changedTouches[0];
       const dx = t.clientX - touchStart.current.x;
@@ -192,7 +254,9 @@ export function SrsStudyPage() {
         if (showStrokeRef.current) {
           setDragX(0);
         } else {
-          const tappedOnWord = wordRef.current && wordRef.current.contains(touchTargetRef.current as Node);
+          const tappedOnWord =
+            wordRef.current &&
+            wordRef.current.contains(touchTargetRef.current as Node);
           const w = itemsRef.current[indexRef.current]?.word;
           if (tappedOnWord && w?.kanji && deck === "word") {
             showStrokeRef.current = true;
@@ -223,7 +287,8 @@ export function SrsStudyPage() {
 
     function onPointerMove(e: PointerEvent) {
       if (e.pointerType === "touch") return;
-      if (flyingRef.current || !touchStart.current || reviewingRef.current) return;
+      if (flyingRef.current || !touchStart.current || reviewingRef.current)
+        return;
       const dx = e.clientX - touchStart.current.x;
       const dy = e.clientY - touchStart.current.y;
 
@@ -243,7 +308,11 @@ export function SrsStudyPage() {
     function onPointerUp(e: PointerEvent) {
       if (e.pointerType === "touch") return;
       if (!touchStart.current) return;
-      try { el.releasePointerCapture(e.pointerId); } catch { /* ignore */ }
+      try {
+        el.releasePointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
 
       if (flyingRef.current || reviewingRef.current) return;
 
@@ -267,7 +336,9 @@ export function SrsStudyPage() {
         if (showStrokeRef.current) {
           setDragX(0);
         } else {
-          const tappedOnWord = wordRef.current && wordRef.current.contains(touchTargetRef.current as Node);
+          const tappedOnWord =
+            wordRef.current &&
+            wordRef.current.contains(touchTargetRef.current as Node);
           const w = itemsRef.current[indexRef.current]?.word;
           if (tappedOnWord && w?.kanji && deck === "word") {
             showStrokeRef.current = true;
@@ -339,7 +410,12 @@ export function SrsStudyPage() {
     return (
       <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-white sm:border-l sm:border-r sm:border-gray-100">
         <p className="text-gray-400">Kart bulunamadı</p>
-        <button onClick={() => navigate(backPath)} className="mt-4 text-main-400 text-sm">Geri Dön</button>
+        <button
+          onClick={() => navigate(backPath)}
+          className="mt-4 text-main-400 text-sm"
+        >
+          Geri Dön
+        </button>
       </div>
     );
   }
@@ -348,16 +424,28 @@ export function SrsStudyPage() {
     return (
       <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-white sm:border-l sm:border-r sm:border-gray-100">
         <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center">
-          <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400">
+          <button
+            onClick={() => navigate(backPath)}
+            className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400"
+          >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
+            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
+              {title}
+            </span>
           </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl" style={{ background: themeVars.star }}>★</div>
+          <div
+            className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
+            style={{ background: themeVars.star }}
+          >
+            ★
+          </div>
           <div>
             <p className="text-2xl font-bold text-gray-900 mb-1">Tamamlandı!</p>
-            <p className="text-sm text-gray-400">Bu oturumdaki kartları bitirdin</p>
+            <p className="text-sm text-gray-400">
+              Bu oturumdaki kartları bitirdin
+            </p>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
@@ -387,24 +475,42 @@ export function SrsStudyPage() {
       ? "translateX(-110vw) rotate(-12deg)"
       : "translateX(110vw) rotate(12deg)"
     : dragX !== 0
-    ? `translateX(${dragX}px) rotate(${dragX * 0.04}deg)`
-    : "translateX(0) rotate(0deg)";
-  const cardTransition = isFlying ? "transform 0.18s ease" : dragX !== 0 ? "none" : "transform 0.22s ease";
+      ? `translateX(${dragX}px) rotate(${dragX * 0.04}deg)`
+      : "translateX(0) rotate(0deg)";
+  const cardTransition = isFlying
+    ? "transform 0.18s ease"
+    : dragX !== 0
+      ? "none"
+      : "transform 0.22s ease";
 
   const liveWord = words.find((w) => w.id === word.id) ?? queueWordToWord(item);
 
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col select-none sm:border-l sm:border-r sm:border-gray-100">
       <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center justify-between shrink-0">
-        <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400">
+        <button
+          onClick={() => navigate(backPath)}
+          className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400"
+        >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
+          <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
+            {title}
+          </span>
         </button>
-        <span className="text-sm text-gray-400 font-medium tabular-nums">{index + 1} / {items.length}</span>
+        <span className="text-sm text-gray-400 font-medium tabular-nums">
+          {index + 1} / {items.length}
+        </span>
       </div>
 
-      <div ref={mainRef} className="flex-1 relative overflow-hidden" style={{ touchAction: "none" }}>
-        <div className="absolute inset-0 flex items-center justify-center" style={{ pointerEvents: "none" }}>
+      <div
+        ref={mainRef}
+        className="flex-1 relative overflow-hidden"
+        style={{ touchAction: "none", paddingBottom: ratingBarHeight }}
+      >
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ pointerEvents: "none" }}
+        >
           <div
             style={{
               transform: cardTransform,
@@ -437,85 +543,104 @@ export function SrsStudyPage() {
           </div>
         </div>
 
-        <div
-          className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 rounded-t-2xl shadow-xl"
-          style={{
-            transform: showDetails ? "translateY(0)" : "translateY(100%)",
-            transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
-            maxHeight: "55vh",
-            overflowY: "auto",
-            zIndex: 10,
-          }}
-          onTouchStart={(e) => e.stopPropagation()}
-          onTouchMove={(e) => e.stopPropagation()}
-          onTouchEnd={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-          onPointerMove={(e) => e.stopPropagation()}
-          onPointerUp={(e) => e.stopPropagation()}
-        >
-          <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 rounded-full bg-gray-200" />
-          </div>
-          <div className="px-6 pb-6 pt-2 space-y-4 relative pr-24">
-            <div className="absolute top-2 right-0 flex flex-col items-end gap-2">
-              <button
-                onClick={() => setShowEdit(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-medium"
-              >
-                <Pencil size={13} />
-                Düzenle
-              </button>
-              {liveWord.meaning && (
-                <RelatedWordsButton
-                  active={showRelated}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowRelated((v) => !v);
-                  }}
-                />
-              )}
-            </div>
-            {deck !== "word" && word.kanji && (
-              <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Kelime</p>
-                <p className="text-3xl font-bold text-gray-800">{word.kanji}</p>
-              </div>
-            )}
-            {deck !== "pronunciation" && word.pronunciation && (
-              <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Okunuş</p>
-                <p className="text-lg font-medium text-gray-700">{word.pronunciation}</p>
-              </div>
-            )}
-            {deck !== "meaning" && word.meaning && (
-              <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Anlam</p>
-                <p className="text-base text-gray-700">{word.meaning}</p>
-              </div>
-            )}
-            {showRelated && liveWord.meaning ? (
-              <RelatedWordsList word={liveWord} allWords={words} />
-            ) : (
-              word.description && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Açıklama</p>
-                  <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">{word.description}</p>
-                </div>
-              )
-            )}
-          </div>
-        </div>
-
         {showStroke && word.kanji && (
           <KanjiStrokeModal
             kanji={word.kanji}
-            onClose={() => { showStrokeRef.current = false; setShowStroke(false); }}
+            onClose={() => {
+              showStrokeRef.current = false;
+              setShowStroke(false);
+            }}
             variant="sheet"
           />
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 px-3 py-3 max-w-2xl mx-auto sm:border-l sm:border-r">
+      {/* SRS-only: fixed above rating bar so it is not covered and taps do not hit mainRef */}
+      <div
+        className="fixed left-0 right-0 z-20 max-w-2xl mx-auto bg-white border-t border-gray-100 rounded-t-2xl shadow-xl sm:border-l sm:border-r pointer-events-auto"
+        style={{
+          bottom: ratingBarHeight,
+          transform: showDetails ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
+          maxHeight: "55vh",
+          overflowY: "auto",
+          pointerEvents: showDetails ? "auto" : "none",
+        }}
+      >
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-10 h-1 rounded-full bg-gray-200" />
+        </div>
+        <div className={`px-6 pb-4 pt-2 relative ${showRelated && liveWord.meaning ? "" : "pr-24"}`}>
+          <div className="absolute top-2 right-6 flex flex-row items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowEdit(true)}
+              className="flex items-center justify-center px-3 py-1.5 w-10 h-8 rounded-lg bg-gray-100 text-gray-600"
+            >
+              <Pencil size={13} />
+            </button>
+            {liveWord.meaning && (
+              <RelatedWordsButton
+                slideUp
+                active={showRelated}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowRelated((v) => !v);
+                }}
+              />
+            )}
+          </div>
+          {showRelated && liveWord.meaning ? (
+            <div className="mt-10">
+              <RelatedWordsList word={liveWord} allWords={words} />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {deck !== "word" && word.kanji && (
+                <div>
+                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                    Kelime
+                  </p>
+                  <p className="text-3xl font-bold text-gray-800">{word.kanji}</p>
+                </div>
+              )}
+              {deck !== "pronunciation" && word.pronunciation && (
+                <div>
+                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                    Okunuş
+                  </p>
+                  <p className="text-lg font-medium text-gray-700">
+                    {word.pronunciation}
+                  </p>
+                </div>
+              )}
+              {deck !== "meaning" && word.meaning && (
+                <div>
+                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                    Anlam
+                  </p>
+                  <p className="text-base text-gray-700">{word.meaning}</p>
+                </div>
+              )}
+              {word.description && (
+                <div className="pt-3 border-t border-gray-100">
+                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                    Açıklama
+                  </p>
+                  <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">
+                    {word.description}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div
+        ref={ratingBarRef}
+        className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 px-3 py-3 max-w-2xl mx-auto sm:border-l sm:border-r"
+      >
         <div className="grid grid-cols-4 gap-2">
           {RATING_BUTTONS.map(({ rating, label, key, className }) => (
             <button
@@ -526,7 +651,9 @@ export function SrsStudyPage() {
             >
               <span>{label}</span>
               {intervals && (
-                <span className="text-[10px] font-normal opacity-90 mt-0.5">{intervals[key]}</span>
+                <span className="text-[10px] font-normal opacity-90 mt-0.5">
+                  {intervals[key]}
+                </span>
               )}
             </button>
           ))}
