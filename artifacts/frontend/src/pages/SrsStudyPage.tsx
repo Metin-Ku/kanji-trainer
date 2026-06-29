@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Dices, Pencil } from "lucide-react";
 import { KanjiStrokeModal } from "../components/KanjiStrokeModal";
 import { WordFormModal } from "../components/WordFormModal";
+import { RelatedWordsList, RelatedWordsButton } from "../components/RelatedWordsList";
 import { useLocation } from "wouter";
 import { getSrsSession } from "../store/srsStore";
 import { reviewSrsCard } from "../hooks/useSrs";
@@ -56,6 +57,7 @@ export function SrsStudyPage() {
   const [showDetails, setShowDetails] = useState(false);
   const [showStroke, setShowStroke] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showRelated, setShowRelated] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [isFlying, setIsFlying] = useState(false);
   const [done, setDone] = useState(false);
@@ -87,6 +89,7 @@ export function SrsStudyPage() {
     setShowDetails(false);
     showStrokeRef.current = false;
     setShowStroke(false);
+    setShowRelated(false);
     setDragX(0);
     setIsFlying(false);
     flyingRef.current = false;
@@ -98,6 +101,7 @@ export function SrsStudyPage() {
     setShowDetails(false);
     showStrokeRef.current = false;
     setShowStroke(false);
+    setShowRelated(false);
     setDragX(0);
     setIsFlying(false);
     flyingRef.current = false;
@@ -300,6 +304,7 @@ export function SrsStudyPage() {
     setShowDetails(false);
     showStrokeRef.current = false;
     setShowStroke(false);
+    setShowRelated(false);
     setDragX(0);
     setIsFlying(false);
     setDone(false);
@@ -444,12 +449,15 @@ export function SrsStudyPage() {
           onTouchStart={(e) => e.stopPropagation()}
           onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          onPointerMove={(e) => e.stopPropagation()}
+          onPointerUp={(e) => e.stopPropagation()}
         >
           <div className="flex justify-center pt-3 pb-1">
             <div className="w-10 h-1 rounded-full bg-gray-200" />
           </div>
-          <div className="px-6 pb-6 pt-2 space-y-4">
-            <div className="flex justify-end">
+          <div className="px-6 pb-6 pt-2 space-y-4 relative pr-24">
+            <div className="absolute top-2 right-0 flex flex-col items-end gap-2">
               <button
                 onClick={() => setShowEdit(true)}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-600 text-xs font-medium"
@@ -457,6 +465,15 @@ export function SrsStudyPage() {
                 <Pencil size={13} />
                 Düzenle
               </button>
+              {liveWord.meaning && (
+                <RelatedWordsButton
+                  active={showRelated}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowRelated((v) => !v);
+                  }}
+                />
+              )}
             </div>
             {deck !== "word" && word.kanji && (
               <div>
@@ -476,11 +493,15 @@ export function SrsStudyPage() {
                 <p className="text-base text-gray-700">{word.meaning}</p>
               </div>
             )}
-            {word.description && (
-              <div className="pt-3 border-t border-gray-100">
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Açıklama</p>
-                <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">{word.description}</p>
-              </div>
+            {showRelated && liveWord.meaning ? (
+              <RelatedWordsList word={liveWord} allWords={words} />
+            ) : (
+              word.description && (
+                <div className="pt-3 border-t border-gray-100">
+                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Açıklama</p>
+                  <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">{word.description}</p>
+                </div>
+              )
             )}
           </div>
         </div>
