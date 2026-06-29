@@ -239,11 +239,7 @@ export function BulkImportModal({ onImport, onClose }: Props) {
 
             <button
               onClick={onClose}
-              className="w-full py-3 rounded-xl font-bold text-white text-sm active:scale-[0.98]"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgb(255,150,30), rgb(255,90,10))",
-              }}
+              className="w-full py-3 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white text-sm active:scale-[0.98]"
             >
               Kapat
             </button>
