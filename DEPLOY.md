@@ -124,15 +124,18 @@ postgresql://postgres.nsxgzydphobasyyygawl:SIFRE@aws-0-REGION.pooler.supabase.co
 
 ## Yerel gelistirme
 
-```bash
+Proje kokunden tek komut (`.env` dosyasini otomatik okur, backend + frontend birlikte baslar):
+
+```powershell
 pnpm install
-set DATABASE_URL=postgresql://...
-pnpm --filter @workspace/backend run dev
-# Baska terminal:
-set PORT=3000
-set BASE_PATH=/
-pnpm --filter @workspace/frontend run dev
+Copy-Item .env.example .env   # DATABASE_URL doldurun
+pnpm dev
 ```
+
+- Frontend: http://localhost:3000 (Vite HMR)
+- API: http://localhost:8080/api/healthz
+- `.env` gitignore'da — Render/Vercel deploy'a dokunmaz
+- Portlar: `BACKEND_PORT` / `FRONTEND_PORT` (varsayilan 8080 / 3000)
 
 ---
 
