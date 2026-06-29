@@ -1,3 +1,4 @@
+import dns from "node:dns";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "./schema";
@@ -25,6 +26,10 @@ function resolvePoolConfig(rawUrl: string): pg.PoolConfig {
   return {
     connectionString,
     ...(useSsl ? { ssl: { rejectUnauthorized: false } } : {}),
+    // Render has no IPv6 route; prefer IPv4 (Supabase direct host is IPv6-only).
+    lookup: (hostname, _opts, cb) => {
+      dns.lookup(hostname, { family: 4 }, cb);
+    },
   };
 }
 

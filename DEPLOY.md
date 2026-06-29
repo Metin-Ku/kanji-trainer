@@ -71,8 +71,22 @@ Repoyu GitHub'a push edin (Render ve Vercel GitHub'dan deploy eder).
    - **Start Command:** `node --enable-source-maps dist/index.mjs`
    - **Health Check Path:** `/api/healthz`
 3. Environment Variables:
-   - `DATABASE_URL` = Supabase connection string
+   - `DATABASE_URL` = Supabase **Transaction pooler** URI (asagiya bakin)
    - `NODE_ENV` = `production`
+
+**Render DATABASE_URL — direct host KULLANMAYIN**
+
+`db.xxx.supabase.co:5432` IPv6 kullanir → Render `ENETUNREACH` verir.
+
+Supabase → **Settings → Database → Connection string → Transaction pooler** kopyalayin:
+
+```
+postgresql://postgres.nsxgzydphobasyyygawl:SIFRE@aws-0-REGION.pooler.supabase.com:6543/postgres
+```
+
+- Kullanici: `postgres.PROJECT_REF` (sadece `postgres` degil)
+- Port: **6543**
+
 4. Deploy sonrasi URL alin: `https://kanji-trainer-api.onrender.com` (ornek)
 5. Test: `https://SIZIN-URL.onrender.com/api/healthz` -> `{"status":"ok"}`
 
@@ -128,5 +142,6 @@ pnpm --filter @workspace/frontend run dev
 |-------|-------|
 | API 502 / timeout | Render servisi uyuyor olabilir; 1 dk bekleyip tekrar deneyin |
 | Kelimeler yuklenmiyor | vercel.json Render URL dogru mu? Browser Network sekmesinde /api/words kontrol edin |
-| DATABASE_URL hatasi | Supabase URL + `?sslmode=require`; kod `ssl: { rejectUnauthorized: false }` kullanir |
+| DATABASE_URL hatasi | Render'da **pooler URL** (6543) kullanin; direct `db.xxx.supabase.co` IPv6 → ENETUNREACH |
+| `ENETUNREACH 2406:da14:...` | Supabase Transaction pooler URL'sine gecin (yukariya bakin) |
 | Build hatasi PORT/BASE_PATH | Vercel env: BASE_PATH=/ veya vite.config varsayilanlari kullanilir |
