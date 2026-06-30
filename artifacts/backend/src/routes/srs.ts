@@ -78,10 +78,12 @@ router.get("/srs/queue", async (req, res, next) => {
           lastReview: card.lastReview?.toISOString() ?? null,
           createdAt: card.createdAt.toISOString(),
           updatedAt: card.updatedAt.toISOString(),
+          exampleCursor: card.exampleCursor,
           intervals: previewIntervals(card, now),
         },
         word: {
           ...word,
+          srsExamples: word.srsExamples ?? [],
           createdAt: word.createdAt.toISOString(),
           updatedAt: word.updatedAt.toISOString(),
           relatedWordIds: [],
@@ -97,12 +99,8 @@ router.post("/srs/cards/:id/review", async (req, res, next) => {
   try {
     const cardId = Number(req.params.id);
     const ratingNum = Number(req.body?.rating);
-    const rating = RATING_MAP[ratingNum];
-
-    if (!rating) {
-      res.status(400).json({ error: "Invalid rating (1=Again, 2=Hard, 3=Good, 4=Easy)" });
-      return;
-    }
+    const correct = req.body?.correct;
+    let rating = RATING_MAP[ratingNum];
 
     const row = await getSrsCardById(cardId);
     if (!row) {
@@ -110,10 +108,35 @@ router.post("/srs/cards/:id/review", async (req, res, next) => {
       return;
     }
 
+    if (row.card.deckType === "example") {
+      if (typeof correct === "boolean") {
+        rating = correct ? Rating.Good : Rating.Again;
+      } else if (!rating) {
+        res.status(400).json({ error: "Invalid rating or correct flag" });
+        return;
+      }
+    } else if (!rating) {
+      res.status(400).json({ error: "Invalid rating (1=Again, 2=Hard, 3=Good, 4=Easy)" });
+      return;
+    }
+
     const now = new Date();
     const mapped = mapSrsRow(row.card);
     const { fields } = reviewCard(mapped, rating, now);
-    const updated = await updateSrsCard(cardId, fields);
+
+    let exampleCursor: number | undefined;
+    if (row.card.deckType === "example" && correct === true) {
+      const examples = row.word.srsExamples ?? [];
+      if (examples.length > 0) {
+        const cursor = mapped.exampleCursor ?? 0;
+        exampleCursor = (cursor + 1) % examples.length;
+      }
+    }
+
+    const updated = await updateSrsCard(cardId, {
+      ...fields,
+      ...(exampleCursor !== undefined ? { exampleCursor } : {}),
+    });
 
     if (!updated) {
       res.status(404).json({ error: "Card not found" });
@@ -127,6 +150,7 @@ router.post("/srs/cards/:id/review", async (req, res, next) => {
         lastReview: updated.lastReview?.toISOString() ?? null,
         createdAt: updated.createdAt.toISOString(),
         updatedAt: updated.updatedAt.toISOString(),
+        exampleCursor: updated.exampleCursor,
         intervals: previewIntervals(updated, now),
       },
     });

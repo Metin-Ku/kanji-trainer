@@ -59,3 +59,13 @@ export async function reviewSrsCard(cardId: number, rating: ReviewRating) {
   if (!res.ok) throw new Error("Failed to review card");
   return res.json();
 }
+
+export async function reviewSrsExample(cardId: number, correct: boolean) {
+  const res = await fetch(`/api/srs/cards/${cardId}/review`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ correct }),
+  });
+  if (!res.ok) throw new Error("Failed to review card");
+  return res.json();
+}

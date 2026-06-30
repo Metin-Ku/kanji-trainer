@@ -1,0 +1,339 @@
+import type { Word, TargetChunk, SrsExample } from "../types";
+import { getExpectedAnswer, expectedForPartialFeedback } from "../lib/srsExamples";
+import {
+  buildWordsById,
+  segmentTextWithLinks,
+  linkedTokensForDisplay,
+  findLinkedTokenForChunk,
+  rubyPartsForLinkedSpan,
+  sliceRubyPartsForRange,
+} from "../lib/wordLinking";
+import {
+  RubyParts,
+  HiddenAnswerDisplay,
+  displayExpectedForChunk,
+} from "./RubyText";
+
+interface Props {
+  example: SrsExample;
+  headwordKanji?: string;
+  words: Word[];
+  wordLinksEnabled: boolean;
+  liveAnswer?: string;
+  answerState?: "typing" | "correct" | "partial" | "revealed";
+  onWordTap?: (word: Word) => void;
+  className?: string;
+}
+
+function LinkedTextSpan({
+  text,
+  chunkOffset,
+  linkedTokens,
+  wordsById,
+  wordLinksEnabled,
+  onWordTap,
+  ruby,
+}: {
+  text: string;
+  chunkOffset: number;
+  linkedTokens?: SrsExample["linkedTokens"];
+  wordsById: Map<number, Word>;
+  wordLinksEnabled: boolean;
+  onWordTap?: (word: Word) => void;
+  ruby?: TargetChunk["ruby"];
+}) {
+  if (!wordLinksEnabled || !linkedTokens?.length) {
+    if (ruby?.length) return <RubyParts parts={ruby} />;
+    return <span>{text}</span>;
+  }
+
+  const segs = segmentTextWithLinks(text, chunkOffset, linkedTokens);
+  let local = 0;
+  return (
+    <>
+      {segs.map((seg, i) => {
+        if (seg.kind === "link") {
+          const word = wordsById.get(seg.wordId);
+          local += seg.text.length;
+          if (!word) return <span key={i}>{seg.text}</span>;
+          return (
+            <button
+              key={i}
+              type="button"
+              onClick={() => onWordTap?.(word)}
+              className="underline decoration-dotted underline-offset-4 decoration-gray-500 hover:decoration-main-500 text-gray-900"
+            >
+              <RubyParts parts={rubyPartsForLinkedSpan(seg.text, word)} />
+            </button>
+          );
+        }
+        const relStart = local;
+        local += seg.text.length;
+        const sub = ruby?.length
+          ? sliceRubyPartsForRange(ruby, relStart, local)
+          : null;
+        if (sub?.some((p) => p.reading)) {
+          return <RubyParts key={i} parts={sub} />;
+        }
+        return <span key={i}>{seg.text}</span>;
+      })}
+    </>
+  );
+}
+
+function TextWithLinks({
+  text,
+  ruby,
+  chunkOffset,
+  linkedTokens,
+  wordsById,
+  wordLinksEnabled,
+  onWordTap,
+}: {
+  text: string;
+  ruby?: TargetChunk["ruby"];
+  chunkOffset: number;
+  linkedTokens?: SrsExample["linkedTokens"];
+  wordsById: Map<number, Word>;
+  wordLinksEnabled: boolean;
+  onWordTap?: (word: Word) => void;
+}) {
+  return (
+    <LinkedTextSpan
+      text={text}
+      chunkOffset={chunkOffset}
+      linkedTokens={linkedTokens}
+      wordsById={wordsById}
+      wordLinksEnabled={wordLinksEnabled}
+      onWordTap={onWordTap}
+      ruby={ruby}
+    />
+  );
+}
+
+function SecondaryHiddenChunk({
+  chunk,
+  chunkOffset,
+  linkedTokens,
+  wordsById,
+  wordLinksEnabled,
+  onWordTap,
+}: {
+  chunk: TargetChunk;
+  chunkOffset: number;
+  linkedTokens?: SrsExample["linkedTokens"];
+  wordsById: Map<number, Word>;
+  wordLinksEnabled: boolean;
+  onWordTap?: (word: Word) => void;
+}) {
+  const token = findLinkedTokenForChunk(
+    chunkOffset,
+    chunk.text,
+    linkedTokens,
+  );
+
+  if (wordLinksEnabled && token) {
+    const word = wordsById.get(token.wordId);
+    if (word) {
+      return (
+        <span className="inline-block mx-0.5">
+          <button
+            type="button"
+            onClick={() => onWordTap?.(word)}
+            className="underline decoration-dotted underline-offset-4 decoration-gray-500 hover:decoration-main-500 text-gray-900"
+          >
+            <RubyParts parts={rubyPartsForLinkedSpan(chunk.text, word)} />
+          </button>
+        </span>
+      );
+    }
+  }
+
+  if (chunk.ruby?.length) {
+    return (
+      <span className="inline-block mx-0.5">
+        <RubyParts parts={chunk.ruby} />
+      </span>
+    );
+  }
+
+  return <span className="inline-block mx-0.5">{chunk.text}</span>;
+}
+
+function HiddenSlot({
+  chunk,
+  expected,
+  partialExpected,
+  liveAnswer,
+  answerState,
+}: {
+  chunk: TargetChunk;
+  expected: string;
+  partialExpected: string;
+  liveAnswer: string;
+  answerState: "typing" | "correct" | "partial" | "revealed";
+}) {
+  return (
+    <HiddenAnswerDisplay
+      expected={answerState === "partial" ? partialExpected : expected}
+      input={liveAnswer}
+      liveInput={liveAnswer}
+      ruby={chunk.ruby}
+      mode={
+        answerState === "correct"
+          ? "correct"
+          : answerState === "revealed"
+            ? "revealed"
+            : answerState === "partial"
+              ? "partial"
+              : "live"
+      }
+    />
+  );
+}
+
+export function ExampleSentenceDisplay({
+  example,
+  headwordKanji,
+  words,
+  wordLinksEnabled,
+  liveAnswer = "",
+  answerState = "typing",
+  onWordTap,
+  className = "",
+}: Props) {
+  const wordsById = buildWordsById(words);
+  const chunks = example.targetChunks;
+  const linkedTokens = linkedTokensForDisplay(example);
+  const primaryHidden = chunks?.find((c) => c.type === "hidden");
+  const expected = primaryHidden
+    ? displayExpectedForChunk(primaryHidden)
+    : getExpectedAnswer(example, headwordKanji);
+  const partialExpected = expectedForPartialFeedback(
+    example,
+    liveAnswer,
+    headwordKanji,
+  );
+
+  if (chunks?.length) {
+    let offset = 0;
+    return (
+      <p
+        className={`text-2xl font-bold text-gray-900 leading-loose ${className}`}
+      >
+        {chunks.map((chunk, i) => {
+          const chunkOffset = offset;
+          offset += chunk.text.length;
+
+          if (chunk.type === "hidden") {
+            const isPrimary = chunk === primaryHidden;
+            if (!isPrimary) {
+              return (
+                <SecondaryHiddenChunk
+                  key={i}
+                  chunk={chunk}
+                  chunkOffset={chunkOffset}
+                  linkedTokens={linkedTokens}
+                  wordsById={wordsById}
+                  wordLinksEnabled={wordLinksEnabled}
+                  onWordTap={onWordTap}
+                />
+              );
+            }
+            return (
+              <span key={i} className="inline-block mx-0.5 align-baseline">
+                <HiddenSlot
+                  chunk={chunk}
+                  expected={expected}
+                  partialExpected={partialExpected}
+                  liveAnswer={liveAnswer}
+                  answerState={answerState}
+                />
+              </span>
+            );
+          }
+          if (chunk.type === "text" && !chunk.text.trim() && !chunk.ruby?.length) {
+            return null;
+          }
+          return (
+            <span key={i}>
+              <TextWithLinks
+                text={chunk.text}
+                ruby={chunk.ruby}
+                chunkOffset={chunkOffset}
+                linkedTokens={linkedTokens}
+                wordsById={wordsById}
+                wordLinksEnabled={wordLinksEnabled}
+                onWordTap={onWordTap}
+              />
+            </span>
+          );
+        })}
+      </p>
+    );
+  }
+
+  const hiddenWord = example.hiddenWord;
+  const sentence = example.sentence;
+
+  if (answerState === "correct") {
+    return (
+      <p className={`text-2xl font-bold text-gray-900 leading-relaxed ${className}`}>
+        {wordLinksEnabled && linkedTokens?.length ? (
+          <LinkedTextSpan
+            text={sentence}
+            chunkOffset={0}
+            linkedTokens={linkedTokens}
+            wordsById={wordsById}
+            wordLinksEnabled
+            onWordTap={onWordTap}
+          />
+        ) : (
+          sentence
+        )}
+      </p>
+    );
+  }
+
+  const before = hiddenWord ? sentence.split(hiddenWord)[0] ?? "" : sentence;
+  const after = hiddenWord ? sentence.split(hiddenWord)[1] ?? "" : "";
+  const beforeLen = before.length;
+  const afterOffset = beforeLen + hiddenWord.length;
+
+  return (
+    <p className={`text-2xl font-bold text-gray-900 leading-relaxed ${className}`}>
+      <LinkedTextSpan
+        text={before}
+        chunkOffset={0}
+        linkedTokens={linkedTokens}
+        wordsById={wordsById}
+        wordLinksEnabled={wordLinksEnabled}
+        onWordTap={onWordTap}
+      />
+      <HiddenAnswerDisplay
+        expected={
+          answerState === "partial"
+            ? expectedForPartialFeedback(example, liveAnswer, headwordKanji)
+            : expected
+        }
+        input={liveAnswer}
+        liveInput={liveAnswer}
+        mode={
+          answerState === "partial"
+            ? "partial"
+            : answerState === "revealed"
+              ? "revealed"
+              : "live"
+        }
+      />
+      <LinkedTextSpan
+        text={after}
+        chunkOffset={afterOffset}
+        linkedTokens={linkedTokens}
+        wordsById={wordsById}
+        wordLinksEnabled={wordLinksEnabled}
+        onWordTap={onWordTap}
+      />
+    </p>
+  );
+}

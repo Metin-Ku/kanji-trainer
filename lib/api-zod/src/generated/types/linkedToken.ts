@@ -6,9 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface BulkImportResult {
-  total: number;
-  added: number;
-  updated: number;
-  updatedWords: string[];
+export interface LinkedToken {
+  start: number;
+  end: number;
+  surface: string;
+  wordId: number;
+  lemma?: string;
 }

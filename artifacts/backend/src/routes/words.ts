@@ -7,7 +7,7 @@ import {
   BulkCreateWordsBody,
 } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
-import { ensureSrsCardsForWord, ensureSrsCardsForWords } from "../lib/srsCards";
+import { ensureSrsCardsForWord, ensureSrsCardsForWords, clampExampleCursorForWord } from "../lib/srsCards";
 
 const router = Router();
 
@@ -93,6 +93,7 @@ router.post("/words/bulk", async (req, res) => {
         pronunciation: w.pronunciation ?? "",
         meaning: w.meaning ?? "",
         description: w.description ?? "",
+        srsExamples: w.srsExamples ?? [],
         level: 1,
         jlptLevel: w.jlptLevel ?? null,
         date: today,
@@ -102,15 +103,26 @@ router.post("/words/bulk", async (req, res) => {
   }
 
   for (const w of toUpdate) {
+    const srsExamples = w.srsExamples ?? [];
     await db
       .update(wordsTable)
       .set({
         pronunciation: w.pronunciation ?? "",
         meaning: w.meaning ?? "",
         description: w.description ?? "",
+        srsExamples,
         jlptLevel: w.jlptLevel ?? null,
       })
       .where(eq(wordsTable.kanji, w.kanji));
+
+    const [updated] = await db
+      .select({ id: wordsTable.id })
+      .from(wordsTable)
+      .where(eq(wordsTable.kanji, w.kanji))
+      .limit(1);
+    if (updated) {
+      await clampExampleCursorForWord(updated.id, srsExamples.length);
+    }
   }
 
   res.json({
@@ -127,10 +139,10 @@ router.post("/words", async (req, res) => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const { kanji, pronunciation = "", meaning = "", description = "", level = 1, jlptLevel, date, relatedWordIds } = parsed.data;
+  const { kanji, pronunciation = "", meaning = "", description = "", srsExamples = [], level = 1, jlptLevel, date, relatedWordIds } = parsed.data;
   const [word] = await db
     .insert(wordsTable)
-    .values({ kanji, pronunciation, meaning, description, level, jlptLevel: jlptLevel ?? null, date })
+    .values({ kanji, pronunciation, meaning, description, srsExamples, level, jlptLevel: jlptLevel ?? null, date })
     .returning();
   if (relatedWordIds && relatedWordIds.length > 0) {
     await setRelatedWords(word.id, relatedWordIds);
@@ -151,12 +163,19 @@ router.patch("/words/:id", async (req, res) => {
     res.status(404).json({ error: "Not found" });
     return;
   }
-  const { relatedWordIds, ...wordFields } = parsed.data;
+  const { relatedWordIds, srsExamples, ...wordFields } = parsed.data;
+  const patch: Record<string, unknown> = { ...wordFields };
+  if (srsExamples !== undefined) patch.srsExamples = srsExamples;
+
   const [updated] = await db
     .update(wordsTable)
-    .set(wordFields)
+    .set(patch)
     .where(eq(wordsTable.id, id))
     .returning();
+
+  if (srsExamples !== undefined) {
+    await clampExampleCursorForWord(id, srsExamples.length);
+  }
 
   if (relatedWordIds !== undefined) {
     await setRelatedWords(id, relatedWordIds);

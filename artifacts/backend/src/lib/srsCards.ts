@@ -85,27 +85,37 @@ export function mapSrsRow(row: typeof srsCardsTable.$inferSelect): SrsCardRow {
     learningSteps: row.learningSteps,
     state: row.state,
     lastReview: row.lastReview,
+    exampleCursor: row.exampleCursor,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
 }
 
+function hasSrsExamples(word: typeof wordsTable.$inferSelect): boolean {
+  const ex = word.srsExamples;
+  return Array.isArray(ex) && ex.length > 0;
+}
+
 export async function getDeckStats(deckType: SrsDeckType) {
   const now = new Date();
   const rows = await db
-    .select()
+    .select({ card: srsCardsTable, word: wordsTable })
     .from(srsCardsTable)
+    .innerJoin(wordsTable, eq(srsCardsTable.wordId, wordsTable.id))
     .where(eq(srsCardsTable.deckType, deckType));
 
   let due = 0;
   let newCount = 0;
-  for (const row of rows) {
-    const mapped = mapSrsRow(row);
+  let total = 0;
+  for (const { card, word } of rows) {
+    if (deckType === "example" && !hasSrsExamples(word)) continue;
+    total++;
+    const mapped = mapSrsRow(card);
     if (mapped.state === 0 && mapped.reps === 0) newCount++;
     else if (mapped.due.getTime() <= now.getTime()) due++;
   }
 
-  return { total: rows.length, due, new: newCount };
+  return { total, due, new: newCount };
 }
 
 const JLPT_RANK: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
@@ -145,8 +155,9 @@ export async function getReviewQueue(
 
   const filtered = rows.filter(({ word }) => {
     const rank = jlptRank(word.jlptLevel);
-    if (rank === 99) return true;
-    return rank >= minRank && rank <= maxRank;
+    if (rank !== 99 && (rank < minRank || rank > maxRank)) return false;
+    if (deckType === "example" && !hasSrsExamples(word)) return false;
+    return true;
   });
 
   const dueOrNew = filtered.filter(({ card }) => {
@@ -190,11 +201,34 @@ export async function getSrsCardById(cardId: number) {
   return rows[0] ?? null;
 }
 
-export async function updateSrsCard(cardId: number, fields: ReturnType<typeof import("./srs").fsrsCardToRowFields>) {
+export async function updateSrsCard(
+  cardId: number,
+  fields: ReturnType<typeof import("./srs").fsrsCardToRowFields> & {
+    exampleCursor?: number;
+  },
+) {
   const [updated] = await db
     .update(srsCardsTable)
     .set(fields)
     .where(eq(srsCardsTable.id, cardId))
     .returning();
   return updated ? mapSrsRow(updated) : null;
+}
+
+export async function clampExampleCursorForWord(wordId: number, exampleCount: number) {
+  if (exampleCount <= 0) return;
+  const rows = await db
+    .select()
+    .from(srsCardsTable)
+    .where(eq(srsCardsTable.wordId, wordId));
+  for (const row of rows) {
+    if (row.deckType !== "example") continue;
+    const max = exampleCount - 1;
+    if (row.exampleCursor > max) {
+      await db
+        .update(srsCardsTable)
+        .set({ exampleCursor: max })
+        .where(eq(srsCardsTable.id, row.id));
+    }
+  }
 }

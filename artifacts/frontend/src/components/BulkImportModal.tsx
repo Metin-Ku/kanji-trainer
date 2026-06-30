@@ -1,11 +1,15 @@
 import { useRef, useState } from "react";
 import { X, Upload, Loader2 } from "lucide-react";
+import type { SrsExample, Word } from "../types";
+import { parseBulkDescriptionHtml, elementSurfaceText } from "../lib/srsExamples";
+import { linkSrsExamples } from "../lib/wordLinking";
 
 interface BulkWord {
   kanji: string;
   pronunciation: string;
   meaning: string;
   description: string;
+  srsExamples?: SrsExample[];
   jlptLevel?: string;
 }
 
@@ -19,11 +23,12 @@ interface ImportResult {
 interface Props {
   onImport: (words: BulkWord[]) => Promise<ImportResult>;
   onClose: () => void;
+  allWords: Word[];
 }
 
 function extractText(el: Element): string {
   el.querySelectorAll("br").forEach((br) => br.replaceWith("\n"));
-  return el.textContent?.trim() ?? "";
+  return elementSurfaceText(el).trim();
 }
 
 const JLPT_SET = new Set(["N1", "N2", "N3", "N4", "N5"]);
@@ -45,11 +50,28 @@ function parseTableHtml(html: string): BulkWord[] {
     if (!kanji || kanji === "Word" || kanji === "Kelime") return;
     const rawJlpt = jlptEl?.textContent?.trim().toUpperCase() ?? "";
     const jlptLevel = JLPT_SET.has(rawJlpt) ? rawJlpt : undefined;
+
+    let description = "";
+    let srsExamples: SrsExample[] | undefined;
+    if (descEl) {
+      if (
+        descEl.querySelector(".example") ||
+        descEl.querySelector(".sentence--target")
+      ) {
+        const parsed = parseBulkDescriptionHtml(descEl);
+        description = parsed.description;
+        srsExamples = parsed.srsExamples;
+      } else {
+        description = extractText(descEl);
+      }
+    }
+
     words.push({
       kanji,
       pronunciation: pronEl ? extractText(pronEl) : "",
       meaning: meanEl ? extractText(meanEl) : "",
-      description: descEl ? extractText(descEl) : "",
+      description,
+      ...(srsExamples && srsExamples.length > 0 ? { srsExamples } : {}),
       ...(jlptLevel ? { jlptLevel } : {}),
     });
   });
@@ -57,9 +79,10 @@ function parseTableHtml(html: string): BulkWord[] {
   return words;
 }
 
-export function BulkImportModal({ onImport, onClose }: Props) {
+export function BulkImportModal({ onImport, onClose, allWords }: Props) {
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(false);
+  const [linking, setLinking] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [preview, setPreview] = useState<BulkWord[]>([]);
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -77,13 +100,27 @@ export function BulkImportModal({ onImport, onClose }: Props) {
   async function handleImport() {
     if (preview.length === 0) return;
     setLoading(true);
+    setLinking(true);
     try {
-      const res = await onImport(preview);
+      const linkedPreview: BulkWord[] = [];
+      for (const w of preview) {
+        if (w.srsExamples?.length) {
+          const srsExamples = await linkSrsExamples(w.srsExamples, allWords);
+          linkedPreview.push({ ...w, srsExamples });
+        } else {
+          linkedPreview.push(w);
+        }
+      }
+      setLinking(false);
+      const res = await onImport(linkedPreview);
       setResult(res);
       setPreview([]);
       setHtml("");
+    } catch {
+      alert("Kelime eşleştirme veya içe aktarma başarısız.");
     } finally {
       setLoading(false);
+      setLinking(false);
     }
   }
 
@@ -175,7 +212,14 @@ export function BulkImportModal({ onImport, onClose }: Props) {
                           </span>
                         )}
                         {w.description && (
-                          <span className="text-gray-300 shrink-0">✓</span>
+                          <span className="text-gray-300 shrink-0" title="Açıklama">
+                            ✓
+                          </span>
+                        )}
+                        {w.srsExamples && w.srsExamples.length > 0 && (
+                          <span className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0 bg-main-100 text-main-600">
+                            {w.srsExamples.length} SRS
+                          </span>
                         )}
                       </div>
                     ))}
@@ -197,7 +241,7 @@ export function BulkImportModal({ onImport, onClose }: Props) {
                     {loading ? (
                       <>
                         <Loader2 size={15} className="animate-spin" />{" "}
-                        Ekleniyor...
+                        {linking ? "Eşleştiriliyor..." : "Ekleniyor..."}
                       </>
                     ) : (
                       <>

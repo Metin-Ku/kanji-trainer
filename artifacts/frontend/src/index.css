@@ -76,6 +76,16 @@
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
+  ruby {
+    ruby-position: over;
+    ruby-align: center;
+  }
+  rt {
+    font-size: 0.5em;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
 }
 
 /* Instant expand/collapse — no animation */

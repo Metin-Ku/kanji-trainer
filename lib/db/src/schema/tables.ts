@@ -8,7 +8,45 @@ import {
   primaryKey,
   real,
   uniqueIndex,
+  jsonb,
 } from "drizzle-orm/pg-core";
+
+export type SrsExampleHint = {
+  text: string;
+  highlights?: string[];
+};
+
+export type RubyPart = {
+  base: string;
+  reading?: string;
+};
+
+export type TargetChunk = {
+  type: "text" | "hidden";
+  text: string;
+  reading?: string;
+  ruby?: RubyPart[];
+  script?: "kanji" | "hiragana" | "katakana";
+};
+
+export type LinkedToken = {
+  start: number;
+  end: number;
+  surface: string;
+  wordId: number;
+  lemma?: string;
+};
+
+export type SrsExample = {
+  order: number;
+  sentence: string;
+  hiddenWord: string;
+  hiddenReading?: string;
+  hiddenScript?: "kanji" | "hiragana" | "katakana";
+  targetChunks?: TargetChunk[];
+  linkedTokens?: LinkedToken[];
+  hints: SrsExampleHint[];
+};
 
 export const wordsTable = pgTable("words", {
   id: serial("id").primaryKey(),
@@ -16,6 +54,10 @@ export const wordsTable = pgTable("words", {
   pronunciation: text("pronunciation").notNull().default(""),
   meaning: text("meaning").notNull().default(""),
   description: text("description").notNull().default(""),
+  srsExamples: jsonb("srs_examples")
+    .$type<SrsExample[]>()
+    .notNull()
+    .default([]),
   level: integer("level").notNull().default(1),
   starred: boolean("starred").notNull().default(false),
   pronLevel: integer("pron_level").notNull().default(1),
@@ -45,7 +87,7 @@ export const wordRelationsTable = pgTable(
   (t) => [primaryKey({ columns: [t.wordId, t.relatedWordId] })],
 );
 
-export const srsDeckTypes = ["word", "pronunciation", "meaning"] as const;
+export const srsDeckTypes = ["word", "pronunciation", "meaning", "example"] as const;
 export type SrsDeckType = (typeof srsDeckTypes)[number];
 
 export const srsCardsTable = pgTable(
@@ -66,6 +108,7 @@ export const srsCardsTable = pgTable(
     learningSteps: integer("learning_steps").notNull().default(0),
     state: integer("state").notNull().default(0),
     lastReview: timestamp("last_review", { withTimezone: true }),
+    exampleCursor: integer("example_cursor").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

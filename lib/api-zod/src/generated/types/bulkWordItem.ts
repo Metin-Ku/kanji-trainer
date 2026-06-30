@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { SrsExample } from './srsExample';
 
 export interface BulkWordItem {
   /** @minLength 1 */
@@ -12,5 +13,6 @@ export interface BulkWordItem {
   pronunciation?: string;
   meaning?: string;
   description?: string;
+  srsExamples?: SrsExample[];
   jlptLevel?: string;
 }

@@ -127,7 +127,7 @@ components:
 
     VocabWord:
       type: object
-      required: [id, kanji, pronunciation, meaning, description, level, starred, pronLevel, pronStarred, meaningLevel, meaningStarred, date, createdAt, relatedWordIds]
+      required: [id, kanji, pronunciation, meaning, description, srsExamples, level, starred, pronLevel, pronStarred, meaningLevel, meaningStarred, date, createdAt, relatedWordIds]
       properties:
         id:
           type: integer
@@ -139,6 +139,10 @@ components:
           type: string
         description:
           type: string
+        srsExamples:
+          type: array
+          items:
+            $ref: "#/components/schemas/SrsExample"
         level:
           type: integer
         starred:
@@ -175,6 +179,10 @@ components:
           type: string
         description:
           type: string
+        srsExamples:
+          type: array
+          items:
+            $ref: "#/components/schemas/SrsExample"
         level:
           type: integer
           minimum: 1
@@ -200,6 +208,10 @@ components:
           type: string
         description:
           type: string
+        srsExamples:
+          type: array
+          items:
+            $ref: "#/components/schemas/SrsExample"
         level:
           type: integer
           minimum: 1
@@ -249,20 +261,106 @@ components:
           type: string
         description:
           type: string
+        srsExamples:
+          type: array
+          items:
+            $ref: "#/components/schemas/SrsExample"
         jlptLevel:
           type: string
 
     BulkImportResult:
       type: object
-      required: [total, added, skipped, skippedWords]
+      required: [total, added, updated, updatedWords]
       properties:
         total:
           type: integer
         added:
           type: integer
-        skipped:
+        updated:
           type: integer
-        skippedWords:
+        updatedWords:
           type: array
           items:
             type: string
+
+    SrsExampleHint:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+        highlights:
+          type: array
+          items:
+            type: string
+
+    RubyPart:
+      type: object
+      required: [base]
+      properties:
+        base:
+          type: string
+        reading:
+          type: string
+
+    TargetChunk:
+      type: object
+      required: [type, text]
+      properties:
+        type:
+          type: string
+          enum: [text, hidden]
+        text:
+          type: string
+        reading:
+          type: string
+        ruby:
+          type: array
+          items:
+            $ref: "#/components/schemas/RubyPart"
+        script:
+          type: string
+          enum: [kanji, hiragana, katakana]
+
+    LinkedToken:
+      type: object
+      required: [start, end, surface, wordId]
+      properties:
+        start:
+          type: integer
+        end:
+          type: integer
+        surface:
+          type: string
+        wordId:
+          type: integer
+        lemma:
+          type: string
+
+    SrsExample:
+      type: object
+      required: [order, sentence, hiddenWord, hints]
+      properties:
+        order:
+          type: integer
+        sentence:
+          type: string
+        hiddenWord:
+          type: string
+        hiddenReading:
+          type: string
+        hiddenScript:
+          type: string
+          enum: [kanji, hiragana, katakana]
+        targetChunks:
+          type: array
+          items:
+            $ref: "#/components/schemas/TargetChunk"
+        linkedTokens:
+          type: array
+          items:
+            $ref: "#/components/schemas/LinkedToken"
+        hints:
+          type: array
+          items:
+            $ref: "#/components/schemas/SrsExampleHint"

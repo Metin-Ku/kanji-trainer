@@ -1,4 +1,6 @@
-export type SrsDeckType = "word" | "pronunciation" | "meaning";
+import type { SrsExample } from "../types";
+
+export type SrsDeckType = "word" | "pronunciation" | "meaning" | "example";
 
 export type SrsSortMode = "due-asc" | "date-asc" | "date-desc";
 
@@ -25,6 +27,7 @@ export interface SrsCard {
   learningSteps: number;
   state: number;
   lastReview: string | null;
+  exampleCursor: number;
   createdAt: string;
   updatedAt: string;
   intervals: SrsIntervals;
@@ -45,6 +48,7 @@ export interface SrsQueueItem {
     pronunciation: string;
     meaning: string;
     description: string;
+    srsExamples: SrsExample[];
     level: number;
     starred: boolean;
     pronLevel: number;
@@ -59,10 +63,14 @@ export interface SrsQueueItem {
   };
 }
 
-export const SRS_DECK_LABELS: Record<SrsDeckType, { title: string; subtitle: string }> = {
+export const SRS_DECK_LABELS: Record<
+  SrsDeckType,
+  { title: string; subtitle: string }
+> = {
   word: { title: "Kelime", subtitle: "Word" },
   pronunciation: { title: "Okunuş", subtitle: "Pronunciation" },
   meaning: { title: "Anlam", subtitle: "Meaning" },
+  example: { title: "Örnek", subtitle: "Example sentences" },
 };
 
 export const JLPT_LEVELS = ["N5", "N4", "N3", "N2", "N1"] as const;

@@ -13,6 +13,7 @@ import type { SrsDeckType, SrsQueueItem, ReviewRating } from "../types/srs";
 import type { Word, WordUpdate } from "../types";
 import { themeVars } from "../theme";
 import { useWords } from "../hooks/useWords";
+import { ExampleSrsStudyPage } from "./ExampleSrsStudyPage";
 
 const MONTHS = [
   "Oca",
@@ -51,8 +52,9 @@ function getPrimary(item: SrsQueueItem, deck: SrsDeckType): string {
 function queueWordToWord(item: SrsQueueItem): Word {
   return {
     ...item.word,
+    srsExamples: item.word.srsExamples ?? [],
     relatedWordIds: item.word.relatedWordIds ?? [],
-  };
+  } as Word;
 }
 
 const RATING_BUTTONS: {
@@ -83,13 +85,25 @@ const RATING_BUTTONS: {
     rating: 4,
     label: "Easy",
     key: "easy",
-    className: "bg-gray-100 hover:bg-emerald-600",
+    className: "bg-gray-100 hover:bg-green-500",
   },
 ];
 
 export function SrsStudyPage() {
-  const [, navigate] = useLocation();
   const sessionRef = useRef(getSrsSession());
+  if (sessionRef.current.deck === "example") {
+    return <ExampleSrsStudyPage />;
+  }
+
+  return <SrsStudyPageInner sessionRef={sessionRef} />;
+}
+
+function SrsStudyPageInner({
+  sessionRef,
+}: {
+  sessionRef: React.MutableRefObject<ReturnType<typeof getSrsSession>>;
+}) {
+  const [, navigate] = useLocation();
   const { deck, title, backPath } = sessionRef.current;
   const { words, updateWord } = useWords();
 
@@ -282,7 +296,7 @@ export function SrsStudyPage() {
       touchStart.current = { x: e.clientX, y: e.clientY };
       touchTargetRef.current = e.target;
       isDragging.current = false;
-      el.setPointerCapture(e.pointerId);
+      el?.setPointerCapture(e.pointerId);
     }
 
     function onPointerMove(e: PointerEvent) {
@@ -309,7 +323,7 @@ export function SrsStudyPage() {
       if (e.pointerType === "touch") return;
       if (!touchStart.current) return;
       try {
-        el.releasePointerCapture(e.pointerId);
+        el?.releasePointerCapture(e.pointerId);
       } catch {
         /* ignore */
       }

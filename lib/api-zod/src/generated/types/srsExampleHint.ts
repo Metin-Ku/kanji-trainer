@@ -6,9 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface BulkImportResult {
-  total: number;
-  added: number;
-  updated: number;
-  updatedWords: string[];
+export interface SrsExampleHint {
+  text: string;
+  highlights?: string[];
 }

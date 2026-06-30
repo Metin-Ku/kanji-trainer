@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, BookOpen, Languages, Waves, ChevronRight } from "lucide-react";
+import { ArrowLeft, BookOpen, Languages, Waves, ChevronRight, FileText } from "lucide-react";
 import { useLocation } from "wouter";
 import { useSrsDecks, useSrsSync, fetchSrsQueue } from "../hooks/useSrs";
 import { startSrsSession } from "../store/srsStore";
@@ -14,6 +14,7 @@ const DECK_ICONS: Record<SrsDeckType, typeof Languages> = {
   word: Languages,
   pronunciation: Waves,
   meaning: BookOpen,
+  example: FileText,
 };
 
 const SORT_OPTIONS: { value: SrsSortMode; label: string }[] = [
@@ -126,7 +127,7 @@ export function SrsHubPage() {
         </div>
 
         <div className="space-y-2.5">
-          {(["word", "pronunciation", "meaning"] as SrsDeckType[]).map((deck) => {
+          {(["word", "pronunciation", "meaning", "example"] as SrsDeckType[]).map((deck) => {
             const Icon = DECK_ICONS[deck];
             const label = SRS_DECK_LABELS[deck];
             const stats = statsFor(deck);

@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { SrsExample } from './srsExample';
 
 export interface WordInput {
   /** @minLength 1 */
@@ -12,6 +13,7 @@ export interface WordInput {
   pronunciation?: string;
   meaning?: string;
   description?: string;
+  srsExamples?: SrsExample[];
   /**
      * @minimum 1
      * @maximum 5

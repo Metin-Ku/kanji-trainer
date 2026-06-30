@@ -22,6 +22,34 @@ export const ListWordsResponseItem = zod.object({
   "pronunciation": zod.string(),
   "meaning": zod.string(),
   "description": zod.string(),
+  "srsExamples": zod.array(zod.object({
+  "order": zod.number(),
+  "sentence": zod.string(),
+  "hiddenWord": zod.string(),
+  "hiddenReading": zod.string().optional(),
+  "hiddenScript": zod.enum(['kanji', 'hiragana', 'katakana']).optional(),
+  "targetChunks": zod.array(zod.object({
+  "type": zod.enum(['text', 'hidden']),
+  "text": zod.string(),
+  "reading": zod.string().optional(),
+  "ruby": zod.array(zod.object({
+  "base": zod.string(),
+  "reading": zod.string().optional()
+})).optional(),
+  "script": zod.enum(['kanji', 'hiragana', 'katakana']).optional()
+})).optional(),
+  "linkedTokens": zod.array(zod.object({
+  "start": zod.number(),
+  "end": zod.number(),
+  "surface": zod.string(),
+  "wordId": zod.number(),
+  "lemma": zod.string().optional()
+})).optional(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})),
   "level": zod.number(),
   "starred": zod.boolean(),
   "pronLevel": zod.number(),
@@ -46,6 +74,34 @@ export const CreateWordBody = zod.object({
   "pronunciation": zod.string().optional(),
   "meaning": zod.string().optional(),
   "description": zod.string().optional(),
+  "srsExamples": zod.array(zod.object({
+  "order": zod.number(),
+  "sentence": zod.string(),
+  "hiddenWord": zod.string(),
+  "hiddenReading": zod.string().optional(),
+  "hiddenScript": zod.enum(['kanji', 'hiragana', 'katakana']).optional(),
+  "targetChunks": zod.array(zod.object({
+  "type": zod.enum(['text', 'hidden']),
+  "text": zod.string(),
+  "reading": zod.string().optional(),
+  "ruby": zod.array(zod.object({
+  "base": zod.string(),
+  "reading": zod.string().optional()
+})).optional(),
+  "script": zod.enum(['kanji', 'hiragana', 'katakana']).optional()
+})).optional(),
+  "linkedTokens": zod.array(zod.object({
+  "start": zod.number(),
+  "end": zod.number(),
+  "surface": zod.string(),
+  "wordId": zod.number(),
+  "lemma": zod.string().optional()
+})).optional(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})).optional(),
   "level": zod.number().min(1).max(createWordBodyLevelMax).optional(),
   "jlptLevel": zod.string().optional(),
   "date": zod.string(),
@@ -65,6 +121,34 @@ export const BulkCreateWordsBody = zod.object({
   "pronunciation": zod.string().optional(),
   "meaning": zod.string().optional(),
   "description": zod.string().optional(),
+  "srsExamples": zod.array(zod.object({
+  "order": zod.number(),
+  "sentence": zod.string(),
+  "hiddenWord": zod.string(),
+  "hiddenReading": zod.string().optional(),
+  "hiddenScript": zod.enum(['kanji', 'hiragana', 'katakana']).optional(),
+  "targetChunks": zod.array(zod.object({
+  "type": zod.enum(['text', 'hidden']),
+  "text": zod.string(),
+  "reading": zod.string().optional(),
+  "ruby": zod.array(zod.object({
+  "base": zod.string(),
+  "reading": zod.string().optional()
+})).optional(),
+  "script": zod.enum(['kanji', 'hiragana', 'katakana']).optional()
+})).optional(),
+  "linkedTokens": zod.array(zod.object({
+  "start": zod.number(),
+  "end": zod.number(),
+  "surface": zod.string(),
+  "wordId": zod.number(),
+  "lemma": zod.string().optional()
+})).optional(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})).optional(),
   "jlptLevel": zod.string().optional()
 }))
 })
@@ -72,8 +156,8 @@ export const BulkCreateWordsBody = zod.object({
 export const BulkCreateWordsResponse = zod.object({
   "total": zod.number(),
   "added": zod.number(),
-  "skipped": zod.number(),
-  "skippedWords": zod.array(zod.string())
+  "updated": zod.number(),
+  "updatedWords": zod.array(zod.string())
 })
 
 
@@ -95,6 +179,34 @@ export const UpdateWordBody = zod.object({
   "pronunciation": zod.string().optional(),
   "meaning": zod.string().optional(),
   "description": zod.string().optional(),
+  "srsExamples": zod.array(zod.object({
+  "order": zod.number(),
+  "sentence": zod.string(),
+  "hiddenWord": zod.string(),
+  "hiddenReading": zod.string().optional(),
+  "hiddenScript": zod.enum(['kanji', 'hiragana', 'katakana']).optional(),
+  "targetChunks": zod.array(zod.object({
+  "type": zod.enum(['text', 'hidden']),
+  "text": zod.string(),
+  "reading": zod.string().optional(),
+  "ruby": zod.array(zod.object({
+  "base": zod.string(),
+  "reading": zod.string().optional()
+})).optional(),
+  "script": zod.enum(['kanji', 'hiragana', 'katakana']).optional()
+})).optional(),
+  "linkedTokens": zod.array(zod.object({
+  "start": zod.number(),
+  "end": zod.number(),
+  "surface": zod.string(),
+  "wordId": zod.number(),
+  "lemma": zod.string().optional()
+})).optional(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})).optional(),
   "level": zod.number().min(1).max(updateWordBodyLevelMax).optional(),
   "starred": zod.boolean().optional(),
   "pronLevel": zod.number().min(1).max(updateWordBodyPronLevelMax).optional(),
@@ -112,6 +224,34 @@ export const UpdateWordResponse = zod.object({
   "pronunciation": zod.string(),
   "meaning": zod.string(),
   "description": zod.string(),
+  "srsExamples": zod.array(zod.object({
+  "order": zod.number(),
+  "sentence": zod.string(),
+  "hiddenWord": zod.string(),
+  "hiddenReading": zod.string().optional(),
+  "hiddenScript": zod.enum(['kanji', 'hiragana', 'katakana']).optional(),
+  "targetChunks": zod.array(zod.object({
+  "type": zod.enum(['text', 'hidden']),
+  "text": zod.string(),
+  "reading": zod.string().optional(),
+  "ruby": zod.array(zod.object({
+  "base": zod.string(),
+  "reading": zod.string().optional()
+})).optional(),
+  "script": zod.enum(['kanji', 'hiragana', 'katakana']).optional()
+})).optional(),
+  "linkedTokens": zod.array(zod.object({
+  "start": zod.number(),
+  "end": zod.number(),
+  "surface": zod.string(),
+  "wordId": zod.number(),
+  "lemma": zod.string().optional()
+})).optional(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})),
   "level": zod.number(),
   "starred": zod.boolean(),
   "pronLevel": zod.number(),

@@ -152,6 +152,7 @@ export function LearnedPage() {
     pronunciation: string;
     meaning: string;
     description: string;
+    srsExamples?: import("../types").SrsExample[];
     level: number;
     jlptLevel: string | null;
     date: string;

@@ -68,6 +68,7 @@ export function HomePage() {
     pronunciation: string;
     meaning: string;
     description: string;
+    srsExamples?: import("../types").SrsExample[];
     level: number;
     jlptLevel: string | null;
     date: string;
@@ -446,6 +447,7 @@ export function HomePage() {
         <BulkImportModal
           onImport={bulkCreate}
           onClose={() => setShowBulk(false)}
+          allWords={words}
         />
       )}
     </div>

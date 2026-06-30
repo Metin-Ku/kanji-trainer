@@ -2,7 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { kuromojiDictPlugin } from "./vite.kuromoji-dict";
 
 const rawPort = process.env.PORT ?? "3000";
 const port = Number(rawPort);
@@ -19,6 +21,15 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    kuromojiDictPlugin(basePath),
+    viteStaticCopy({
+      targets: [
+        {
+          src: "node_modules/kuromoji/dict/*",
+          dest: "kuromoji/dict",
+        },
+      ],
+    }),
     runtimeErrorOverlay(),
     ...(process.env.NODE_ENV !== "production" &&
     process.env.REPL_ID !== undefined
@@ -43,8 +54,13 @@ export default defineConfig({
         "..",
         "attached_assets",
       ),
+      // kuromoji's loader does `require("path")`; shim it for the browser
+      path: "path-browserify",
     },
     dedupe: ["react", "react-dom"],
+  },
+  optimizeDeps: {
+    include: ["kuromoji"],
   },
   root: path.resolve(import.meta.dirname),
   build: {

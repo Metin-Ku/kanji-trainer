@@ -5,6 +5,7 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { SrsExample } from './srsExample';
 
 export interface VocabWord {
   id: number;
@@ -12,6 +13,7 @@ export interface VocabWord {
   pronunciation: string;
   meaning: string;
   description: string;
+  srsExamples: SrsExample[];
   level: number;
   starred: boolean;
   pronLevel: number;

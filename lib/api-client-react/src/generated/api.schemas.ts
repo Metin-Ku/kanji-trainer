@@ -9,12 +9,76 @@ export interface HealthStatus {
   status: string;
 }
 
+export type SrsExampleHiddenScript = typeof SrsExampleHiddenScript[keyof typeof SrsExampleHiddenScript];
+
+
+export const SrsExampleHiddenScript = {
+  kanji: 'kanji',
+  hiragana: 'hiragana',
+  katakana: 'katakana',
+} as const;
+
+export type TargetChunkType = typeof TargetChunkType[keyof typeof TargetChunkType];
+
+
+export const TargetChunkType = {
+  text: 'text',
+  hidden: 'hidden',
+} as const;
+
+export interface RubyPart {
+  base: string;
+  reading?: string;
+}
+
+export type TargetChunkScript = typeof TargetChunkScript[keyof typeof TargetChunkScript];
+
+
+export const TargetChunkScript = {
+  kanji: 'kanji',
+  hiragana: 'hiragana',
+  katakana: 'katakana',
+} as const;
+
+export interface TargetChunk {
+  type: TargetChunkType;
+  text: string;
+  reading?: string;
+  ruby?: RubyPart[];
+  script?: TargetChunkScript;
+}
+
+export interface LinkedToken {
+  start: number;
+  end: number;
+  surface: string;
+  wordId: number;
+  lemma?: string;
+}
+
+export interface SrsExampleHint {
+  text: string;
+  highlights?: string[];
+}
+
+export interface SrsExample {
+  order: number;
+  sentence: string;
+  hiddenWord: string;
+  hiddenReading?: string;
+  hiddenScript?: SrsExampleHiddenScript;
+  targetChunks?: TargetChunk[];
+  linkedTokens?: LinkedToken[];
+  hints: SrsExampleHint[];
+}
+
 export interface VocabWord {
   id: number;
   kanji: string;
   pronunciation: string;
   meaning: string;
   description: string;
+  srsExamples: SrsExample[];
   level: number;
   starred: boolean;
   pronLevel: number;
@@ -34,6 +98,7 @@ export interface WordInput {
   pronunciation?: string;
   meaning?: string;
   description?: string;
+  srsExamples?: SrsExample[];
   /**
      * @minimum 1
      * @maximum 5
@@ -50,6 +115,7 @@ export interface WordUpdate {
   pronunciation?: string;
   meaning?: string;
   description?: string;
+  srsExamples?: SrsExample[];
   /**
      * @minimum 1
      * @maximum 5
@@ -80,6 +146,7 @@ export interface BulkWordItem {
   pronunciation?: string;
   meaning?: string;
   description?: string;
+  srsExamples?: SrsExample[];
   jlptLevel?: string;
 }
 
@@ -90,7 +157,7 @@ export interface WordBulkInput {
 export interface BulkImportResult {
   total: number;
   added: number;
-  skipped: number;
-  skippedWords: string[];
+  updated: number;
+  updatedWords: string[];
 }
 
