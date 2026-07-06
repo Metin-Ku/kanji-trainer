@@ -7,6 +7,7 @@ import {
   useBulkCreateWords,
   getListWordsQueryKey,
 } from "@workspace/api-client-react";
+import { apiUrl } from "../lib/apiOrigin";
 import type { WordInput, WordUpdate, Word } from "../types";
 
 export function useWords() {
@@ -62,7 +63,7 @@ export function useWords() {
 
   const deleteWords = async (ids: number[]) => {
     await Promise.allSettled(
-      ids.map((id) => fetch(`/api/words/${id}`, { method: "DELETE" }))
+      ids.map((id) => fetch(apiUrl(`/api/words/${id}`), { method: "DELETE" }))
     );
     invalidate();
   };

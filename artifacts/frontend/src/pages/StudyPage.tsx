@@ -5,6 +5,7 @@ import { useLocation } from "wouter";
 import { getStudySession, StudyMode } from "../store/studyStore";
 import { Word } from "../types";
 import { themeVars } from "../theme";
+import { apiUrl } from "../lib/apiOrigin";
 import { useTranslation } from "../i18n/I18nProvider";
 const LONG_PRESS_MS = 320;
 const LEVEL_STEP_PX = 30;
@@ -115,7 +116,7 @@ export function StudyPage() {
 
     setWords(prev => prev.map(w => w.id === wordId ? { ...w, ...patch } : w));
 
-    fetch(`/api/words/${wordId}`, {
+    fetch(apiUrl(`/api/words/${wordId}`), {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),

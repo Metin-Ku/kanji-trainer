@@ -15,6 +15,7 @@ import {
   type AppSettings,
 } from "../settings/appSettings";
 import { useWords } from "../hooks/useWords";
+import { apiUrl } from "../lib/apiOrigin";
 import { relinkAllWordsSrsExamples } from "../lib/wordLinking";
 import { sanitizeSrsExamples } from "../lib/srsExamples";
 import { useTranslation } from "../i18n/I18nProvider";
@@ -88,7 +89,7 @@ export function SettingsPage() {
     setBackupBusy(true);
     setStatusMessage(null);
     try {
-      const res = await fetch("/api/backup");
+      const res = await fetch(apiUrl("/api/backup"));
       if (!res.ok) throw new Error("backup failed");
       const data = await res.json();
       const stamp = new Date().toISOString().slice(0, 10);

@@ -107,12 +107,10 @@ postgresql://postgres.nsxgzydphobasyyygawl:SIFRE@aws-0-REGION.pooler.supabase.co
 3. Environment Variables (Build):
    - `BASE_PATH` = `/`
    - `NODE_ENV` = `production`
-4. **Settings → Rewrites** — API proxy'yi proje bazinda tanimlayin (repoda sabit backend URL yok):
-   - **Source:** `/api/:path*`
-   - **Destination:** `https://SIZIN-RENDER-URL.onrender.com/api/:path*`
-5. Deploy edin ve siteyi acin
+   - `VITE_API_ORIGIN` = Render backend origin (sonunda `/` yok), ornek: `https://kanji-trainer.onrender.com`
+4. Deploy edin ve siteyi acin
 
-**Not:** Tek instance icin yukaridaki rewrite yeterli. CV + kisisel icin [Cift instance deploy](#cift-instance-deploy-cv--kisisel) bolumune bakin.
+**Not:** API istekleri dogrudan Render'a gider (`VITE_API_ORIGIN`). Vercel rewrite gerekmez. CV + kisisel icin [Cift instance deploy](#cift-instance-deploy-cv--kisisel) bolumune bakin.
 
 ---
 
@@ -147,7 +145,7 @@ pnpm dev
 | Sorun | Cozum |
 |-------|-------|
 | API 502 / timeout | Render servisi uyuyor olabilir; 1 dk bekleyip tekrar deneyin |
-| Kelimeler yuklenmiyor | Vercel **Settings → Rewrites** dogru mu? `/api/:path*` hedefi ilgili Render URL olmali. Browser Network'te /api/words kontrol edin |
+| Kelimeler yuklenmiyor | Vercel'de `VITE_API_ORIGIN` dogru mu? (Render URL, sonunda `/` yok). Redeploy gerekir. Network'te istek Render host'una gitmeli |
 | DATABASE_URL hatasi | Render'da **pooler URL** (6543) kullanin; direct `db.xxx.supabase.co` IPv6 → ENETUNREACH |
 | `ENETUNREACH 2406:da14:...` | Supabase Transaction pooler URL'sine gecin (yukariya bakin) |
 | Build hatasi PORT/BASE_PATH | Vercel env: BASE_PATH=/ veya vite.config varsayilanlari kullanilir |
@@ -156,14 +154,14 @@ pnpm dev
 
 ## Cift instance deploy (CV + kisisel)
 
-Ayni GitHub repo ve `main` branch'ten iki bagimsiz canli site: kod her push'ta ikisine de gider; yalnizca veritabani, backend URL ve Vercel rewrite farklidir.
+Ayni GitHub repo ve `main` branch'ten iki bagimsiz canli site: kod her push'ta ikisine de gider; yalnizca veritabani ve `VITE_API_ORIGIN` farklidir.
 
 ```
 GitHub (main)
     ├── Render: kanji-trainer-api-cv        → Supabase CV
     ├── Render: kanji-trainer-api-personal  → Supabase kisisel
-    ├── Vercel: cv-site      → /api → Render CV
-    └── Vercel: personal-site → /api → Render kisisel
+    ├── Vercel: cv-site      → VITE_API_ORIGIN = Render CV
+    └── Vercel: personal-site → VITE_API_ORIGIN = Render kisisel
 ```
 
 **Kural:** CV frontend yalnizca CV backend'e, kisisel frontend yalnizca kisisel backend'e baglanmali.
@@ -214,14 +212,18 @@ GET https://kanji-trainer-api-personal.onrender.com/api/healthz
 
 ### 3 — Iki Vercel frontend projesi
 
-Her proje Adim 4 ile ayni build ayarlarina sahip olmali. **Settings → Rewrites** proje bazinda farklidir:
+Her proje Adim 4 ile ayni build ayarlarina sahip olmali. **Environment Variables** proje bazinda farklidir:
 
-| Vercel projesi | Source | Destination |
-|----------------|--------|-------------|
-| CV (or. `kanji-trainer-cv`) | `/api/:path*` | `https://kanji-trainer-api-cv.onrender.com/api/:path*` |
-| Kisisel (or. `kanji-trainer-personal`) | `/api/:path*` | `https://kanji-trainer-api-personal.onrender.com/api/:path*` |
+| Vercel projesi | `VITE_API_ORIGIN` (Production) |
+|----------------|--------------------------------|
+| CV (or. `kanji-trainer-cv`) | `https://kanji-trainer-api-cv.onrender.com` |
+| Kisisel (or. `kanji-trainer-five`) | `https://kanji-trainer.onrender.com` |
 
-SPA fallback (`vercel.json` icindeki `/index.html` rewrite) repodan gelir; ekstra ayar gerekmez.
+- Sonunda `/` olmamali
+- Degisiklikten sonra **Redeploy** gerekir (build-time env)
+- Lokal gelistirmede bos birakilir; Vite `/api` isteklerini localhost:8080'e proxy eder
+
+SPA fallback (`vercel.json`) repodan gelir; API icin Vercel rewrite gerekmez.
 
 Domain (opsiyonel): CV icin portfolio subdomain, kisisel icin ayri URL.
 
@@ -249,7 +251,7 @@ Her instance icin ayri ayri:
 - [ ] Kelime ekle / duzenle / sil calisiyor
 - [ ] SRS calisma modu calisiyor
 - [ ] CV sitesinde kisisel kelimeler gorunmuyor (DB ayrimi dogru)
-- [ ] Browser Network: `/api/words` istegi dogru Render host'una gidiyor
+- [ ] Browser Network: `/api/words` istegi dogru Render host'una gidiyor (`VITE_API_ORIGIN`)
 
 ### Maliyet ve kisitlar
 
