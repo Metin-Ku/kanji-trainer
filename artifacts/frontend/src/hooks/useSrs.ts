@@ -29,6 +29,7 @@ export function useSrsSync() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["srs"] });
+      queryClient.invalidateQueries({ queryKey: ["trouble-words"] });
     },
   });
 }

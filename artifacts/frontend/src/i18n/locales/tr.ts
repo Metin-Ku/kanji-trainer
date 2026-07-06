@@ -73,6 +73,25 @@ export const tr: Messages = {
     },
   },
 
+  dailyGoal: {
+    title: "Günlük hedef",
+    progress: "{count} / {target}",
+    remaining: "Bugün {count} kaldı",
+    complete: "Hedef tamam!",
+    streak: "{days} gün seri",
+    streakNone: "Seriye başla",
+    settingsTarget: "Günlük kelime hedefi",
+    settingsTargetDeck: "{deck} günlük hedefi",
+    settingsHint:
+      "SRS (kelime/okunuş/anlam): yalnızca sonraki aralık en az 1 gün olduğunda sayılır. Örnek deste: doğru cevap. Flashcard: sağ kaydır veya seviye kaydı.",
+    byDeck: "Deste bazında",
+    noDeckTargets: "En az bir deste için 0'dan büyük hedef belirleyin.",
+    off: "Kapalı",
+    decks: {
+      flashcard: "Flashcard",
+    },
+  },
+
   words: {
     title: "Kelimeler",
     loadError: "Kelimeler yüklenemedi.",
@@ -138,6 +157,8 @@ export const tr: Messages = {
       noCardsToday: "Bugün kart yok",
       totalCards: " · {count} toplam",
       noCardsWithFilters: "Bu filtrelerle çalışılacak kart yok.",
+      troubleWordsTile: "Zor kelimeler",
+      troubleWordsCount: "{count} kelime",
     },
     decks: {
       word: { title: "Kelime", subtitle: "Word" },
@@ -272,6 +293,11 @@ export const tr: Messages = {
         description:
           "Latin harflerle yazarken otomatik hiragana/katakana dönüşümü (ya → や, arubaito → アルバイト).",
       },
+      dailyGoal: {
+        label: "Deste bazında günlük hedefler",
+        description:
+          "Her SRS destesi ve flashcard için ayrı günlük hedef belirleyin. Ana sayfadaki gösterge toplamı gösterir.",
+      },
     },
     database: {
       nav: "Veritabanı",
@@ -353,5 +379,23 @@ export const tr: Messages = {
 
   search: {
     relatedNotFound: '"{query}" için eşleşme yok',
+  },
+
+  troubleWords: {
+    title: "Zor kelimeler",
+    subtitle: "SRS Again ve örnek yanlış cevaplarından otomatik birikir",
+    filterAll: "Tümü",
+    empty: "Henüz zor kelime yok — Again veya yanlış cevap verince burada görünür.",
+    study: "Çalış",
+    dismiss: "Havuzdan çıkar",
+    lastMistake: "Son hata: {when}",
+    today: "bugün",
+    yesterday: "dün",
+    daysAgo: "{count} gün önce",
+    pickDeck: "Hangi deste ile çalışılacak?",
+    deckWordCount: "{count} kelime",
+    sessionTitle: "Zor kelimeler · {label}",
+    noCardsForDeck: "Bu deste için çalışılacak kart yok.",
+    loadFailed: "Liste yüklenemedi.",
   },
 };

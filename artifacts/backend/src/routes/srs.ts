@@ -15,6 +15,10 @@ import {
   updateSrsCard,
   type SrsSortMode,
 } from "../lib/srsCards";
+import {
+  recordMistake,
+  recordSuccess,
+} from "../lib/wordMistakes";
 
 const router = Router();
 
@@ -66,8 +70,23 @@ router.get("/srs/queue", async (req, res, next) => {
     const sort = (req.query.sort as SrsSortMode | undefined) ?? "due-asc";
     const jlptMin = req.query.jlptMin ? String(req.query.jlptMin) : null;
     const jlptMax = req.query.jlptMax ? String(req.query.jlptMax) : null;
+    const wordIdsRaw = req.query.wordIds ? String(req.query.wordIds) : "";
+    const wordIds = wordIdsRaw
+      ? wordIdsRaw
+          .split(",")
+          .map((s) => Number(s.trim()))
+          .filter((n) => Number.isFinite(n) && n > 0)
+      : undefined;
+    const ignoreDue =
+      req.query.ignoreDue === "1" || req.query.ignoreDue === "true";
 
-    const queue = await getReviewQueue(deckType, { jlptMin, jlptMax, sort });
+    const queue = await getReviewQueue(deckType, {
+      jlptMin,
+      jlptMax,
+      sort,
+      wordIds,
+      ignoreDue,
+    });
     const now = new Date();
 
     res.json(
@@ -141,6 +160,23 @@ router.post("/srs/cards/:id/review", async (req, res, next) => {
     if (!updated) {
       res.status(404).json({ error: "Card not found" });
       return;
+    }
+
+    const deckType = row.card.deckType as SrsDeckType;
+    try {
+      if (deckType === "example") {
+        if (correct === true) {
+          await recordSuccess(row.word.id, deckType);
+        } else if (correct === false) {
+          await recordMistake(row.word.id, deckType);
+        }
+      } else if (rating === Rating.Again) {
+        await recordMistake(row.word.id, deckType);
+      } else if (rating === Rating.Good || rating === Rating.Easy) {
+        await recordSuccess(row.word.id, deckType);
+      }
+    } catch {
+      // Non-fatal: review already persisted
     }
 
     res.json({

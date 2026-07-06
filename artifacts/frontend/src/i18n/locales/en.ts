@@ -71,6 +71,25 @@ export const en = {
     },
   },
 
+  dailyGoal: {
+    title: "Daily goal",
+    progress: "{count} / {target}",
+    remaining: "{count} left today",
+    complete: "Goal complete!",
+    streak: "{days}-day streak",
+    streakNone: "Start your streak",
+    settingsTarget: "Daily word target",
+    settingsTargetDeck: "Daily target for {deck}",
+    settingsHint:
+      "SRS (word/pronunciation/meaning): counts when the next interval is at least 1 day. Example deck: correct answers only. Flashcards: swipe right or save level.",
+    byDeck: "By deck",
+    noDeckTargets: "Set a target above 0 for at least one deck.",
+    off: "Off",
+    decks: {
+      flashcard: "Flashcards",
+    },
+  },
+
   words: {
     title: "Words",
     loadError: "Failed to load words.",
@@ -136,6 +155,8 @@ export const en = {
       noCardsToday: "No cards today",
       totalCards: " · {count} total",
       noCardsWithFilters: "No cards to study with these filters.",
+      troubleWordsTile: "Trouble words",
+      troubleWordsCount: "{count} words",
     },
     decks: {
       word: { title: "Word", subtitle: "Word" },
@@ -270,6 +291,11 @@ export const en = {
         description:
           "Automatically convert Latin input to hiragana/katakana (ya → や, arubaito → アルバイト).",
       },
+      dailyGoal: {
+        label: "Daily goals by deck",
+        description:
+          "Set a separate daily target for each SRS deck and flashcards. The home widget shows the total.",
+      },
     },
     database: {
       nav: "Database",
@@ -351,6 +377,24 @@ export const en = {
 
   search: {
     relatedNotFound: 'No match for "{query}"',
+  },
+
+  troubleWords: {
+    title: "Trouble words",
+    subtitle: "Built automatically from SRS Again and example wrong answers",
+    filterAll: "All",
+    empty: "No trouble words yet — they appear after Again or a wrong example answer.",
+    study: "Study",
+    dismiss: "Remove from pool",
+    lastMistake: "Last mistake: {when}",
+    today: "today",
+    yesterday: "yesterday",
+    daysAgo: "{count} days ago",
+    pickDeck: "Which deck to study?",
+    deckWordCount: "{count} words",
+    sessionTitle: "Trouble words · {label}",
+    noCardsForDeck: "No cards to study for this deck.",
+    loadFailed: "Could not load the list.",
   },
 } as const;
 

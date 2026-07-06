@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ArrowLeft, BookOpen, Languages, Waves, ChevronRight, FileText } from "lucide-react";
+import { ArrowLeft, BookOpen, Languages, Waves, ChevronRight, FileText, AlertCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useSrsDecks, useSrsSync, fetchSrsQueue } from "../hooks/useSrs";
 import { startSrsSession } from "../store/srsStore";
@@ -10,6 +10,8 @@ import {
 } from "../types/srs";
 import { useTranslation } from "../i18n/I18nProvider";
 import { srsDeckLabel } from "../i18n/srsDeckLabels";
+import { DailyGoalCard } from "../components/DailyGoalCard";
+import { useTroubleWordCount } from "../hooks/useTroubleWords";
 
 const DECK_ICONS: Record<SrsDeckType, typeof Languages> = {
   word: Languages,
@@ -23,6 +25,7 @@ export function SrsHubPage() {
   const [, navigate] = useLocation();
   const { data: decks = [], isLoading } = useSrsDecks();
   const sync = useSrsSync();
+  const { data: troubleCount = 0 } = useTroubleWordCount();
 
   const sortOptions: { value: SrsSortMode; label: string }[] = [
     { value: "due-asc", label: t("srs.sort.dueAsc") },
@@ -82,6 +85,27 @@ export function SrsHubPage() {
       </div>
 
       <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+        <DailyGoalCard variant="banner" />
+
+        <button
+          type="button"
+          onClick={() => navigate("/srs/trouble")}
+          className="w-full flex items-center gap-4 bg-white rounded-2xl border border-gray-100 px-4 py-4 active:scale-[0.99] transition-transform"
+        >
+          <div className="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
+            <AlertCircle size={20} className="text-red-500" strokeWidth={1.8} />
+          </div>
+          <div className="flex-1 text-left min-w-0">
+            <p className="text-base font-bold text-gray-900">
+              {t("srs.hub.troubleWordsTile")}
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {t("srs.hub.troubleWordsCount", { count: troubleCount })}
+            </p>
+          </div>
+          <ChevronRight size={18} className="text-gray-300 shrink-0" />
+        </button>
+
         <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t("srs.hub.filters")}</p>
 

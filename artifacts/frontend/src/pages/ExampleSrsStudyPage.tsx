@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Dices, Pencil } from "lucide-react";
 import { SrsWordSlideUp } from "../components/SrsWordSlideUp";
 import { ExampleSentenceDisplay } from "../components/ExampleSentenceDisplay";
@@ -14,6 +15,7 @@ import { romajiToKanaInput } from "../lib/japaneseInput";
 import { gradeClozeAnswer, renderHintParts } from "../lib/srsExamples";
 import { linkedTokensForDisplay } from "../lib/wordLinking";
 import { useTranslation } from "../i18n/I18nProvider";
+import { recordStudyUnit } from "../lib/dailyGoal";
 
 type AnswerPhase = "typing" | "correct" | "partial" | "revealed";
 
@@ -28,6 +30,7 @@ function queueWordToWord(item: SrsQueueItem): Word {
 export function ExampleSrsStudyPage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
   const sessionRef = useRef(getSrsSession());
   const { title, backPath } = sessionRef.current;
   const { words, updateWord } = useWords();
@@ -75,6 +78,8 @@ export function ExampleSrsStudyPage() {
     setReviewing(true);
     try {
       await reviewSrsExample(current.card.id, correct);
+      if (correct) recordStudyUnit("example");
+      queryClient.invalidateQueries({ queryKey: ["trouble-words"] });
     } catch {
       alert(t("srs.study.saveFailed"));
       throw new Error("review failed");

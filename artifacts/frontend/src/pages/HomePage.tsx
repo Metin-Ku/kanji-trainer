@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { SearchBar } from "../components/SearchBar";
+import { DailyGoalCard } from "../components/DailyGoalCard";
 import { WordAddFab } from "../components/WordAddFab";
 import { BulkImportModal } from "../components/BulkImportModal";
 import { useWords } from "../hooks/useWords";
@@ -111,6 +112,7 @@ export function HomePage() {
           onChange={setQuery}
           placeholder={t("home.searchPlaceholder")}
         />
+        {!isSearching && <DailyGoalCard />}
       </div>
 
       {isSearching ? (
@@ -187,7 +189,7 @@ export function HomePage() {
                           ).map(({ Icon, starred, level }, i) => (
                             <div
                               key={i}
-                              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-gray-100"
+                              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white"
                             >
                               <Icon
                                 size={13}
@@ -287,7 +289,7 @@ export function HomePage() {
           )}
         </div>
       ) : (
-        <div className="flex-1 flex flex-col gap-2.5 p-3 overflow-hidden">
+        <div className="flex-1 flex flex-col gap-2.5 p-3 overflow-hidden min-h-[clamp(500px,70vh,600px)]">
           <div className="flex-[2] flex flex-col gap-2.5 min-h-0">
             <button
               onClick={() => navigate("/words")}

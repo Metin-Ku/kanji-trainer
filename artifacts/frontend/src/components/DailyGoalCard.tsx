@@ -1,0 +1,170 @@
+import { useState } from "react";
+import { Check, ChevronDown, Flame } from "lucide-react";
+import { useTranslation } from "../i18n/I18nProvider";
+import { useDailyGoal } from "../hooks/useDailyGoal";
+import { srsDeckLabel } from "../i18n/srsDeckLabels";
+import type { DeckDailyProgress } from "../lib/dailyGoal";
+
+type DailyGoalCardProps = {
+  variant?: "card" | "banner";
+};
+
+function deckLabel(
+  t: (key: string) => string,
+  deck: DeckDailyProgress["deck"],
+): string {
+  //if (deck === "flashcard") return t("dailyGoal.decks.flashcard");
+  return srsDeckLabel(t, deck).title;
+}
+
+function ProgressBar({
+  ratio,
+  goalMet,
+  size = "md",
+}: {
+  ratio: number;
+  goalMet: boolean;
+  size?: "sm" | "md";
+}) {
+  return (
+    <div
+      className={`rounded-full bg-white overflow-hidden ${size === "sm" ? "h-1.5" : "h-2"}`}
+    >
+      <div
+        className={`h-full rounded-full transition-all duration-300 ${
+          goalMet ? "bg-main-500" : "bg-main-400"
+        }`}
+        style={{ width: `${Math.round(ratio * 100)}%` }}
+      />
+    </div>
+  );
+}
+
+function DeckRow({ deck, compact }: { deck: DeckDailyProgress; compact?: boolean }) {
+  const { t } = useTranslation();
+  if (!deck.enabled) return null;
+
+  const label = deckLabel(t, deck.deck);
+  const progressLabel = t("dailyGoal.progress", {
+    count: deck.count,
+    target: deck.target,
+  });
+
+  return (
+    <div className={compact ? "space-y-1" : "space-y-1.5"}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span
+            className={`truncate font-medium text-gray-700 ${compact ? "text-xs" : "text-sm"}`}
+          >
+            {label}
+          </span>
+          {deck.goalMet && (
+            <Check size={12} className="text-main-500 shrink-0" strokeWidth={2.5} />
+          )}
+        </div>
+        <span
+          className={`tabular-nums shrink-0 ${compact ? "text-xs text-gray-500" : "text-sm font-semibold text-gray-800"}`}
+        >
+          {progressLabel}
+        </span>
+      </div>
+      <ProgressBar ratio={deck.progressRatio} goalMet={deck.goalMet} size="sm" />
+    </div>
+  );
+}
+
+export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
+  const { t } = useTranslation();
+  const { count, target, remaining, goalMet, streak, progressRatio, decks } =
+    useDailyGoal();
+  const [expanded, setExpanded] = useState(false);
+
+  const progressLabel = t("dailyGoal.progress", { count, target });
+  const statusLabel = goalMet
+    ? t("dailyGoal.complete")
+    : t("dailyGoal.remaining", { count: remaining });
+
+  const enabledDecks = decks.filter((d) => d.enabled);
+  const shellClass =
+    variant === "banner"
+      ? `rounded-2xl border px-4 py-4 border-main-200 bg-main-50`
+      : `rounded-2xl border px-4 py-4 mt-3 border-main-200 bg-main-50/80`;
+
+  return (
+    <div className={shellClass}>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full text-left"
+        aria-expanded={expanded}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                {t("dailyGoal.title")}
+              </p>
+              {goalMet && (
+                <Check size={14} className="text-main-500 shrink-0" strokeWidth={2.5} />
+              )}
+            </div>
+            <p
+              className={`font-bold text-gray-900 leading-tight ${variant === "banner" ? "text-sm" : "text-lg"}`}
+            >
+              {progressLabel}
+            </p>
+            <p className="text-xs text-gray-500 mt-0.5">{statusLabel}</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {streak > 0 ? (
+              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white/80 border border-main-100">
+                <Flame size={variant === "banner" ? 14 : 16} className="text-main-500" />
+                <span className="text-sm font-bold text-main-600">{streak}</span>
+              </div>
+            ) : (
+              variant !== "banner" && (
+                <p className="text-[11px] text-gray-400 max-w-20 leading-snug text-right">
+                  {t("dailyGoal.streakNone")}
+                </p>
+              )
+            )}
+            <ChevronDown
+              size={18}
+              className={`text-gray-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            />
+          </div>
+        </div>
+        <div className={`${variant === "banner" ? "mt-2" : "mt-2.5"}`}>
+          <ProgressBar ratio={progressRatio} goalMet={goalMet} />
+        </div>
+        {variant === "banner" && streak > 0 && (
+          <p className="text-[11px] text-main-600 font-medium mt-2">
+            {t("dailyGoal.streak", { days: streak })}
+          </p>
+        )}
+      </button>
+
+      <div
+        className={`grid transition-all duration-200 ease-out ${
+          expanded ? "grid-rows-[1fr] opacity-100 pt-3 border-t border-gray-100/80" : "grid-rows-[0fr] opacity-0"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+            {t("dailyGoal.byDeck")}
+          </p>
+          <div className="space-y-3">
+            {enabledDecks.length === 0 ? (
+              <p className="text-xs text-gray-400">{t("dailyGoal.noDeckTargets")}</p>
+            ) : (
+              enabledDecks.map((deck) => (
+                <DeckRow key={deck.deck} deck={deck} compact={variant === "banner"} />
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

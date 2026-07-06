@@ -11,6 +11,7 @@ import { StudyPage } from "@/pages/StudyPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { SrsHubPage } from "@/pages/SrsHubPage";
 import { SrsStudyPage } from "@/pages/SrsStudyPage";
+import { TroubleWordsPage } from "@/pages/TroubleWordsPage";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" component={HomePage} />
         <Route path="/settings" component={SettingsPage} />
         <Route path="/srs/study" component={SrsStudyPage} />
+        <Route path="/srs/trouble" component={TroubleWordsPage} />
         <Route path="/srs" component={SrsHubPage} />
         <Route path="/words" component={WordListPage} />
         <Route path="/pronunciation" component={PronunciationPage} />

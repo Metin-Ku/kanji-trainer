@@ -134,6 +134,8 @@ export async function getReviewQueue(
     jlptMax?: string | null;
     sort?: SrsSortMode;
     limit?: number;
+    wordIds?: number[];
+    ignoreDue?: boolean;
   } = {},
 ) {
   await backfillAllSrsCards();
@@ -143,6 +145,14 @@ export async function getReviewQueue(
   const maxRank = options.jlptMax ? jlptRank(options.jlptMax) : 5;
   const sort = options.sort ?? "due-asc";
   const limit = options.limit ?? 200;
+  const wordIdSet =
+    options.wordIds && options.wordIds.length > 0
+      ? new Set(options.wordIds)
+      : null;
+
+  if (wordIdSet && wordIdSet.size === 0) {
+    return [];
+  }
 
   const rows = await db
     .select({
@@ -153,20 +163,23 @@ export async function getReviewQueue(
     .innerJoin(wordsTable, eq(srsCardsTable.wordId, wordsTable.id))
     .where(eq(srsCardsTable.deckType, deckType));
 
-  const filtered = rows.filter(({ word }) => {
+  const filtered = rows.filter(({ card, word }) => {
+    if (wordIdSet && !wordIdSet.has(word.id)) return false;
     const rank = jlptRank(word.jlptLevel);
     if (rank !== 99 && (rank < minRank || rank > maxRank)) return false;
     if (deckType === "example" && !hasSrsExamples(word)) return false;
     return true;
   });
 
-  const dueOrNew = filtered.filter(({ card }) => {
-    const mapped = mapSrsRow(card);
-    const isNew = mapped.state === 0 && mapped.reps === 0;
-    return isNew || mapped.due.getTime() <= now.getTime();
-  });
+  const queueSource = options.ignoreDue
+    ? filtered
+    : filtered.filter(({ card }) => {
+        const mapped = mapSrsRow(card);
+        const isNew = mapped.state === 0 && mapped.reps === 0;
+        return isNew || mapped.due.getTime() <= now.getTime();
+      });
 
-  dueOrNew.sort((a, b) => {
+  queueSource.sort((a, b) => {
     const ca = mapSrsRow(a.card);
     const cb = mapSrsRow(b.card);
     const aNew = ca.state === 0 && ca.reps === 0;
@@ -185,7 +198,7 @@ export async function getReviewQueue(
     return ca.due.getTime() - cb.due.getTime();
   });
 
-  return dueOrNew.slice(0, limit).map(({ card, word }) => ({
+  return queueSource.slice(0, limit).map(({ card, word }) => ({
     card: mapSrsRow(card),
     word,
   }));

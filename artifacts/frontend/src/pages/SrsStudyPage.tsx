@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Dices, Pencil } from "lucide-react";
 import { KanjiStrokeModal } from "../components/KanjiStrokeModal";
 import { WordFormModal } from "../components/WordFormModal";
@@ -15,6 +16,10 @@ import { themeVars } from "../theme";
 import { useWords } from "../hooks/useWords";
 import { ExampleSrsStudyPage } from "./ExampleSrsStudyPage";
 import { useTranslation } from "../i18n/I18nProvider";
+import {
+  intervalCountsAsDailyLearn,
+  recordStudyUnit,
+} from "../lib/dailyGoal";
 
 function getPrimary(item: SrsQueueItem, deck: SrsDeckType, emDash: string): string {
   const { word } = item;
@@ -79,6 +84,7 @@ function SrsStudyPageInner({
 }) {
   const { t, formatStudyDate } = useTranslation();
   const [, navigate] = useLocation();
+  const queryClient = useQueryClient();
   const { deck, title, backPath } = sessionRef.current;
   const { words, updateWord } = useWords();
 
@@ -153,6 +159,14 @@ function SrsStudyPageInner({
       setReviewing(true);
       try {
         await reviewSrsCard(current.card.id, rating);
+        const ratingMeta = RATING_KEYS.find((r) => r.rating === rating);
+        const intervalLabel = ratingMeta
+          ? current.card.intervals[ratingMeta.key]
+          : "";
+        if (intervalCountsAsDailyLearn(intervalLabel)) {
+          recordStudyUnit(deck);
+        }
+        queryClient.invalidateQueries({ queryKey: ["trouble-words"] });
         advanceAfterReview();
       } catch {
         alert(t("srs.study.saveFailed"));
@@ -164,7 +178,7 @@ function SrsStudyPageInner({
         setReviewing(false);
       }
     },
-    [advanceAfterReview],
+    [advanceAfterReview, deck, queryClient, t],
   );
 
   function handleReviewClick(rating: ReviewRating) {

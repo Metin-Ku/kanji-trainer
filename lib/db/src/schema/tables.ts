@@ -118,3 +118,18 @@ export const srsCardsTable = pgTable(
   },
   (t) => [uniqueIndex("srs_cards_word_deck_idx").on(t.wordId, t.deckType)],
 );
+
+export const wordMistakesTable = pgTable(
+  "word_mistakes",
+  {
+    wordId: integer("word_id")
+      .notNull()
+      .references(() => wordsTable.id, { onDelete: "cascade" }),
+    deckType: text("deck_type").notNull(),
+    mistakeCount: integer("mistake_count").notNull().default(1),
+    lastMistakeAt: timestamp("last_mistake_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.wordId, t.deckType] })],
+);

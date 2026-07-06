@@ -20,6 +20,14 @@ import { relinkAllWordsSrsExamples } from "../lib/wordLinking";
 import { sanitizeSrsExamples } from "../lib/srsExamples";
 import { useTranslation } from "../i18n/I18nProvider";
 import { LOCALES } from "../i18n/locales";
+import { useDailyGoal } from "../hooks/useDailyGoal";
+import {
+  DAILY_GOAL_DECK_IDS,
+  DAILY_TARGET_PRESETS,
+  MAX_DAILY_TARGET,
+  MIN_DAILY_TARGET,
+} from "../lib/dailyGoal";
+import { srsDeckLabel } from "../i18n/srsDeckLabels";
 
 type Section = "styling" | "srs" | "database" | "language";
 
@@ -75,6 +83,7 @@ export function SettingsPage() {
     total: number;
   } | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const { decks: dailyDeckProgress, setDeckTarget } = useDailyGoal();
 
   function selectPalette(name: PaletteName) {
     applyTheme(name);
@@ -282,6 +291,78 @@ export function SettingsPage() {
                 checked={appSettings.srsRomajiInput}
                 onChange={(v) => patchSettings({ srsRomajiInput: v })}
               />
+
+              <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {t("settings.srs.dailyGoal.label")}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                    {t("settings.srs.dailyGoal.description")}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                    {t("dailyGoal.settingsHint")}
+                  </p>
+                </div>
+
+                {DAILY_GOAL_DECK_IDS.map((deckId) => {
+                  const deckProgress = dailyDeckProgress.find((d) => d.deck === deckId);
+                  const target = deckProgress?.target ?? 0;
+                  const deckName = srsDeckLabel(t, deckId).title;
+                  // const deckName =
+                  // deckId === "flashcard"
+                  //   ? t("dailyGoal.decks.flashcard")
+                  //   : srsDeckLabel(t, deckId).title;
+
+                  return (
+                    <div
+                      key={deckId}
+                      className="rounded-lg border border-gray-100 bg-gray-50/80 p-3 space-y-2"
+                    >
+                      <p className="text-sm font-semibold text-gray-800">{deckName}</p>
+                      <div className="flex flex-wrap gap-2">
+                        {DAILY_TARGET_PRESETS.map((preset) => (
+                          <button
+                            key={preset}
+                            type="button"
+                            onClick={() => setDeckTarget(deckId, preset)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                              target === preset
+                                ? "bg-main-500 text-white"
+                                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                            }`}
+                          >
+                            {preset}
+                          </button>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => setDeckTarget(deckId, 0)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                            target === 0
+                              ? "bg-gray-600 text-white"
+                              : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
+                          }`}
+                        >
+                          {t("dailyGoal.off")}
+                        </button>
+                      </div>
+                      <input
+                        type="number"
+                        min={MIN_DAILY_TARGET}
+                        max={MAX_DAILY_TARGET}
+                        value={target}
+                        onChange={(e) => {
+                          const n = Number(e.target.value);
+                          if (!Number.isNaN(n)) setDeckTarget(deckId, n);
+                        }}
+                        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800"
+                        aria-label={t("dailyGoal.settingsTargetDeck", { deck: deckName })}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
