@@ -104,11 +104,13 @@ postgresql://postgres.nsxgzydphobasyyygawl:SIFRE@aws-0-REGION.pooler.supabase.co
    - **Framework Preset:** Vite
    - **Build Command:** `cd ../.. && pnpm install && pnpm --filter @workspace/frontend run build`
    - **Output Directory:** `dist/public`
-3. Environment Variables (Build):
+3. Environment Variables (**Production** scope, build icin gerekli):
    - `BASE_PATH` = `/`
    - `NODE_ENV` = `production`
    - `VITE_API_ORIGIN` = Render backend origin (sonunda `/` yok), ornek: `https://kanji-trainer.onrender.com`
-4. Deploy edin ve siteyi acin
+4. Deploy edin. Env degisikliginden sonra mutlaka **Redeploy** yapin (Build cache kapali deneyin).
+5. Build loglarinda `[vite] VITE_API_ORIGIN is not set` uyarisi **olmamali**.
+6. Browser Network'te istekler `SIZIN-RENDER.onrender.com/api/...` adresine gitmeli (`vercel.app/api/...` degil).
 
 **Not:** API istekleri dogrudan Render'a gider (`VITE_API_ORIGIN`). Vercel rewrite gerekmez. CV + kisisel icin [Cift instance deploy](#cift-instance-deploy-cv--kisisel) bolumune bakin.
 
@@ -145,7 +147,7 @@ pnpm dev
 | Sorun | Cozum |
 |-------|-------|
 | API 502 / timeout | Render servisi uyuyor olabilir; 1 dk bekleyip tekrar deneyin |
-| Kelimeler yuklenmiyor | Vercel'de `VITE_API_ORIGIN` dogru mu? (Render URL, sonunda `/` yok). Redeploy gerekir. Network'te istek Render host'una gitmeli |
+| Kelimeler yuklenmiyor / 404 on `vercel.app/api/*` | `VITE_API_ORIGIN` Production'da set mi? Push + Redeploy yaptiniz mi? Network'te istek Render host'una gitmeli |
 | DATABASE_URL hatasi | Render'da **pooler URL** (6543) kullanin; direct `db.xxx.supabase.co` IPv6 → ENETUNREACH |
 | `ENETUNREACH 2406:da14:...` | Supabase Transaction pooler URL'sine gecin (yukariya bakin) |
 | Build hatasi PORT/BASE_PATH | Vercel env: BASE_PATH=/ veya vite.config varsayilanlari kullanilir |
