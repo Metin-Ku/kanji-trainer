@@ -1,6 +1,10 @@
 const SETTINGS_STORAGE_KEY = "kanji-trainer-app-settings";
 
+export type AppLocale = "en" | "tr";
+
 export interface AppSettings {
+  /** UI language */
+  locale: AppLocale;
   /** Dotted links for known vocabulary words inside SRS example sentences */
   srsSentenceWordLinks: boolean;
   /** Convert Latin keyboard input to kana while typing in SRS example deck */
@@ -8,6 +12,7 @@ export interface AppSettings {
 }
 
 const DEFAULTS: AppSettings = {
+  locale: "en",
   srsSentenceWordLinks: true,
   srsRomajiInput: true,
 };

@@ -7,6 +7,7 @@ import {
   sanitizeSrsExamples,
   srsExamplesToPlainDescription,
 } from "../lib/srsExamples";
+import { useTranslation } from "../i18n/I18nProvider";
 
 interface SaveData {
   kanji: string;
@@ -45,6 +46,7 @@ export function WordFormModal({
   onSave,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<TabId>("general");
   const [kanji, setKanji] = useState(initial?.kanji ?? "");
   const [pronunciation, setPronunciation] = useState(
@@ -74,7 +76,7 @@ export function WordFormModal({
     if (!next) return;
     if (
       description.trim() &&
-      !confirm("Mevcut açıklama SRS örneklerinden yeniden oluşturulsun mu?")
+      !confirm(t("wordForm.confirmRegenerateDescription"))
     )
       return;
     setDescription(next);
@@ -107,7 +109,7 @@ export function WordFormModal({
       <div className="modal-sheet max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between mb-4 shrink-0">
           <h2 className="text-lg font-bold text-gray-800">
-            {initial ? "Kelimeyi Düzenle" : "Yeni Kelime Ekle"}
+            {initial ? t("wordForm.editTitle") : t("wordForm.addTitle")}
           </h2>
           <button
             onClick={onClose}
@@ -127,7 +129,7 @@ export function WordFormModal({
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Genel
+            {t("wordForm.tabs.general")}
           </button>
           <button
             type="button"
@@ -138,7 +140,7 @@ export function WordFormModal({
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            SRS Örnekleri
+            {t("wordForm.tabs.srsExamples")}
             {srsExamples.length > 0 && (
               <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-main-100 text-main-600">
                 {srsExamples.length}
@@ -156,13 +158,13 @@ export function WordFormModal({
               <>
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                    Japonca Kelime
+                    {t("wordForm.labels.kanji")}
                   </label>
                   <input
                     type="text"
                     value={kanji}
                     onChange={(e) => setKanji(e.target.value)}
-                    placeholder="例: 工事"
+                    placeholder={t("wordForm.placeholders.kanji")}
                     className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xl text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
                     required
                   />
@@ -170,26 +172,26 @@ export function WordFormModal({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                    Okunuş
+                    {t("wordForm.labels.pronunciation")}
                   </label>
                   <input
                     type="text"
                     value={pronunciation}
                     onChange={(e) => setPronunciation(e.target.value)}
-                    placeholder="こうじ (kouji)"
+                    placeholder={t("wordForm.placeholders.pronunciation")}
                     className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                    Anlam
+                    {t("wordForm.labels.meaning")}
                   </label>
                   <input
                     type="text"
                     value={meaning}
                     onChange={(e) => setMeaning(e.target.value)}
-                    placeholder="TR: İnşaat | EN: Construction"
+                    placeholder={t("wordForm.placeholders.meaning")}
                     className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
                   />
                 </div>
@@ -197,7 +199,7 @@ export function WordFormModal({
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                      Örnek Cümleler & Notlar
+                      {t("wordForm.labels.examplesAndNotes")}
                     </label>
                     {srsExamples.length > 0 && (
                       <button
@@ -205,16 +207,14 @@ export function WordFormModal({
                         onClick={syncDescriptionFromSrs}
                         className="text-[10px] font-semibold text-main-500 hover:text-main-600"
                       >
-                        SRS örneklerinden oluştur
+                        {t("wordForm.actions.generateFromSrs")}
                       </button>
                     )}
                   </div>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder={
-                      "工事中です。\n--> Kouji-chuu desu.\n--> İnşaat çalışması var."
-                    }
+                    placeholder={t("wordForm.placeholders.description")}
                     rows={5}
                     className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-main-300 transition-all font-mono"
                   />
@@ -223,9 +223,9 @@ export function WordFormModal({
                 {allWords.length > 0 && (
                   <div>
                     <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                      İlişkili Kelimeler{" "}
+                      {t("wordForm.labels.relatedWords")}{" "}
                       <span className="normal-case font-normal text-gray-300">
-                        (A ≡ B)
+                        {t("wordForm.labels.relatedWordsHint")}
                       </span>
                     </label>
                     <RelatedWordsSelect
@@ -239,9 +239,9 @@ export function WordFormModal({
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                    JLPT Seviyesi{" "}
+                    {t("wordForm.labels.jlptLevel")}{" "}
                     <span className="normal-case font-normal text-gray-300">
-                      (isteğe bağlı)
+                      {t("wordForm.labels.jlptOptional")}
                     </span>
                   </label>
                   <div className="flex gap-1.5">
@@ -264,7 +264,7 @@ export function WordFormModal({
                 <div className="flex gap-3">
                   <div className="flex-1">
                     <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                      Tarih
+                      {t("wordForm.labels.date")}
                     </label>
                     <input
                       type="date"
@@ -275,7 +275,7 @@ export function WordFormModal({
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
-                      Seviye
+                      {t("wordForm.labels.level")}
                     </label>
                     <div className="flex gap-1.5">
                       {[1, 2, 3, 4, 5].map((l) => (
@@ -315,7 +315,9 @@ export function WordFormModal({
             type="submit"
             className="w-full py-3 mt-4 rounded-xl font-bold text-white text-base active:scale-[0.98] transition-all bg-main-500 hover:bg-main-600 shrink-0"
           >
-            {initial ? "Güncelle" : "Ekle"}
+            {initial
+              ? t("wordForm.actions.submitUpdate")
+              : t("wordForm.actions.submitAdd")}
           </button>
         </form>
       </div>

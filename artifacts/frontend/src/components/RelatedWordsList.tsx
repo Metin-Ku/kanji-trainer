@@ -2,11 +2,11 @@ import { useState } from "react";
 import { BookOpen, Languages, Waves } from "lucide-react";
 import type { Word } from "../types";
 import { themeVars } from "../theme";
+import { useTranslation } from "../i18n/I18nProvider";
 
 export function getRelatedWords(word: Word, allWords: Word[]): Word[] {
   if (!word.meaning) return [];
 
-  // Split source meaning by comma and pipe → each segment is a token
   const tokens = word.meaning
     .split(/[,|]/)
     .map((s) => s.trim())
@@ -20,7 +20,6 @@ export function getRelatedWords(word: Word, allWords: Word[]): Word[] {
   for (const w of allWords) {
     if (w.id === word.id || seen.has(w.id) || !w.meaning) continue;
 
-    // Split target meaning into individual words
     const targetWords = w.meaning
       .split(/[,|\s]+/)
       .map((s) => s.trim().toLowerCase())
@@ -45,6 +44,7 @@ interface Props {
 }
 
 export function RelatedWordsList({ word, allWords }: Props) {
+  const { t } = useTranslation();
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
 
   const manualIds = word.relatedWordIds ?? [];
@@ -63,7 +63,9 @@ export function RelatedWordsList({ word, allWords }: Props) {
   if (allRelated.length === 0) {
     return (
       <div className="border border-gray-100 rounded-lg bg-white px-4 py-3">
-        <p className="text-xs text-gray-300 text-center">İlgili kelime bulunamadı</p>
+        <p className="text-xs text-gray-300 text-center">
+          {t("common.relatedWordsNotFound")}
+        </p>
       </div>
     );
   }
@@ -89,7 +91,9 @@ export function RelatedWordsList({ word, allWords }: Props) {
                 <div className="flex items-center gap-1.5 leading-none">
                   <p className="text-sm font-bold text-gray-800">{w.kanji}</p>
                   {isManual && (
-                    <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-main-100 text-main-600">≡</span>
+                    <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-main-100 text-main-600">
+                      {t("common.manualLinkBadge")}
+                    </span>
                   )}
                 </div>
                 {w.pronunciation && (
@@ -139,7 +143,9 @@ export function RelatedWordsList({ word, allWords }: Props) {
                 {w.description ? (
                   <p className="whitespace-pre-wrap text-xs text-gray-600 leading-relaxed">{w.description}</p>
                 ) : (
-                  <p className="text-xs text-gray-300 italic">Açıklama yok</p>
+                  <p className="text-xs text-gray-300 italic">
+                    {t("common.noDescription")}
+                  </p>
                 )}
               </div>
             )}
@@ -151,6 +157,7 @@ export function RelatedWordsList({ word, allWords }: Props) {
 }
 
 export function RelatedWordsButton({ active, onClick, slideUp }: { active: boolean; onClick: (e: React.MouseEvent) => void; slideUp?: boolean }) {
+  const { t } = useTranslation();
   return (
     <button
       type="button"
@@ -159,9 +166,9 @@ export function RelatedWordsButton({ active, onClick, slideUp }: { active: boole
       className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold transition-colors ${slideUp ? "h-8" : ""} ${
         active ? "bg-red-400 text-white" : "bg-main-100 text-main-400"
       }`}
-      title="İlgili kelimeler"
+      title={t("a11y.relatedWords")}
     >
-      A ≡ B
+      {t("common.relatedWordsButton")}
     </button>
   );
 }

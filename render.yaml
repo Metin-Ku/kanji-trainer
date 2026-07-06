@@ -1,6 +1,19 @@
 ﻿services:
   - type: web
-    name: kanji-trainer-api
+    name: kanji-trainer-api-cv
+    runtime: node
+    rootDir: artifacts/backend
+    buildCommand: cd ../.. && pnpm install && pnpm --filter @workspace/backend run build
+    startCommand: node --enable-source-maps dist/index.mjs
+    healthCheckPath: /api/healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+
+  - type: web
+    name: kanji-trainer-api-personal
     runtime: node
     rootDir: artifacts/backend
     buildCommand: cd ../.. && pnpm install && pnpm --filter @workspace/backend run build

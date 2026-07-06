@@ -1,4 +1,5 @@
 import kuromoji from "kuromoji";
+import * as wanakana from "wanakana";
 import type { LinkedToken, RubyPart, SrsExample, TargetChunk, Word } from "../types";
 import {
   exampleDisplayText,
@@ -136,23 +137,73 @@ export function readingForWord(word: Word): string {
   return extractReading(word.pronunciation);
 }
 
-/** Build ruby segments for a linked surface using the vocabulary reading. */
+function kataToHira(katakana: string): string {
+  return wanakana.toHiragana(katakana);
+}
+
+/** Split one kuromoji token surface into ruby parts (kanji stem + okurigana). */
+function tokenSurfaceToRubyParts(
+  surface: string,
+  readingKatakana?: string,
+): RubyPart[] {
+  if (!surface) return [];
+  if (!readingKatakana || !containsKanji(surface)) {
+    return [{ base: surface }];
+  }
+
+  const reading = kataToHira(readingKatakana);
+  let kanjiEnd = 0;
+  for (let i = 0; i < surface.length; i++) {
+    if (containsKanji(surface[i]!)) kanjiEnd = i + 1;
+    else break;
+  }
+
+  const kanjiPart = surface.slice(0, kanjiEnd);
+  const okurigana = surface.slice(kanjiEnd);
+
+  if (!kanjiPart) return [{ base: surface }];
+  if (!okurigana) return [{ base: kanjiPart, reading }];
+  if (reading.endsWith(okurigana)) {
+    return [
+      {
+        base: kanjiPart,
+        reading: reading.slice(0, reading.length - okurigana.length),
+      },
+      { base: okurigana },
+    ];
+  }
+  return [{ base: surface, reading }];
+}
+
+/** Build ruby parts for a linked surface using kuromoji readings. */
+export function buildRubyPartsForSurface(
+  surface: string,
+  tokenizer: KuromojiTokenizer,
+): RubyPart[] {
+  if (!surface) return [{ base: surface }];
+  const tokens = tokenizer.tokenize(surface);
+  if (tokens.length === 0) return [{ base: surface }];
+
+  const parts: RubyPart[] = [];
+  let built = "";
+  for (const t of tokens) {
+    parts.push(...tokenSurfaceToRubyParts(t.surface_form, t.reading));
+    built += t.surface_form;
+  }
+  if (built.length < surface.length) {
+    parts.push({ base: surface.slice(built.length) });
+  }
+  return parts;
+}
+
+/** Sync fallback when persisted chunk.ruby is unavailable (dictionary form only). */
 export function rubyPartsForLinkedSpan(surface: string, word: Word): RubyPart[] {
   const reading = readingForWord(word);
   const kanji = word.kanji.trim();
-  if (!reading || !containsKanji(surface)) {
-    return [{ base: surface }];
+  if (surface === kanji && reading) {
+    return [{ base: kanji, reading }];
   }
-  if (!kanji || !surface.includes(kanji)) {
-    return [{ base: surface, reading }];
-  }
-  const idx = surface.indexOf(kanji);
-  const parts: RubyPart[] = [];
-  if (idx > 0) parts.push({ base: surface.slice(0, idx) });
-  parts.push({ base: kanji, reading });
-  const rest = surface.slice(idx + kanji.length);
-  if (rest) parts.push({ base: rest });
-  return parts;
+  return [{ base: surface }];
 }
 
 function sliceRubyParts(
@@ -181,12 +232,13 @@ function sliceRubyParts(
 }
 
 /** Inject furigana into text chunks for linked vocabulary (persists in targetChunks). */
-export function applyLinkedRubyToExample(
+export async function applyLinkedRubyToExample(
   ex: SrsExample,
   words: Word[],
-): SrsExample {
+): Promise<SrsExample> {
   if (!ex.targetChunks?.length || !ex.linkedTokens?.length) return ex;
 
+  const tokenizer = await getKuromojiTokenizer();
   const wordsById = buildWordsById(words);
   const tokens = linkedTokensForDisplay(ex) ?? ex.linkedTokens;
   let offset = 0;
@@ -222,10 +274,11 @@ export function applyLinkedRubyToExample(
         parts.push({ base: text.slice(local, relStart) });
       }
       const word = wordsById.get(token.wordId);
+      const span = text.slice(relStart, relEnd);
       if (word) {
-        parts.push(...rubyPartsForLinkedSpan(text.slice(relStart, relEnd), word));
+        parts.push(...buildRubyPartsForSurface(span, tokenizer));
       } else {
-        parts.push({ base: text.slice(relStart, relEnd) });
+        parts.push({ base: span });
       }
       local = relEnd;
     }
@@ -346,7 +399,7 @@ export async function linkSrsExamples(
       excludeWordId,
     });
     out.push(
-      applyLinkedRubyToExample({ ...synced, linkedTokens }, words),
+      await applyLinkedRubyToExample({ ...synced, linkedTokens }, words),
     );
   }
   return out;

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslation } from "../i18n/I18nProvider";
 
 function getKanjiChars(str: string): string[] {
   return [...str].filter((c) => {
@@ -59,6 +60,7 @@ interface Props {
 }
 
 export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
+  const { t } = useTranslation();
   const chars = getKanjiChars(kanji);
   const [charIndex, setCharIndex] = useState(0);
   const [svgContent, setSvgContent] = useState<string | null>(null);
@@ -242,14 +244,14 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
-            筆順 · Yazım Sırası
+            {t("kanjiStroke.title")}
           </p>
           <div className="flex items-center gap-0.5">
             {svgContent && !loading && (
               <button
                 onClick={runAnimation}
                 className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
-                title="Tekrar oynat"
+                title={t("a11y.replayAnimation")}
               >
                 <RefreshCw size={13} />
               </button>
@@ -317,11 +319,13 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
           className="mx-4 mb-4 rounded-xl flex items-center justify-center"
           style={{ height: 248, background: "#f9f9f9" }}
         >
-          {loading && <p className="text-gray-300 text-sm">Yükleniyor…</p>}
+          {loading && (
+            <p className="text-gray-300 text-sm">{t("kanjiStroke.loading")}</p>
+          )}
           {error && (
             <div className="text-center px-6">
               <p className="text-3xl text-gray-200 mb-2">{currentChar}</p>
-              <p className="text-xs text-gray-300">SVG bulunamadı</p>
+              <p className="text-xs text-gray-300">{t("kanjiStroke.svgNotFound")}</p>
             </div>
           )}
           {svgContent && !loading && (

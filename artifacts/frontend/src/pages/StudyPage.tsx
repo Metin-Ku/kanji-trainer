@@ -5,21 +5,9 @@ import { useLocation } from "wouter";
 import { getStudySession, StudyMode } from "../store/studyStore";
 import { Word } from "../types";
 import { themeVars } from "../theme";
-const MONTHS = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+import { useTranslation } from "../i18n/I18nProvider";
 const LONG_PRESS_MS = 320;
 const LEVEL_STEP_PX = 30;
-
-function formatDate(dateStr: string): string {
-  if (!dateStr) return "";
-  const parts = dateStr.split("-");
-  if (parts.length === 3) {
-    const d = parseInt(parts[2], 10);
-    const m = parseInt(parts[1], 10) - 1;
-    const y = parseInt(parts[0], 10);
-    if (!isNaN(d) && !isNaN(m) && !isNaN(y)) return `${d} ${MONTHS[m]} ${y}`;
-  }
-  return dateStr;
-}
 
 function getLevelInfo(word: Word, mode: StudyMode) {
   if (mode === "okunuş") return { level: word.pronLevel, starred: word.pronStarred };
@@ -27,10 +15,10 @@ function getLevelInfo(word: Word, mode: StudyMode) {
   return { level: word.level, starred: word.starred };
 }
 
-function getPrimary(word: Word, mode: StudyMode): string {
-  if (mode === "okunuş") return word.pronunciation || "—";
-  if (mode === "anlam") return word.meaning || "—";
-  return word.kanji || "—";
+function getPrimary(word: Word, mode: StudyMode, emDash: string): string {
+  if (mode === "okunuş") return word.pronunciation || emDash;
+  if (mode === "anlam") return word.meaning || emDash;
+  return word.kanji || emDash;
 }
 
 // idx: 0=lv1, 1=lv2, 2=lv3, 3=lv4, 4=lv5, 5=★
@@ -52,6 +40,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function StudyPage() {
+  const { t, formatStudyDate } = useTranslation();
   const [, navigate] = useLocation();
   const sessionRef = useRef(getStudySession());
   const [words, setWords] = useState(sessionRef.current.words);
@@ -278,8 +267,8 @@ export function StudyPage() {
   if (!word && !done) {
     return (
       <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-white sm:border-l sm:border-r sm:border-gray-100">
-        <p className="text-gray-400">Kelime bulunamadı</p>
-        <button onClick={() => navigate(backPath)} className="mt-4 text-main-400 text-sm">Geri Dön</button>
+        <p className="text-gray-400">{t("study.notFound")}</p>
+        <button onClick={() => navigate(backPath)} className="mt-4 text-main-400 text-sm">{t("study.backToList")}</button>
       </div>
     );
   }
@@ -296,8 +285,8 @@ export function StudyPage() {
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
           <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl" style={{ background: themeVars.star }}>★</div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 mb-1">Tamamlandı!</p>
-            <p className="text-sm text-gray-400">{words.length} kelimeyi bitirdin</p>
+            <p className="text-2xl font-bold text-gray-900 mb-1">{t("common.completed")}</p>
+            <p className="text-sm text-gray-400">{t("study.finishedCount", { count: words.length })}</p>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
@@ -306,13 +295,13 @@ export function StudyPage() {
               style={{ background: themeVars.level(1) }}
             >
               <Dices size={16} strokeWidth={2} />
-              Yeniden Karıştır
+              {t("study.shuffleAgain")}
             </button>
             <button
               onClick={() => navigate(backPath)}
               className="w-full py-3 rounded-2xl font-semibold text-sm border border-gray-200 text-gray-600"
             >
-              Listeye Dön
+              {t("study.backToList")}
             </button>
           </div>
         </div>
@@ -342,7 +331,7 @@ export function StudyPage() {
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
         </button>
-        <span className="text-sm text-gray-400 font-medium tabular-nums">{index + 1} / {words.length}</span>
+        <span className="text-sm text-gray-400 font-medium tabular-nums">{t("common.cardProgress", { current: index + 1, total: words.length })}</span>
       </div>
 
       <div ref={mainRef} className="flex-1 relative overflow-hidden" style={{ touchAction: "none" }}>
@@ -361,13 +350,13 @@ export function StudyPage() {
               className="font-bold text-gray-900 text-center leading-tight"
               style={{ fontSize: mode === "anlam" ? "1.4rem" : "3rem" }}
             >
-              {getPrimary(word, mode)}
+              {getPrimary(word, mode, t("common.emDash"))}
             </p>
 
             <div className="flex items-center gap-2 flex-wrap justify-center">
               {word.date && (
                 <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-500">
-                  {formatDate(word.date)}
+                  {formatStudyDate(word.date)}
                 </span>
               )}
               {word.jlptLevel && (
@@ -410,25 +399,25 @@ export function StudyPage() {
           <div className="px-6 pb-6 pt-2 space-y-4">
             {mode !== "kelime" && word.kanji && (
               <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Kelime</p>
+                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{t("study.detailLabels.word")}</p>
                 <p className="text-3xl font-bold text-gray-800">{word.kanji}</p>
               </div>
             )}
             {mode !== "okunuş" && word.pronunciation && (
               <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Okunuş</p>
+                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{t("study.detailLabels.pronunciation")}</p>
                 <p className="text-lg font-medium text-gray-700">{word.pronunciation}</p>
               </div>
             )}
             {mode !== "anlam" && word.meaning && (
               <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Anlam</p>
+                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{t("study.detailLabels.meaning")}</p>
                 <p className="text-base text-gray-700">{word.meaning}</p>
               </div>
             )}
             {word.description && (
               <div className="pt-3 border-t border-gray-100">
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">Açıklama</p>
+                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{t("study.detailLabels.description")}</p>
                 <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">{word.description}</p>
               </div>
             )}

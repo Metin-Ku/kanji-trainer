@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { X } from "lucide-react";
 import type { Word } from "../types";
+import { useTranslation } from "../i18n/I18nProvider";
 
 interface Props {
   allWords: Word[];
@@ -15,6 +16,7 @@ export function RelatedWordsSelect({
   currentWordId,
   onChange,
 }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -83,7 +85,7 @@ export function RelatedWordsSelect({
             {w.kanji}
             <button
               type="button"
-              aria-label="Kaldır"
+              aria-label={t("a11y.remove")}
               onMouseDown={(e) => e.preventDefault()}
               onClick={(e) => {
                 e.stopPropagation();
@@ -105,7 +107,9 @@ export function RelatedWordsSelect({
           }}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
-          placeholder={selectedWords.length === 0 ? "Kelime ara…" : ""}
+          placeholder={
+            selectedWords.length === 0 ? t("a11y.searchWords") : ""
+          }
           className="flex-1 min-w-[90px] bg-transparent text-sm text-gray-700 focus:outline-none placeholder:text-gray-300"
         />
       </div>
@@ -117,7 +121,7 @@ export function RelatedWordsSelect({
         >
           {filteredWords.length === 0 ? (
             <p className="px-4 py-3 text-xs text-gray-300 text-center">
-              "{query}" bulunamadı
+              {t("search.relatedNotFound", { query })}
             </p>
           ) : (
             filteredWords.map((w) => (

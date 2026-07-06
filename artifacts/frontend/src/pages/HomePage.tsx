@@ -21,39 +21,12 @@ import {
 import { WordFormModal } from "../components/WordFormModal";
 import type { Word } from "../types";
 import { themeVars } from "../theme";
-
-const TURKISH_MONTHS = [
-  "Ocak",
-  "Şubat",
-  "Mart",
-  "Nisan",
-  "Mayıs",
-  "Haziran",
-  "Temmuz",
-  "Ağustos",
-  "Eylül",
-  "Ekim",
-  "Kasım",
-  "Aralık",
-];
-const TURKISH_DAYS = [
-  "Pazar",
-  "Pazartesi",
-  "Salı",
-  "Çarşamba",
-  "Perşembe",
-  "Cuma",
-  "Cumartesi",
-];
-
-function formatTodayTurkish(): string {
-  const now = new Date();
-  return `${TURKISH_DAYS[now.getDay()]}, ${now.getDate()} ${TURKISH_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
-}
+import { useTranslation } from "../i18n/I18nProvider";
 
 const SHADOW = "0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)";
 
 export function HomePage() {
+  const { t, formatToday } = useTranslation();
   const [, navigate] = useLocation();
   const { words, updateWord, deleteWord, addWord, bulkCreate } = useWords();
   const [query, setQuery] = useState("");
@@ -111,32 +84,32 @@ export function HomePage() {
       <div className="bg-white border-b border-gray-100 px-5 pt-5 pb-3 shrink-0">
         <div className="flex items-start justify-between gap-3 mb-0.5">
           <p className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
-            Japonca Kelime Defteri
+            {t("home.appSubtitle")}
           </p>
           <div className="flex items-center gap-0.5 -mr-2 -mt-1">
             <button
               onClick={() => navigate("/srs")}
               className="p-2 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
-              aria-label="SRS"
+              aria-label={t("a11y.srs")}
             >
               <Layers size={20} strokeWidth={2} />
             </button>
             <button
               onClick={() => navigate("/settings")}
               className="p-2 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
-              aria-label="Ayarlar"
+              aria-label={t("a11y.settings")}
             >
               <Settings size={20} strokeWidth={2} />
             </button>
           </div>
         </div>
         <h1 className="text-xl font-bold text-gray-900 mb-3">
-          {formatTodayTurkish()}
+          {formatToday()}
         </h1>
         <SearchBar
           value={query}
           onChange={setQuery}
-          placeholder="Kelime, okunuş veya anlam ara…"
+          placeholder={t("home.searchPlaceholder")}
         />
       </div>
 
@@ -146,13 +119,13 @@ export function HomePage() {
             <div className="flex flex-col items-center justify-center py-20 text-center px-8">
               <p className="text-4xl text-gray-200 mb-3">?</p>
               <p className="text-gray-400 text-sm">
-                "{query}" için sonuç bulunamadı
+                {t("common.noResultsForQuery", { query })}
               </p>
             </div>
           ) : (
             <div>
               <p className="px-5 pt-3 pb-1 text-xs text-gray-400 font-medium">
-                {results.length} sonuç
+                {t("common.resultCount", { count: results.length })}
               </p>
               {results.map((word) => {
                 const isOpen = openIds.has(word.id);
@@ -260,7 +233,7 @@ export function HomePage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (confirm(`"${word.kanji}" silinsin mi?`))
+                            if (confirm(t("home.confirmDelete", { kanji: word.kanji })))
                               deleteWord(word.id);
                           }}
                           className="p-1.5 rounded-lg bg-gray-100 active:opacity-60 transition-opacity"
@@ -316,7 +289,6 @@ export function HomePage() {
       ) : (
         <div className="flex-1 flex flex-col gap-2.5 p-3 overflow-hidden">
           <div className="flex-[2] flex flex-col gap-2.5 min-h-0">
-            {/* Kelimeler — centered */}
             <button
               onClick={() => navigate("/words")}
               className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
@@ -333,14 +305,11 @@ export function HomePage() {
                 />
               </div>
               <div className="text-center">
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                  Word
-                </p>
                 <p className="text-xl font-bold text-gray-900 leading-tight">
-                  Kelimeler
+                  {t("home.tiles.wordsTitle")}
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {nonStarredCount} kelime
+                  {t("common.wordCount", { count: nonStarredCount })}
                 </p>
               </div>
             </button>
@@ -362,11 +331,8 @@ export function HomePage() {
                   />
                 </div>
                 <div className="text-center">
-                  <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">
-                    Pronunciation
-                  </p>
                   <p className="text-base font-bold text-gray-900 leading-tight">
-                    Okunuş
+                    {t("home.tiles.pronunciationTitle")}
                   </p>
                 </div>
               </button>
@@ -387,18 +353,14 @@ export function HomePage() {
                   />
                 </div>
                 <div className="text-center">
-                  <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider">
-                    Meaning
-                  </p>
                   <p className="text-base font-bold text-gray-900 leading-tight">
-                    Anlam
+                    {t("home.tiles.meaningTitle")}
                   </p>
                 </div>
               </button>
             </div>
           </div>
 
-          {/* Öğrenilenler — centered */}
           <button
             onClick={() => navigate("/learned")}
             className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
@@ -411,14 +373,11 @@ export function HomePage() {
               <span style={{ color: themeVars.level(1), fontSize: 20 }}>★</span>
             </div>
             <div className="text-center">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                Learned
-              </p>
               <p className="text-xl font-bold text-gray-900 leading-tight">
-                Öğrenilenler
+                {t("home.tiles.learnedTitle")}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                {starredCount} kelime
+                {t("common.wordCount", { count: starredCount })}
               </p>
             </div>
           </button>

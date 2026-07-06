@@ -64,7 +64,9 @@ Repoyu GitHub'a push edin (Render ve Vercel GitHub'dan deploy eder).
 
 ## Adim 3 — Render (Backend API)
 
-1. Render > **New > Web Service** > GitHub repo sec
+[`render.yaml`](render.yaml) iki servis tanimlar (`kanji-trainer-api-cv`, `kanji-trainer-api-personal`). Tek instance icin yalnizca birini kullanin veya Blueprint ile ikisini birden olusturun.
+
+1. Render > **New > Web Service** (veya **Blueprint**) > GitHub repo sec
 2. Ayarlar:
    - **Root Directory:** `artifacts/backend`
    - **Build Command:** `cd ../.. && pnpm install && pnpm --filter @workspace/backend run build`
@@ -105,11 +107,12 @@ postgresql://postgres.nsxgzydphobasyyygawl:SIFRE@aws-0-REGION.pooler.supabase.co
 3. Environment Variables (Build):
    - `BASE_PATH` = `/`
    - `NODE_ENV` = `production`
-4. Deploy oncesi `artifacts/frontend/vercel.json` icindeki Render URL'sini guncelleyin:
-   ```json
-   "destination": "https://SIZIN-RENDER-URL.onrender.com/api/:path*"
-   ```
+4. **Settings → Rewrites** — API proxy'yi proje bazinda tanimlayin (repoda sabit backend URL yok):
+   - **Source:** `/api/:path*`
+   - **Destination:** `https://SIZIN-RENDER-URL.onrender.com/api/:path*`
 5. Deploy edin ve siteyi acin
+
+**Not:** Tek instance icin yukaridaki rewrite yeterli. CV + kisisel icin [Cift instance deploy](#cift-instance-deploy-cv--kisisel) bolumune bakin.
 
 ---
 
@@ -144,7 +147,111 @@ pnpm dev
 | Sorun | Cozum |
 |-------|-------|
 | API 502 / timeout | Render servisi uyuyor olabilir; 1 dk bekleyip tekrar deneyin |
-| Kelimeler yuklenmiyor | vercel.json Render URL dogru mu? Browser Network sekmesinde /api/words kontrol edin |
+| Kelimeler yuklenmiyor | Vercel **Settings → Rewrites** dogru mu? `/api/:path*` hedefi ilgili Render URL olmali. Browser Network'te /api/words kontrol edin |
 | DATABASE_URL hatasi | Render'da **pooler URL** (6543) kullanin; direct `db.xxx.supabase.co` IPv6 → ENETUNREACH |
 | `ENETUNREACH 2406:da14:...` | Supabase Transaction pooler URL'sine gecin (yukariya bakin) |
 | Build hatasi PORT/BASE_PATH | Vercel env: BASE_PATH=/ veya vite.config varsayilanlari kullanilir |
+
+---
+
+## Cift instance deploy (CV + kisisel)
+
+Ayni GitHub repo ve `main` branch'ten iki bagimsiz canli site: kod her push'ta ikisine de gider; yalnizca veritabani, backend URL ve Vercel rewrite farklidir.
+
+```
+GitHub (main)
+    ├── Render: kanji-trainer-api-cv        → Supabase CV
+    ├── Render: kanji-trainer-api-personal  → Supabase kisisel
+    ├── Vercel: cv-site      → /api → Render CV
+    └── Vercel: personal-site → /api → Render kisisel
+```
+
+**Kural:** CV frontend yalnizca CV backend'e, kisisel frontend yalnizca kisisel backend'e baglanmali.
+
+### 1 — Iki Supabase projesi
+
+Her biri icin Adim 1'i tekrarlayin (ayri proje, ayri `DATABASE_URL`):
+
+| Proje | Veri |
+|-------|------|
+| **CV** | Secilmis demo kelimeler, temiz SRS ornekleri |
+| **Kisisel** | Tam kelime listeniz, gercek SRS ilerlemeniz |
+
+**CV verisi hazirlama:**
+
+1. Kisisel siteden **Ayarlar → Yedek indir** (`GET /api/backup`)
+2. JSON'dan kisisel icerikleri cikarin veya kucuk bir subset birakin
+3. CV Supabase'e import (SQL Editor, pgAdmin veya Table Editor CSV)
+4. Sequence:
+   ```sql
+   SELECT setval('public.words_id_seq', (SELECT COALESCE(MAX(id), 1) FROM public.words));
+   ```
+
+**Mevcut canli deploy varsa:** Onu kisisel instance kabul edin; yalnizca CV stack'ini ekleyin.
+
+### 2 — Iki Render backend servisi
+
+[`render.yaml`](render.yaml) iki servis tanimlar. Render Dashboard > **New Blueprint** veya her servisi ayri olusturun:
+
+| Servis | `DATABASE_URL` |
+|--------|----------------|
+| `kanji-trainer-api-cv` | Supabase CV (Transaction pooler, port **6543**) |
+| `kanji-trainer-api-personal` | Supabase kisisel |
+
+Her ikisi de:
+
+- GitHub repo, branch: **`main`**
+- Root Directory: `artifacts/backend`
+- Build / Start / Health check: Adim 3 ile ayni
+- `NODE_ENV` = `production`
+
+Deploy sonrasi URL'leri not edin ve test edin:
+
+```
+GET https://kanji-trainer-api-cv.onrender.com/api/healthz
+GET https://kanji-trainer-api-personal.onrender.com/api/healthz
+```
+
+### 3 — Iki Vercel frontend projesi
+
+Her proje Adim 4 ile ayni build ayarlarina sahip olmali. **Settings → Rewrites** proje bazinda farklidir:
+
+| Vercel projesi | Source | Destination |
+|----------------|--------|-------------|
+| CV (or. `kanji-trainer-cv`) | `/api/:path*` | `https://kanji-trainer-api-cv.onrender.com/api/:path*` |
+| Kisisel (or. `kanji-trainer-personal`) | `/api/:path*` | `https://kanji-trainer-api-personal.onrender.com/api/:path*` |
+
+SPA fallback (`vercel.json` icindeki `/index.html` rewrite) repodan gelir; ekstra ayar gerekmez.
+
+Domain (opsiyonel): CV icin portfolio subdomain, kisisel icin ayri URL.
+
+### 4 — Eslestirme tablosu
+
+| | CV | Kisisel |
+|---|-----|---------|
+| Vercel | `kanji-trainer-cv` | `kanji-trainer-personal` |
+| Render | `kanji-trainer-api-cv` | `kanji-trainer-api-personal` |
+| Supabase | Proje A | Proje B |
+
+### 5 — Gunluk workflow
+
+1. Lokal: `.env` → kisisel Supabase
+2. `pnpm dev` ile gelistir
+3. `git push origin main` → 4 deploy (2 Render + 2 Vercel)
+4. Veri otomatik senkron **olmaz** — CV verisini bilincli backup/import ile guncelleyin
+
+### 6 — Cift instance dogrulama
+
+Her instance icin ayri ayri:
+
+- [ ] `/api/healthz` OK
+- [ ] Ana sayfa aciliyor, kelime listesi yukleniyor
+- [ ] Kelime ekle / duzenle / sil calisiyor
+- [ ] SRS calisma modu calisiyor
+- [ ] CV sitesinde kisisel kelimeler gorunmuyor (DB ayrimi dogru)
+- [ ] Browser Network: `/api/words` istegi dogru Render host'una gidiyor
+
+### Maliyet ve kisitlar
+
+- Supabase free x2, Render free x2, Vercel free x2
+- Render free tier: 15 dk idle sonrasi uyku; ilk istek 30-60 sn

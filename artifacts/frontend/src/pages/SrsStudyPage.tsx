@@ -14,39 +14,13 @@ import type { Word, WordUpdate } from "../types";
 import { themeVars } from "../theme";
 import { useWords } from "../hooks/useWords";
 import { ExampleSrsStudyPage } from "./ExampleSrsStudyPage";
+import { useTranslation } from "../i18n/I18nProvider";
 
-const MONTHS = [
-  "Oca",
-  "Şub",
-  "Mar",
-  "Nis",
-  "May",
-  "Haz",
-  "Tem",
-  "Ağu",
-  "Eyl",
-  "Eki",
-  "Kas",
-  "Ara",
-];
-
-function formatDate(dateStr: string): string {
-  if (!dateStr) return "";
-  const parts = dateStr.split("-");
-  if (parts.length === 3) {
-    const d = parseInt(parts[2], 10);
-    const m = parseInt(parts[1], 10) - 1;
-    const y = parseInt(parts[0], 10);
-    if (!isNaN(d) && !isNaN(m) && !isNaN(y)) return `${d} ${MONTHS[m]} ${y}`;
-  }
-  return dateStr;
-}
-
-function getPrimary(item: SrsQueueItem, deck: SrsDeckType): string {
+function getPrimary(item: SrsQueueItem, deck: SrsDeckType, emDash: string): string {
   const { word } = item;
-  if (deck === "pronunciation") return word.pronunciation || "—";
-  if (deck === "meaning") return word.meaning || "—";
-  return word.kanji || "—";
+  if (deck === "pronunciation") return word.pronunciation || emDash;
+  if (deck === "meaning") return word.meaning || emDash;
+  return word.kanji || emDash;
 }
 
 function queueWordToWord(item: SrsQueueItem): Word {
@@ -57,33 +31,33 @@ function queueWordToWord(item: SrsQueueItem): Word {
   } as Word;
 }
 
-const RATING_BUTTONS: {
+const RATING_KEYS: {
   rating: ReviewRating;
-  label: string;
+  labelKey: "again" | "hard" | "good" | "easy";
   key: keyof SrsQueueItem["card"]["intervals"];
   className: string;
 }[] = [
   {
     rating: 1,
-    label: "Again",
+    labelKey: "again",
     key: "again",
     className: "bg-gray-100 hover:bg-red-600",
   },
   {
     rating: 2,
-    label: "Hard",
+    labelKey: "hard",
     key: "hard",
     className: "bg-gray-100 hover:bg-main-800",
   },
   {
     rating: 3,
-    label: "Good",
+    labelKey: "good",
     key: "good",
     className: "bg-gray-100 hover:bg-main-600",
   },
   {
     rating: 4,
-    label: "Easy",
+    labelKey: "easy",
     key: "easy",
     className: "bg-gray-100 hover:bg-green-500",
   },
@@ -103,6 +77,7 @@ function SrsStudyPageInner({
 }: {
   sessionRef: React.MutableRefObject<ReturnType<typeof getSrsSession>>;
 }) {
+  const { t, formatStudyDate } = useTranslation();
   const [, navigate] = useLocation();
   const { deck, title, backPath } = sessionRef.current;
   const { words, updateWord } = useWords();
@@ -180,7 +155,7 @@ function SrsStudyPageInner({
         await reviewSrsCard(current.card.id, rating);
         advanceAfterReview();
       } catch {
-        alert("Kart kaydedilemedi. Tekrar deneyin.");
+        alert(t("srs.study.saveFailed"));
         setDragX(0);
         setIsFlying(false);
         flyingRef.current = false;
@@ -423,12 +398,12 @@ function SrsStudyPageInner({
   if (!item && !done) {
     return (
       <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-white sm:border-l sm:border-r sm:border-gray-100">
-        <p className="text-gray-400">Kart bulunamadı</p>
+        <p className="text-gray-400">{t("srs.study.cardNotFound")}</p>
         <button
           onClick={() => navigate(backPath)}
           className="mt-4 text-main-400 text-sm"
         >
-          Geri Dön
+          {t("common.goBack")}
         </button>
       </div>
     );
@@ -456,9 +431,9 @@ function SrsStudyPageInner({
             ★
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 mb-1">Tamamlandı!</p>
+            <p className="text-2xl font-bold text-gray-900 mb-1">{t("common.completed")}</p>
             <p className="text-sm text-gray-400">
-              Bu oturumdaki kartları bitirdin
+              {t("srs.study.sessionComplete")}
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
@@ -468,13 +443,13 @@ function SrsStudyPageInner({
               style={{ background: themeVars.level(1) }}
             >
               <Dices size={16} strokeWidth={2} />
-              Yeniden Başla
+              {t("srs.study.restart")}
             </button>
             <button
               onClick={() => navigate(backPath)}
               className="w-full py-3 rounded-2xl font-semibold text-sm border border-gray-200 text-gray-600"
             >
-              Destelere Dön
+              {t("srs.study.backToDecks")}
             </button>
           </div>
         </div>
@@ -512,7 +487,7 @@ function SrsStudyPageInner({
           </span>
         </button>
         <span className="text-sm text-gray-400 font-medium tabular-nums">
-          {index + 1} / {items.length}
+          {t("common.cardProgress", { current: index + 1, total: items.length })}
         </span>
       </div>
 
@@ -539,13 +514,13 @@ function SrsStudyPageInner({
               className="font-bold text-gray-900 text-center leading-tight"
               style={{ fontSize: deck === "meaning" ? "1.4rem" : "3rem" }}
             >
-              {getPrimary(item, deck)}
+              {getPrimary(item, deck, t("common.emDash"))}
             </p>
 
             <div className="flex items-center gap-2 flex-wrap justify-center">
               {word.date && (
                 <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-500">
-                  {formatDate(word.date)}
+                  {formatStudyDate(word.date)}
                 </span>
               )}
               {word.jlptLevel && (
@@ -613,7 +588,7 @@ function SrsStudyPageInner({
               {deck !== "word" && word.kanji && (
                 <div>
                   <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
-                    Kelime
+                    {t("study.detailLabels.word")}
                   </p>
                   <p className="text-3xl font-bold text-gray-800">{word.kanji}</p>
                 </div>
@@ -621,7 +596,7 @@ function SrsStudyPageInner({
               {deck !== "pronunciation" && word.pronunciation && (
                 <div>
                   <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
-                    Okunuş
+                    {t("study.detailLabels.pronunciation")}
                   </p>
                   <p className="text-lg font-medium text-gray-700">
                     {word.pronunciation}
@@ -631,7 +606,7 @@ function SrsStudyPageInner({
               {deck !== "meaning" && word.meaning && (
                 <div>
                   <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
-                    Anlam
+                    {t("study.detailLabels.meaning")}
                   </p>
                   <p className="text-base text-gray-700">{word.meaning}</p>
                 </div>
@@ -639,7 +614,7 @@ function SrsStudyPageInner({
               {word.description && (
                 <div className="pt-3 border-t border-gray-100">
                   <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
-                    Açıklama
+                    {t("study.detailLabels.description")}
                   </p>
                   <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">
                     {word.description}
@@ -656,14 +631,14 @@ function SrsStudyPageInner({
         className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 px-3 py-3 max-w-2xl mx-auto sm:border-l sm:border-r"
       >
         <div className="grid grid-cols-4 gap-2">
-          {RATING_BUTTONS.map(({ rating, label, key, className }) => (
+          {RATING_KEYS.map(({ rating, labelKey, key, className }) => (
             <button
               key={rating}
               onClick={() => handleReviewClick(rating)}
               disabled={reviewing}
               className={`flex flex-col items-center justify-center py-2.5 rounded-xl text-gray-500 text-xs font-semibold transition-opacity disabled:opacity-50 ${className}`}
             >
-              <span>{label}</span>
+              <span>{t(`srs.study.ratings.${labelKey}`)}</span>
               {intervals && (
                 <span className="text-[10px] font-normal opacity-90 mt-0.5">
                   {intervals[key]}

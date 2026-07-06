@@ -13,6 +13,7 @@ import { getAppSettings } from "../settings/appSettings";
 import { romajiToKanaInput } from "../lib/japaneseInput";
 import { gradeClozeAnswer, renderHintParts } from "../lib/srsExamples";
 import { linkedTokensForDisplay } from "../lib/wordLinking";
+import { useTranslation } from "../i18n/I18nProvider";
 
 type AnswerPhase = "typing" | "correct" | "partial" | "revealed";
 
@@ -25,6 +26,7 @@ function queueWordToWord(item: SrsQueueItem): Word {
 }
 
 export function ExampleSrsStudyPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const sessionRef = useRef(getSrsSession());
   const { title, backPath } = sessionRef.current;
@@ -74,7 +76,7 @@ export function ExampleSrsStudyPage() {
     try {
       await reviewSrsExample(current.card.id, correct);
     } catch {
-      alert("Kart kaydedilemedi. Tekrar deneyin.");
+      alert(t("srs.study.saveFailed"));
       throw new Error("review failed");
     } finally {
       reviewingRef.current = false;
@@ -200,12 +202,12 @@ export function ExampleSrsStudyPage() {
   if (!item && !done) {
     return (
       <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-white">
-        <p className="text-gray-400">Kart bulunamadı</p>
+        <p className="text-gray-400">{t("srs.study.cardNotFound")}</p>
         <button
           onClick={() => navigate(backPath)}
           className="mt-4 text-main-400 text-sm"
         >
-          Geri Dön
+          {t("common.goBack")}
         </button>
       </div>
     );
@@ -233,9 +235,9 @@ export function ExampleSrsStudyPage() {
             ★
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 mb-1">Tamamlandı!</p>
+            <p className="text-2xl font-bold text-gray-900 mb-1">{t("common.completed")}</p>
             <p className="text-sm text-gray-400">
-              Bu oturumdaki örnekleri bitirdin
+              {t("srs.study.examplesComplete")}
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
@@ -244,13 +246,13 @@ export function ExampleSrsStudyPage() {
               className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-gray-500 text-sm"
               style={{ background: themeVars.level(1) }}
             >
-              <Dices size={16} /> Yeniden Başla
+              <Dices size={16} /> {t("srs.study.restart")}
             </button>
             <button
               onClick={() => navigate(backPath)}
               className="w-full py-3 rounded-2xl font-semibold text-sm border border-gray-200 text-gray-600"
             >
-              Destelere Dön
+              {t("srs.study.backToDecks")}
             </button>
           </div>
         </div>
@@ -289,7 +291,7 @@ export function ExampleSrsStudyPage() {
             <Pencil size={14} />
           </button>
           <span className="text-sm text-gray-400 font-medium tabular-nums">
-            {index + 1} / {items.length}
+            {t("common.cardProgress", { current: index + 1, total: items.length })}
           </span>
         </div>
       </div>
@@ -313,7 +315,7 @@ export function ExampleSrsStudyPage() {
               />
               {examples.length > 1 && (
                 <p className="text-xs text-gray-400 mt-3">
-                  Örnek {(cursor % examples.length) + 1} / {examples.length}
+                  {t("common.exampleProgress", { current: (cursor % examples.length) + 1, total: examples.length })}
                 </p>
               )}
             </div>
@@ -387,13 +389,13 @@ export function ExampleSrsStudyPage() {
                 disabled={reviewing}
                 className="w-full py-3 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white disabled:opacity-50"
               >
-                {answerPhase === "typing" ? "Kontrol" : "Devam"}
+                {answerPhase === "typing" ? t("common.check") : t("common.continue")}
               </button>
             </div>
           </>
         ) : (
           <p className="text-center text-gray-400">
-            Bu kelime için SRS örneği yok.
+            {t("srs.example.noExample")}
           </p>
         )}
       </div>

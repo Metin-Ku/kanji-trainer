@@ -4,6 +4,7 @@ import { LevelChart } from "./LevelChart";
 import { KanjiStrokeModal } from "./KanjiStrokeModal";
 import { RelatedWordsList, RelatedWordsButton } from "./RelatedWordsList";
 import { Pencil, Trash2 } from "lucide-react";
+import { useTranslation } from "../i18n/I18nProvider";
 
 interface Props {
   word: Word;
@@ -45,6 +46,7 @@ export function WordCard({
   onSelect,
   allWords,
 }: Props) {
+  const { t, formatCardDate } = useTranslation();
   const [showStroke, setShowStroke] = useState(false);
   const [showRelated, setShowRelated] = useState(false);
   useEffect(() => {
@@ -120,7 +122,6 @@ export function WordCard({
             {word.kanji}
           </span>
 
-          {/* JLPT badge inline in the row */}
           {word.jlptLevel && !selectMode && (
             <span
               className="text-[10px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0"
@@ -139,14 +140,14 @@ export function WordCard({
               <button
                 className="p-1.5 rounded-lg text-gray-300 hover:text-blue-400 transition-colors"
                 onClick={() => onEdit(word)}
-                aria-label="Düzenle"
+                aria-label={t("a11y.edit")}
               >
                 <Pencil size={14} />
               </button>
               <button
                 className="p-1.5 rounded-lg text-gray-300 hover:text-red-400 transition-colors"
                 onClick={() => onDelete(word.id)}
-                aria-label="Sil"
+                aria-label={t("common.delete")}
               >
                 <Trash2 size={14} />
               </button>
@@ -159,7 +160,7 @@ export function WordCard({
             <div className="px-5 pb-4 space-y-2">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-xs text-gray-400 font-medium">
-                  {showRelated ? "" : formatDate(word.date)}
+                  {showRelated ? "" : formatCardDate(word.date)}
                 </p>
                 {word.meaning && allWords && (
                   <RelatedWordsButton
@@ -178,7 +179,7 @@ export function WordCard({
                   {word.pronunciation && (
                     <p className="text-sm text-gray-500">
                       <span className="font-medium text-gray-400 text-xs uppercase tracking-wide mr-2">
-                        Okunuş
+                        {t("common.pronunciation")}
                       </span>
                       {word.pronunciation}
                     </p>
@@ -186,7 +187,7 @@ export function WordCard({
                   {word.meaning && (
                     <p className="text-sm text-gray-600">
                       <span className="font-medium text-gray-400 text-xs uppercase tracking-wide mr-2">
-                        Anlam
+                        {t("common.meaning")}
                       </span>
                       {word.meaning}
                     </p>
@@ -202,7 +203,7 @@ export function WordCard({
                     !word.meaning &&
                     !word.description && (
                       <span className="text-gray-300 italic text-sm">
-                        Açıklama yok
+                        {t("common.noDescription")}
                       </span>
                     )}
                 </>
@@ -220,27 +221,4 @@ export function WordCard({
       )}
     </>
   );
-}
-
-function formatDate(dateStr: string): string {
-  try {
-    const [y, m, d] = dateStr.split("-").map(Number);
-    const months = [
-      "Ocak",
-      "Şubat",
-      "Mart",
-      "Nisan",
-      "Mayıs",
-      "Haziran",
-      "Temmuz",
-      "Ağustos",
-      "Eylül",
-      "Ekim",
-      "Kasım",
-      "Aralık",
-    ];
-    return `${d} ${months[m - 1]} ${y}`;
-  } catch {
-    return dateStr;
-  }
 }

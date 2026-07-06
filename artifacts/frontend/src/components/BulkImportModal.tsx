@@ -3,6 +3,7 @@ import { X, Upload, Loader2 } from "lucide-react";
 import type { SrsExample, Word } from "../types";
 import { parseBulkDescriptionHtml, elementSurfaceText } from "../lib/srsExamples";
 import { linkSrsExamples } from "../lib/wordLinking";
+import { useTranslation } from "../i18n/I18nProvider";
 
 interface BulkWord {
   kanji: string;
@@ -80,6 +81,7 @@ function parseTableHtml(html: string): BulkWord[] {
 }
 
 export function BulkImportModal({ onImport, onClose, allWords }: Props) {
+  const { t } = useTranslation();
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(false);
   const [linking, setLinking] = useState(false);
@@ -117,7 +119,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
       setPreview([]);
       setHtml("");
     } catch {
-      alert("Kelime eşleştirme veya içe aktarma başarısız.");
+      alert(t("bulkImport.importFailed"));
     } finally {
       setLoading(false);
       setLinking(false);
@@ -132,7 +134,9 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
     >
       <div className="modal-sheet">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-800">Toplu Kelime Ekle</h2>
+          <h2 className="text-lg font-bold text-gray-800">
+            {t("bulkImport.title")}
+          </h2>
           <button
             onClick={onClose}
             className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400"
@@ -144,27 +148,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
         {!result ? (
           <>
             <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-              HTML tabloyu yapıştırın.{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
-                .word
-              </code>
-              ,{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
-                .pronunciation
-              </code>
-              ,{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
-                .meaning
-              </code>
-              ,{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
-                .description
-              </code>{" "}
-              ve{" "}
-              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
-                .jlpt
-              </code>{" "}
-              class'larına göre ayrıştırılır.
+              {t("bulkImport.instructions")}
             </p>
 
             <textarea
@@ -173,7 +157,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                 setHtml(e.target.value);
                 setPreview([]);
               }}
-              placeholder="<table>...</table>"
+              placeholder={t("bulkImport.placeholder")}
               rows={6}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xs text-gray-600 font-mono focus:outline-none focus:ring-2 focus:ring-main-300 transition-all mb-3"
             />
@@ -184,14 +168,14 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                 disabled={!html.trim()}
                 className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 border-gray-200 text-gray-500 hover:border-main-300 hover:text-main-500 transition-colors disabled:opacity-40"
               >
-                {html.trim() ? "Önizle" : "Tablo yapıştırın"}
+                {html.trim() ? t("common.preview") : t("bulkImport.pasteTable")}
               </button>
             ) : (
               <div className="space-y-3">
                 <div className="bg-main-50 border border-main-100 rounded-xl px-4 py-3 text-sm text-gray-700">
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-semibold text-gray-800">
-                      {preview.length} kelime algılandı
+                      {t("bulkImport.wordsDetected", { count: preview.length })}
                     </p>
                   </div>
                   <div className="max-h-36 overflow-y-auto space-y-1.5">
@@ -212,13 +196,18 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                           </span>
                         )}
                         {w.description && (
-                          <span className="text-gray-300 shrink-0" title="Açıklama">
+                          <span
+                            className="text-gray-300 shrink-0"
+                            title={t("bulkImport.descriptionTitle")}
+                          >
                             ✓
                           </span>
                         )}
                         {w.srsExamples && w.srsExamples.length > 0 && (
                           <span className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0 bg-main-100 text-main-600">
-                            {w.srsExamples.length} SRS
+                            {t("common.srsBadge", {
+                              count: w.srsExamples.length,
+                            })}
                           </span>
                         )}
                       </div>
@@ -231,7 +220,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                     onClick={() => setPreview([])}
                     className="flex-1 py-2.5 rounded-xl font-semibold text-sm border-2 border-gray-200 text-gray-400 hover:border-gray-300 transition-colors"
                   >
-                    İptal
+                    {t("common.cancel")}
                   </button>
                   <button
                     onClick={handleImport}
@@ -241,11 +230,14 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                     {loading ? (
                       <>
                         <Loader2 size={15} className="animate-spin" />{" "}
-                        {linking ? "Eşleştiriliyor..." : "Ekleniyor..."}
+                        {linking
+                          ? t("bulkImport.linking")
+                          : t("bulkImport.adding")}
                       </>
                     ) : (
                       <>
-                        <Upload size={15} /> {preview.length} Kelime Ekle
+                        <Upload size={15} />{" "}
+                        {t("bulkImport.addWords", { count: preview.length })}
                       </>
                     )}
                   </button>
@@ -257,15 +249,15 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
           <div className="space-y-4">
             <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 space-y-2">
               <p className="text-sm text-gray-500">
-                {result.total} kelime verildi
+                {t("bulkImport.result.totalGiven", { count: result.total })}
               </p>
               <p className="text-base font-bold text-gray-800">
-                ✓ {result.added} yeni kelime eklendi
+                {t("bulkImport.result.added", { count: result.added })}
               </p>
               {result.updated > 0 && (
                 <>
                   <p className="text-sm text-gray-400">
-                    {result.updated} kelime zaten mevcut, alanlar güncellendi:
+                    {t("bulkImport.result.updated", { count: result.updated })}
                   </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {result.updatedWords.map((w) => (
@@ -285,7 +277,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
               onClick={onClose}
               className="w-full py-3 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white text-sm active:scale-[0.98]"
             >
-              Kapat
+              {t("common.close")}
             </button>
           </div>
         )}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { themeVars } from "../theme";
+import { useTranslation } from "../i18n/I18nProvider";
 
 interface Props {
   level: number;
@@ -16,6 +17,7 @@ function getLevelColor(bar: number, level: number): string {
 }
 
 export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar }: Props) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -42,7 +44,7 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
         onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
         className="flex items-end gap-[1px] h-[17px]"
         style={{ padding: 0 }}
-        aria-label="Seviye değiştir"
+        aria-label={t("a11y.changeLevel")}
       >
         {[1, 2, 3, 4, 5].map((bar) => {
           const pct = HEIGHTS[bar - 1];
@@ -68,7 +70,9 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
           style={{ minWidth: 216 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <p className="text-xs text-gray-400 mb-2.5 font-medium text-center">Öğrenme seviyesi</p>
+          <p className="text-xs text-gray-400 mb-2.5 font-medium text-center">
+            {t("levelChart.title")}
+          </p>
           <div className="flex gap-2 justify-center items-center">
             {[1, 2, 3, 4, 5].map((l) => {
               const active = l === level;
@@ -108,13 +112,17 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
                 opacity: starEnabled ? 1 : 0.4,
                 transition: "none",
               }}
-              aria-label={starred ? "Öğrenilenlerden çıkar" : "Öğrenildi olarak işaretle"}
+              aria-label={
+                starred ? t("a11y.unmarkLearned") : t("a11y.markLearned")
+              }
             >
               ★
             </button>
           </div>
           {!starEnabled && (
-            <p className="text-[10px] text-gray-300 text-center mt-2">5. seviyede yıldız atanabilir</p>
+            <p className="text-[10px] text-gray-300 text-center mt-2">
+              {t("levelChart.starAtLevel5Hint")}
+            </p>
           )}
         </div>
       )}

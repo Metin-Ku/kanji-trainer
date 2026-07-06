@@ -54,8 +54,16 @@ function LinkedTextSpan({
       {segs.map((seg, i) => {
         if (seg.kind === "link") {
           const word = wordsById.get(seg.wordId);
+          const relStart = local;
           local += seg.text.length;
           if (!word) return <span key={i}>{seg.text}</span>;
+          const sub = ruby?.length
+            ? sliceRubyPartsForRange(ruby, relStart, local)
+            : null;
+          const parts =
+            sub && sub.length > 0
+              ? sub
+              : rubyPartsForLinkedSpan(seg.text, word);
           return (
             <button
               key={i}
@@ -63,7 +71,7 @@ function LinkedTextSpan({
               onClick={() => onWordTap?.(word)}
               className="underline decoration-dotted underline-offset-4 decoration-gray-500 hover:decoration-main-500 text-gray-900"
             >
-              <RubyParts parts={rubyPartsForLinkedSpan(seg.text, word)} />
+              <RubyParts parts={parts} />
             </button>
           );
         }
@@ -135,6 +143,9 @@ function SecondaryHiddenChunk({
   if (wordLinksEnabled && token) {
     const word = wordsById.get(token.wordId);
     if (word) {
+      const parts = chunk.ruby?.length
+        ? chunk.ruby
+        : rubyPartsForLinkedSpan(chunk.text, word);
       return (
         <span className="inline-block mx-0.5">
           <button
@@ -142,7 +153,7 @@ function SecondaryHiddenChunk({
             onClick={() => onWordTap?.(word)}
             className="underline decoration-dotted underline-offset-4 decoration-gray-500 hover:decoration-main-500 text-gray-900"
           >
-            <RubyParts parts={rubyPartsForLinkedSpan(chunk.text, word)} />
+            <RubyParts parts={parts} />
           </button>
         </span>
       );

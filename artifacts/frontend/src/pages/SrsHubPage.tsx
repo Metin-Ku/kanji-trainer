@@ -5,10 +5,11 @@ import { useSrsDecks, useSrsSync, fetchSrsQueue } from "../hooks/useSrs";
 import { startSrsSession } from "../store/srsStore";
 import {
   JLPT_LEVELS,
-  SRS_DECK_LABELS,
   type SrsDeckType,
   type SrsSortMode,
 } from "../types/srs";
+import { useTranslation } from "../i18n/I18nProvider";
+import { srsDeckLabel } from "../i18n/srsDeckLabels";
 
 const DECK_ICONS: Record<SrsDeckType, typeof Languages> = {
   word: Languages,
@@ -17,16 +18,17 @@ const DECK_ICONS: Record<SrsDeckType, typeof Languages> = {
   example: FileText,
 };
 
-const SORT_OPTIONS: { value: SrsSortMode; label: string }[] = [
-  { value: "due-asc", label: "Tekrar tarihi" },
-  { value: "date-desc", label: "Eklenme: Yeni → Eski" },
-  { value: "date-asc", label: "Eklenme: Eski → Yeni" },
-];
-
 export function SrsHubPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { data: decks = [], isLoading } = useSrsDecks();
   const sync = useSrsSync();
+
+  const sortOptions: { value: SrsSortMode; label: string }[] = [
+    { value: "due-asc", label: t("srs.sort.dueAsc") },
+    { value: "date-desc", label: t("srs.sort.dateDesc") },
+    { value: "date-asc", label: t("srs.sort.dateAsc") },
+  ];
 
   const [jlptMin, setJlptMin] = useState<string>("");
   const [jlptMax, setJlptMax] = useState<string>("");
@@ -46,11 +48,11 @@ export function SrsHubPage() {
         sort,
       });
       if (items.length === 0) {
-        alert("Bu filtrelerle çalışılacak kart yok.");
+        alert(t("srs.hub.noCardsWithFilters"));
         return;
       }
-      const label = SRS_DECK_LABELS[deck];
-      startSrsSession(deck, items, `SRS · ${label.title}`, "/srs", {
+      const label = srsDeckLabel(t, deck);
+      startSrsSession(deck, items, t("srs.hub.sessionTitlePrefix", { label: label.title }), "/srs", {
         jlptMin: jlptMin || null,
         jlptMax: jlptMax || null,
         sort,
@@ -73,38 +75,38 @@ export function SrsHubPage() {
           className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
         >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">SRS</span>
+          <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{t("nav.srs")}</span>
         </button>
-        <h1 className="text-xl font-bold text-gray-900 mt-2">Aralıklı Tekrar</h1>
-        <p className="text-sm text-gray-500 mt-1">FSRS algoritması — Anki ile aynı mantık</p>
+        <h1 className="text-xl font-bold text-gray-900 mt-2">{t("srs.hub.title")}</h1>
+        <p className="text-sm text-gray-500 mt-1">{t("srs.hub.subtitle")}</p>
       </div>
 
       <div className="p-4 space-y-4 flex-1 overflow-y-auto">
         <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Filtreler</p>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t("srs.hub.filters")}</p>
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-xs text-gray-500 mb-1 block">JLPT min</span>
+              <span className="text-xs text-gray-500 mb-1 block">{t("srs.hub.jlptMin")}</span>
               <select
                 value={jlptMin}
                 onChange={(e) => setJlptMin(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800"
               >
-                <option value="">Hepsi</option>
+                <option value="">{t("common.all")}</option>
                 {JLPT_LEVELS.map((l) => (
                   <option key={l} value={l}>{l}</option>
                 ))}
               </select>
             </label>
             <label className="block">
-              <span className="text-xs text-gray-500 mb-1 block">JLPT max</span>
+              <span className="text-xs text-gray-500 mb-1 block">{t("srs.hub.jlptMax")}</span>
               <select
                 value={jlptMax}
                 onChange={(e) => setJlptMax(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800"
               >
-                <option value="">Hepsi</option>
+                <option value="">{t("common.all")}</option>
                 {JLPT_LEVELS.map((l) => (
                   <option key={l} value={l}>{l}</option>
                 ))}
@@ -113,13 +115,13 @@ export function SrsHubPage() {
           </div>
 
           <label className="block">
-            <span className="text-xs text-gray-500 mb-1 block">Sıralama</span>
+            <span className="text-xs text-gray-500 mb-1 block">{t("srs.hub.sortLabel")}</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SrsSortMode)}
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800"
             >
-              {SORT_OPTIONS.map((o) => (
+              {sortOptions.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
@@ -129,7 +131,7 @@ export function SrsHubPage() {
         <div className="space-y-2.5">
           {(["word", "pronunciation", "meaning", "example"] as SrsDeckType[]).map((deck) => {
             const Icon = DECK_ICONS[deck];
-            const label = SRS_DECK_LABELS[deck];
+            const label = srsDeckLabel(t, deck);
             const stats = statsFor(deck);
             const reviewCount = stats.due + stats.new;
 
@@ -147,8 +149,8 @@ export function SrsHubPage() {
                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{label.subtitle}</p>
                   <p className="text-base font-bold text-gray-900">{label.title}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {reviewCount > 0 ? `${reviewCount} kart hazır` : "Bugün kart yok"}
-                    {stats.total > 0 && ` · ${stats.total} toplam`}
+                    {reviewCount > 0 ? t("srs.hub.cardsReady", { count: reviewCount }) : t("srs.hub.noCardsToday")}
+                    {stats.total > 0 && t("srs.hub.totalCards", { count: stats.total })}
                   </p>
                 </div>
                 <ChevronRight size={18} className="text-gray-300 shrink-0" />

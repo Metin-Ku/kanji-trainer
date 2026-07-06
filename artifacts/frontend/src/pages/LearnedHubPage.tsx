@@ -1,13 +1,14 @@
 import { ArrowLeft, Languages, Waves, BookOpen } from "lucide-react";
 import { useLocation } from "wouter";
 import { themeVars } from "../theme";
+import { useTranslation } from "../i18n/I18nProvider";
 
 export function LearnedHubPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
 
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 shrink-0">
         <div className="flex items-center gap-2">
           <button
@@ -15,12 +16,13 @@ export function LearnedHubPage() {
             className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
           >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">Öğrenilenler</span>
+            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
+              {t("learned.hubTitle")}
+            </span>
           </button>
         </div>
       </div>
 
-      {/* 3 equal-width section buttons */}
       <div className="flex-1 flex">
         <button
           onClick={() => navigate("/learned/words")}
@@ -33,10 +35,9 @@ export function LearnedHubPage() {
             <Languages size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-              Word
+            <p className="text-base font-bold text-gray-900 leading-tight">
+              {t("learned.wordsTitle")}
             </p>
-            <p className="text-base font-bold text-gray-900 leading-tight">Kelimeler</p>
           </div>
         </button>
 
@@ -51,10 +52,9 @@ export function LearnedHubPage() {
             <Waves size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-              Pronunciation
+            <p className="text-base font-bold text-gray-900 leading-tight">
+              {t("learned.pronunciationTitle")}
             </p>
-            <p className="text-base font-bold text-gray-900 leading-tight">Okunuş</p>
           </div>
         </button>
 
@@ -69,10 +69,9 @@ export function LearnedHubPage() {
             <BookOpen size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-[9px] font-semibold text-gray-400 uppercase tracking-wider mb-0.5">
-              Meaning
+            <p className="text-base font-bold text-gray-900 leading-tight">
+              {t("learned.meaningTitle")}
             </p>
-            <p className="text-base font-bold text-gray-900 leading-tight">Anlam</p>
           </div>
         </button>
       </div>

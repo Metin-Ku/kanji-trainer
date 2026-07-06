@@ -16,6 +16,7 @@ import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import { Word } from "../types";
 import { startStudy } from "../store/studyStore";
+import { useTranslation } from "../i18n/I18nProvider";
 
 type SortMode =
   | "level-asc"
@@ -26,16 +27,6 @@ type SortMode =
   | "jlpt-desc"
   | "kanji-cluster";
 type SortGroup = "level" | "date" | "jlpt" | "kanji";
-
-const SORT_OPTIONS: { value: SortMode; label: string; group: SortGroup }[] = [
-  { value: "level-asc", label: "Seviye ↑", group: "level" },
-  { value: "level-desc", label: "Seviye ↓", group: "level" },
-  { value: "date-asc", label: "Tarih: Eski → Yeni", group: "date" },
-  { value: "date-desc", label: "Tarih: Yeni → Eski", group: "date" },
-  { value: "jlpt-asc", label: "N5 → N1 (Kolay → Zor)", group: "jlpt" },
-  { value: "jlpt-desc", label: "N1 → N5 (Zor → Kolay)", group: "jlpt" },
-  { value: "kanji-cluster", label: "Ortak Kanji Kümeleme", group: "kanji" },
-];
 
 const JLPT_RANK: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
 function jlptRank(w: Word): number {
@@ -87,12 +78,16 @@ function sortWords(words: Word[], sorts: Set<SortMode>): Word[] {
   return arr.sort(cmp);
 }
 
-function toggleSort(prev: Set<SortMode>, value: SortMode): Set<SortMode> {
+function toggleSort(
+  prev: Set<SortMode>,
+  value: SortMode,
+  sortOptions: { value: SortMode; group: SortGroup }[],
+): Set<SortMode> {
   const next = new Set(prev);
-  const opt = SORT_OPTIONS.find((o) => o.value === value)!;
-  const others = SORT_OPTIONS.filter(
-    (o) => o.group === opt.group && o.value !== value,
-  ).map((o) => o.value);
+  const opt = sortOptions.find((o) => o.value === value)!;
+  const others = sortOptions
+    .filter((o) => o.group === opt.group && o.value !== value)
+    .map((o) => o.value);
   if (next.has(value)) {
     next.delete(value);
   } else {
@@ -102,14 +97,8 @@ function toggleSort(prev: Set<SortMode>, value: SortMode): Set<SortMode> {
   return next;
 }
 
-const GROUPS: { key: SortGroup; label: string }[] = [
-  { key: "jlpt", label: "JLPT" },
-  { key: "level", label: "Seviye" },
-  { key: "date", label: "Tarih" },
-  { key: "kanji", label: "Kümeleme" },
-];
-
 export function WordListPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const {
     words,
@@ -119,6 +108,24 @@ export function WordListPage() {
     deleteWord,
     deleteWords,
   } = useWords();
+
+  const sortOptions: { value: SortMode; label: string; group: SortGroup }[] = [
+    { value: "level-asc", label: t("words.sort.levelAsc"), group: "level" },
+    { value: "level-desc", label: t("words.sort.levelDesc"), group: "level" },
+    { value: "date-asc", label: t("words.sort.dateAsc"), group: "date" },
+    { value: "date-desc", label: t("words.sort.dateDesc"), group: "date" },
+    { value: "jlpt-asc", label: t("words.sort.jlptAsc"), group: "jlpt" },
+    { value: "jlpt-desc", label: t("words.sort.jlptDesc"), group: "jlpt" },
+    { value: "kanji-cluster", label: t("words.sort.kanjiCluster"), group: "kanji" },
+  ];
+
+  const groups: { key: SortGroup; label: string }[] = [
+    { key: "jlpt", label: t("common.jlpt") },
+    { key: "level", label: t("common.level") },
+    { key: "date", label: t("common.date") },
+    { key: "kanji", label: t("common.clustering") },
+  ];
+
   const [showForm, setShowForm] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | undefined>(undefined);
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
@@ -182,7 +189,7 @@ export function WordListPage() {
   async function handleBulkDelete() {
     if (
       !window.confirm(
-        `${selectedIds.size} kelimeyi silmek istediğinizden emin misiniz?`,
+        t("common.confirmBulkDelete", { count: selectedIds.size }),
       )
     )
       return;
@@ -207,7 +214,7 @@ export function WordListPage() {
   }
 
   function handleDelete(id: number) {
-    if (window.confirm("Bu kelimeyi silmek istediğinizden emin misiniz?")) {
+    if (window.confirm(t("common.confirmDeleteWord"))) {
       deleteWord(id);
       setOpenIds((prev) => {
         const n = new Set(prev);
@@ -236,13 +243,13 @@ export function WordListPage() {
             >
               <ArrowLeft size={18} />
               <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
-                Kelimeler
+                {t("words.title")}
               </span>
             </button>
             <button
               onClick={() => {
                 if (displayed.length === 0) return;
-                startStudy(displayed, "kelime", "Kelimeler", "/words");
+                startStudy(displayed, "kelime", t("words.studyTitle"), "/words");
                 navigate("/study");
               }}
               disabled={displayed.length === 0}
@@ -254,7 +261,9 @@ export function WordListPage() {
 
           <div className="flex items-center gap-2">
             <p className="text-sm text-gray-400 shrink-0">
-              {isLoading ? "…" : `${displayed.length} kelime`}
+              {isLoading
+                ? t("common.loading")
+                : t("common.wordCount", { count: displayed.length })}
             </p>
             <div className="flex-1 min-w-0">
               <SearchBar value={query} onChange={setQuery} />
@@ -266,12 +275,14 @@ export function WordListPage() {
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
                 <span className="text-xs font-medium">
-                  Sırala{activeSortCount > 1 ? ` (${activeSortCount})` : ""}
+                  {activeSortCount > 1
+                    ? t("common.sortWithCount", { count: activeSortCount })
+                    : t("common.sort")}
                 </span>
               </button>
               {showSortMenu && (
                 <div className="absolute right-0 top-full mt-1.5 z-50 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden w-56">
-                  {GROUPS.map((group, gi) => (
+                  {groups.map((group, gi) => (
                     <div key={group.key}>
                       {gi > 0 && (
                         <div className="mx-3 my-1.5 border-t border-gray-100" />
@@ -281,14 +292,17 @@ export function WordListPage() {
                           {group.label}
                         </p>
                       </div>
-                      {SORT_OPTIONS.filter((o) => o.group === group.key).map(
-                        (opt) => {
+                      {sortOptions
+                        .filter((o) => o.group === group.key)
+                        .map((opt) => {
                           const active = activeSorts.has(opt.value);
                           return (
                             <button
                               key={opt.value}
                               onClick={() =>
-                                setActiveSorts((p) => toggleSort(p, opt.value))
+                                setActiveSorts((p) =>
+                                  toggleSort(p, opt.value, sortOptions),
+                                )
                               }
                               className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-gray-50 transition-colors"
                             >
@@ -316,14 +330,13 @@ export function WordListPage() {
                               </span>
                             </button>
                           );
-                        },
-                      )}
+                        })}
                     </div>
                   ))}
                   {activeSortCount > 1 && (
                     <div className="mx-3 mb-2.5 mt-1.5 px-2.5 py-1.5 bg-main-50 rounded-lg">
                       <p className="text-[11px] text-main-400 font-medium">
-                        {activeSortCount} kriter uygulanıyor (önce seçilen)
+                        {t("words.sort.multiCriteria", { count: activeSortCount })}
                       </p>
                     </div>
                   )}
@@ -337,14 +350,14 @@ export function WordListPage() {
               }
               className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50" : "text-gray-400 hover:bg-gray-50"}`}
             >
-              {selectMode ? "İptal" : "Seç"}
+              {selectMode ? t("common.cancel") : t("common.select")}
             </button>
           </div>
         </div>
 
         {isError && (
           <div className="mx-4 mt-4 p-4 bg-red-50 border border-red-100 rounded-xl text-sm text-red-400 text-center">
-            Kelimeler yüklenemedi.
+            {t("words.loadError")}
           </div>
         )}
 
@@ -355,14 +368,14 @@ export function WordListPage() {
                 <>
                   <p className="text-4xl text-gray-200 mb-3">?</p>
                   <p className="text-gray-400 text-sm">
-                    "{query}" için sonuç bulunamadı
+                    {t("common.noResultsForQuery", { query })}
                   </p>
                 </>
               ) : (
                 <>
                   <div className="text-6xl mb-4 text-gray-200">漢</div>
                   <p className="text-gray-400 font-medium">
-                    Henüz kelime eklenmedi
+                    {t("words.empty")}
                   </p>
                 </>
               )}
@@ -415,12 +428,12 @@ export function WordListPage() {
             onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))}
             className="text-xs text-gray-500 hover:text-gray-700 transition-colors shrink-0"
           >
-            Tümünü Seç
+            {t("common.selectAll")}
           </button>
           <span className="flex-1 text-center text-sm text-gray-500 font-medium">
             {selectedIds.size > 0
-              ? `${selectedIds.size} seçildi`
-              : "Satır seçin"}
+              ? t("common.selectedCount", { count: selectedIds.size })
+              : t("common.selectRows")}
           </span>
           <button
             onClick={handleBulkDelete}
@@ -428,7 +441,7 @@ export function WordListPage() {
             className="flex items-center gap-1.5 px-3 bg-[rgb(239,68,68)] py-2 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40 shrink-0"
           >
             <Trash2 size={14} />
-            Sil
+            {t("common.delete")}
           </button>
         </div>
       )}

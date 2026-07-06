@@ -16,6 +16,7 @@ import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import { Word } from "../types";
 import { startStudy } from "../store/studyStore";
+import { useTranslation } from "../i18n/I18nProvider";
 
 type SortMode =
   | "date-asc"
@@ -24,20 +25,6 @@ type SortMode =
   | "jlpt-desc"
   | "kanji-cluster";
 type SortGroup = "jlpt" | "date" | "kanji";
-
-const SORT_OPTIONS: { value: SortMode; label: string; group: SortGroup }[] = [
-  { value: "jlpt-asc", label: "N5 → N1 (Kolay → Zor)", group: "jlpt" },
-  { value: "jlpt-desc", label: "N1 → N5 (Zor → Kolay)", group: "jlpt" },
-  { value: "date-asc", label: "Tarih: Eski → Yeni", group: "date" },
-  { value: "date-desc", label: "Tarih: Yeni → Eski", group: "date" },
-  { value: "kanji-cluster", label: "Ortak Kanji Kümeleme", group: "kanji" },
-];
-
-const GROUPS: { key: SortGroup; label: string }[] = [
-  { key: "jlpt", label: "JLPT" },
-  { key: "date", label: "Tarih" },
-  { key: "kanji", label: "Kümeleme" },
-];
 
 const JLPT_RANK: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
 function jlptRank(w: Word): number {
@@ -64,8 +51,24 @@ function sortLearned(words: Word[], sort: SortMode): Word[] {
 }
 
 export function LearnedPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { words, isLoading, updateWord, deleteWord, deleteWords } = useWords();
+
+  const sortOptions: { value: SortMode; label: string; group: SortGroup }[] = [
+    { value: "jlpt-asc", label: t("learned.sort.jlptAsc"), group: "jlpt" },
+    { value: "jlpt-desc", label: t("learned.sort.jlptDesc"), group: "jlpt" },
+    { value: "date-asc", label: t("learned.sort.dateAsc"), group: "date" },
+    { value: "date-desc", label: t("learned.sort.dateDesc"), group: "date" },
+    { value: "kanji-cluster", label: t("learned.sort.kanjiCluster"), group: "kanji" },
+  ];
+
+  const groups: { key: SortGroup; label: string }[] = [
+    { key: "jlpt", label: t("common.jlpt") },
+    { key: "date", label: t("common.date") },
+    { key: "kanji", label: t("common.clustering") },
+  ];
+
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [query, setQuery] = useState("");
   const [selectMode, setSelectMode] = useState(false);
@@ -127,7 +130,7 @@ export function LearnedPage() {
   async function handleBulkDelete() {
     if (
       !window.confirm(
-        `${selectedIds.size} kelimeyi silmek istediğinizden emin misiniz?`,
+        t("common.confirmBulkDelete", { count: selectedIds.size }),
       )
     )
       return;
@@ -137,7 +140,7 @@ export function LearnedPage() {
   }
 
   function handleDelete(id: number) {
-    if (window.confirm("Bu kelimeyi silmek istediğinizden emin misiniz?")) {
+    if (window.confirm(t("common.confirmDeleteWord"))) {
       deleteWord(id);
       setOpenIds((prev) => {
         const n = new Set(prev);
@@ -179,7 +182,7 @@ export function LearnedPage() {
             >
               <ArrowLeft size={18} />
               <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
-                Öğrenilenler
+                {t("learned.pageTitle")}
               </span>
             </button>
             <button
@@ -188,7 +191,7 @@ export function LearnedPage() {
                 startStudy(
                   displayed,
                   "kelime",
-                  "Öğrenilenler",
+                  t("learned.studyWordsTitle"),
                   "/learned/words",
                 );
                 navigate("/study");
@@ -201,7 +204,9 @@ export function LearnedPage() {
           </div>
           <div className="flex items-center gap-2">
             <p className="text-sm text-gray-400 shrink-0">
-              {isLoading ? "…" : `${displayed.length} kelime`}
+              {isLoading
+                ? t("common.loading")
+                : t("common.wordCount", { count: displayed.length })}
             </p>
             <div className="flex-1">
               <SearchBar value={query} onChange={setQuery} />
@@ -213,11 +218,11 @@ export function LearnedPage() {
                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-main-400 bg-main-50 hover:bg-main-100 transition-colors"
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
-                <span className="text-xs font-medium">Sırala</span>
+                <span className="text-xs font-medium">{t("common.sort")}</span>
               </button>
               {showSortMenu && (
                 <div className="absolute right-0 top-full mt-1.5 z-50 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden w-56">
-                  {GROUPS.map((group, gi) => (
+                  {groups.map((group, gi) => (
                     <div key={group.key}>
                       {gi > 0 && (
                         <div className="mx-3 my-1.5 border-t border-gray-100" />
@@ -227,8 +232,9 @@ export function LearnedPage() {
                           {group.label}
                         </p>
                       </div>
-                      {SORT_OPTIONS.filter((o) => o.group === group.key).map(
-                        (opt) => (
+                      {sortOptions
+                        .filter((o) => o.group === group.key)
+                        .map((opt) => (
                           <button
                             key={opt.value}
                             onClick={() => {
@@ -260,8 +266,7 @@ export function LearnedPage() {
                               {opt.label}
                             </span>
                           </button>
-                        ),
-                      )}
+                        ))}
                     </div>
                   ))}
                   <div className="h-2" />
@@ -275,7 +280,7 @@ export function LearnedPage() {
               }
               className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50" : "text-gray-400 hover:bg-gray-50"}`}
             >
-              {selectMode ? "İptal" : "Seç"}
+              {selectMode ? t("common.cancel") : t("common.select")}
             </button>
           </div>
         </div>
@@ -285,13 +290,13 @@ export function LearnedPage() {
             <p className="text-5xl text-gray-200 mb-3">★</p>
             {query ? (
               <p className="text-gray-400 text-sm">
-                "{query}" için sonuç bulunamadı
+                {t("common.noResultsForQuery", { query })}
               </p>
             ) : (
               <p className="text-gray-400 text-sm">
-                Henüz öğrenilen kelime yok.
+                {t("learned.empty")}
                 <br />
-                Seviye 5'te ★ tuşuna basarak ekleyebilirsiniz.
+                {t("learned.emptyHint")}
               </p>
             )}
           </div>
@@ -342,12 +347,12 @@ export function LearnedPage() {
             onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))}
             className="text-xs text-gray-500 shrink-0"
           >
-            Tümünü Seç
+            {t("common.selectAll")}
           </button>
           <span className="flex-1 text-center text-sm text-gray-500 font-medium">
             {selectedIds.size > 0
-              ? `${selectedIds.size} seçildi`
-              : "Satır seçin"}
+              ? t("common.selectedCount", { count: selectedIds.size })
+              : t("common.selectRows")}
           </span>
           <button
             onClick={handleBulkDelete}
@@ -356,7 +361,7 @@ export function LearnedPage() {
             style={{ background: "rgb(239,68,68)" }}
           >
             <Trash2 size={14} />
-            Sil
+            {t("common.delete")}
           </button>
         </div>
       )}

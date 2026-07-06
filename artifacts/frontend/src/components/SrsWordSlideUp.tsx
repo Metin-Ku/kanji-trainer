@@ -4,6 +4,7 @@ import type { Word } from "../types";
 import { RelatedWordsButton, RelatedWordsList } from "./RelatedWordsList";
 import { WordFormModal } from "./WordFormModal";
 import type { WordUpdate } from "../types";
+import { useTranslation } from "../i18n/I18nProvider";
 
 interface Props {
   open: boolean;
@@ -22,6 +23,7 @@ export function SrsWordSlideUp({
   onSave,
   bottom = 0,
 }: Props) {
+  const { t } = useTranslation();
   const [showRelated, setShowRelated] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [mounted, setMounted] = useState(open);
@@ -99,7 +101,7 @@ export function SrsWordSlideUp({
               {word.kanji && (
                 <div>
                   <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
-                    Kelime
+                    {t("common.word")}
                   </p>
                   <p className="text-3xl font-bold text-gray-800">{word.kanji}</p>
                 </div>
@@ -107,7 +109,7 @@ export function SrsWordSlideUp({
               {word.pronunciation && (
                 <div>
                   <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
-                    Okunuş
+                    {t("common.pronunciation")}
                   </p>
                   <p className="text-lg font-medium text-gray-700">
                     {word.pronunciation}
@@ -117,7 +119,7 @@ export function SrsWordSlideUp({
               {word.meaning && (
                 <div>
                   <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
-                    Anlam
+                    {t("common.meaning")}
                   </p>
                   <p className="text-base text-gray-700">{word.meaning}</p>
                 </div>
@@ -125,7 +127,7 @@ export function SrsWordSlideUp({
               {word.description && (
                 <div className="pt-3 border-t border-gray-100">
                   <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
-                    Açıklama
+                    {t("common.description")}
                   </p>
                   <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">
                     {word.description}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Check, Palette, BookOpen, Database, Download, Link2, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, Palette, BookOpen, Database, Download, Link2, Loader2, Languages } from "lucide-react";
 import { useLocation } from "wouter";
 import {
   applyTheme,
@@ -17,8 +17,10 @@ import {
 import { useWords } from "../hooks/useWords";
 import { relinkAllWordsSrsExamples } from "../lib/wordLinking";
 import { sanitizeSrsExamples } from "../lib/srsExamples";
+import { useTranslation } from "../i18n/I18nProvider";
+import { LOCALES } from "../i18n/locales";
 
-type Section = "styling" | "srs" | "database";
+type Section = "styling" | "srs" | "database" | "language";
 
 function Toggle({
   label,
@@ -57,6 +59,7 @@ function Toggle({
 }
 
 export function SettingsPage() {
+  const { t, locale, setLocale } = useTranslation();
   const [, navigate] = useLocation();
   const [section, setSection] = useState<Section>("styling");
   const [palette, setPalette] = useState<PaletteName>(() => getStoredPalette());
@@ -86,7 +89,7 @@ export function SettingsPage() {
     setStatusMessage(null);
     try {
       const res = await fetch("/api/backup");
-      if (!res.ok) throw new Error("Yedek alınamadı");
+      if (!res.ok) throw new Error("backup failed");
       const data = await res.json();
       const stamp = new Date().toISOString().slice(0, 10);
       const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -98,9 +101,9 @@ export function SettingsPage() {
       a.download = `kanji-trainer-backup-${stamp}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      setStatusMessage("Yedek dosyası indirildi.");
+      setStatusMessage(t("settings.database.backup.success"));
     } catch {
-      setStatusMessage("Yedekleme başarısız oldu.");
+      setStatusMessage(t("settings.database.backup.failed"));
     } finally {
       setBackupBusy(false);
     }
@@ -109,12 +112,12 @@ export function SettingsPage() {
   async function relinkAllExamples() {
     const withExamples = words.filter((w) => w.srsExamples?.length);
     if (withExamples.length === 0) {
-      setStatusMessage("SRS örneği olan kelime yok.");
+      setStatusMessage(t("settings.database.relink.noWords"));
       return;
     }
     if (
       !confirm(
-        `${withExamples.length} kelimenin SRS cümleleri yeniden eşleştirilecek. Yeni eklenen kelimeler de dahil edilir. Devam edilsin mi?`,
+        t("settings.database.relink.confirm", { count: withExamples.length }),
       )
     ) {
       return;
@@ -133,12 +136,10 @@ export function SettingsPage() {
         });
       }
       setStatusMessage(
-        `${results.length} kelimenin SRS cümleleri güncellendi.`,
+        t("settings.database.relink.success", { count: results.length }),
       );
     } catch {
-      setStatusMessage(
-        "Toplu eşleştirme başarısız. Kuromoji sözlüğünün yüklendiğinden emin olun.",
-      );
+      setStatusMessage(t("settings.database.relink.failed"));
     } finally {
       setRelinkBusy(false);
       setRelinkProgress(null);
@@ -154,7 +155,7 @@ export function SettingsPage() {
         >
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
-            Ayarlar
+            {t("settings.title")}
           </span>
         </button>
       </div>
@@ -162,7 +163,7 @@ export function SettingsPage() {
       <div className="flex-1 flex min-h-0">
         <aside className="w-44 shrink-0 bg-white border-r border-gray-100 p-3">
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2">
-            Bölümler
+            {t("settings.sections")}
           </p>
           <button
             onClick={() => setSection("styling")}
@@ -173,7 +174,7 @@ export function SettingsPage() {
             }`}
           >
             <Palette size={16} strokeWidth={2} />
-            Styling
+            {t("settings.styling.nav")}
           </button>
           <button
             onClick={() => setSection("srs")}
@@ -184,7 +185,7 @@ export function SettingsPage() {
             }`}
           >
             <BookOpen size={16} strokeWidth={2} />
-            SRS
+            {t("settings.srs.nav")}
           </button>
           <button
             onClick={() => setSection("database")}
@@ -195,17 +196,27 @@ export function SettingsPage() {
             }`}
           >
             <Database size={16} strokeWidth={2} />
-            Veritabanı
+            {t("settings.database.nav")}
+          </button>
+          <button
+            onClick={() => setSection("language")}
+            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
+              section === "language"
+                ? "bg-main-50 text-main-600"
+                : "text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            <Languages size={16} strokeWidth={2} />
+            {t("settings.language.nav")}
           </button>
         </aside>
 
         <main className="flex-1 overflow-y-auto p-4">
           {section === "styling" && (
             <div className="max-w-2xl">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">Styling</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-1">{t("settings.styling.title")}</h2>
               <p className="text-sm text-gray-500 mb-5">
-                Ana tema rengini seçin. Seviye renkleri, yıldız ve vurgular buna
-                göre güncellenir.
+                {t("settings.styling.description")}
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -229,7 +240,7 @@ export function SettingsPage() {
                         {selected && (
                           <span className="flex items-center gap-1 text-xs font-medium text-main-500">
                             <Check size={14} strokeWidth={2.5} />
-                            Seçili
+                            {t("settings.styling.selected")}
                           </span>
                         )}
                       </div>
@@ -252,21 +263,21 @@ export function SettingsPage() {
 
           {section === "srs" && (
             <div className="max-w-lg space-y-3">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">SRS</h2>
+              <h2 className="text-lg font-bold text-gray-900 mb-1">{t("settings.srs.title")}</h2>
               <p className="text-sm text-gray-500 mb-5">
-                Örnek cümle destesi ve yazma deneyimi ayarları.
+                {t("settings.srs.description")}
               </p>
 
               <Toggle
-                label="Cümledeki bilinen kelimeler"
-                description="Veritabanındaki kelimeler cümle içinde noktalı altı çizili görünür; dokununca bilgi paneli açılır."
+                label={t("settings.srs.wordLinks.label")}
+                description={t("settings.srs.wordLinks.description")}
                 checked={appSettings.srsSentenceWordLinks}
                 onChange={(v) => patchSettings({ srsSentenceWordLinks: v })}
               />
 
               <Toggle
-                label="Romaji → kana dönüşümü"
-                description="Latin harflerle yazarken otomatik hiragana/katakana dönüşümü (ya → や, arubaito → アルバイト)."
+                label={t("settings.srs.romajiInput.label")}
+                description={t("settings.srs.romajiInput.description")}
                 checked={appSettings.srsRomajiInput}
                 onChange={(v) => patchSettings({ srsRomajiInput: v })}
               />
@@ -277,22 +288,20 @@ export function SettingsPage() {
             <div className="max-w-lg space-y-4">
               <div>
                 <h2 className="text-lg font-bold text-gray-900 mb-1">
-                  Veritabanı
+                  {t("settings.database.title")}
                 </h2>
                 <p className="text-sm text-gray-500 mb-5">
-                  Yedek alma ve SRS cümlelerini tüm kelimelerle yeniden
-                  eşleştirme.
+                  {t("settings.database.description")}
                 </p>
               </div>
 
               <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
-                    Yedek indir
+                    {t("settings.database.backup.title")}
                   </p>
                   <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    Kelimeler, ilişkiler ve SRS kart ilerlemesini JSON dosyası
-                    olarak indirir.
+                    {t("settings.database.backup.description")}
                   </p>
                 </div>
                 <button
@@ -306,20 +315,17 @@ export function SettingsPage() {
                   ) : (
                     <Download size={16} />
                   )}
-                  Yedeği indir
+                  {t("settings.database.backup.button")}
                 </button>
               </div>
 
               <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
                 <div>
                   <p className="text-sm font-semibold text-gray-800">
-                    Tüm SRS cümlelerini eşleştir
+                    {t("settings.database.relink.title")}
                   </p>
                   <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-                    Veritabanındaki her kelimenin örnek cümlelerini baştan tarar.
-                    Sonradan eklediğiniz kelimeler (ör. 勉強) mevcut
-                    cümlelerde otomatik bulunur; bağlantılar ve furigana
-                    güncellenir.
+                    {t("settings.database.relink.description")}
                   </p>
                 </div>
                 <button
@@ -333,11 +339,14 @@ export function SettingsPage() {
                   ) : (
                     <Link2 size={16} />
                   )}
-                  Toplu kelime eşleştir
+                  {t("settings.database.relink.button")}
                 </button>
                 {relinkProgress && (
                   <p className="text-xs text-gray-500 tabular-nums">
-                    {relinkProgress.done} / {relinkProgress.total} kelime…
+                    {t("settings.database.relink.progress", {
+                      done: relinkProgress.done,
+                      total: relinkProgress.total,
+                    })}
                   </p>
                 )}
               </div>
@@ -345,6 +354,50 @@ export function SettingsPage() {
               {statusMessage && (
                 <p className="text-sm text-main-600 font-medium">{statusMessage}</p>
               )}
+            </div>
+          )}
+
+          {section === "language" && (
+            <div className="max-w-lg">
+              <h2 className="text-lg font-bold text-gray-900 mb-1">
+                {t("settings.language.title")}
+              </h2>
+              <p className="text-sm text-gray-500 mb-5">
+                {t("settings.language.description")}
+              </p>
+
+              <div className="grid grid-cols-2 gap-3">
+                {LOCALES.map(({ id, labelKey }) => {
+                  const selected = locale === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => {
+                        setLocale(id);
+                        patchSettings({ locale: id });
+                      }}
+                      className={`text-left rounded-xl border p-4 transition-all active:scale-[0.99] ${
+                        selected
+                          ? "border-main-400 ring-2 ring-main-200 bg-white"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-gray-800">
+                          {t(labelKey)}
+                        </span>
+                        {selected && (
+                          <span className="flex items-center gap-1 text-xs font-medium text-main-500">
+                            <Check size={14} strokeWidth={2.5} />
+                            {t("settings.styling.selected")}
+                          </span>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           )}
         </main>

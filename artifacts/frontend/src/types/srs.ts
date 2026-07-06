@@ -63,14 +63,4 @@ export interface SrsQueueItem {
   };
 }
 
-export const SRS_DECK_LABELS: Record<
-  SrsDeckType,
-  { title: string; subtitle: string }
-> = {
-  word: { title: "Kelime", subtitle: "Word" },
-  pronunciation: { title: "Okunuş", subtitle: "Pronunciation" },
-  meaning: { title: "Anlam", subtitle: "Meaning" },
-  example: { title: "Örnek", subtitle: "Example sentences" },
-};
-
 export const JLPT_LEVELS = ["N5", "N4", "N3", "N2", "N1"] as const;

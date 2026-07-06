@@ -19,6 +19,7 @@ import { SearchBar } from "../components/SearchBar";
 import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import { startStudy } from "../store/studyStore";
+import { useTranslation } from "../i18n/I18nProvider";
 
 type SortMode =
   | "level-asc"
@@ -29,16 +30,6 @@ type SortMode =
   | "jlpt-desc"
   | "kanji-cluster";
 type SortGroup = "jlpt" | "level" | "date" | "kanji";
-
-const SORT_OPTIONS: { value: SortMode; label: string; group: SortGroup }[] = [
-  { value: "jlpt-asc", label: "N5 → N1 (Kolay → Zor)", group: "jlpt" },
-  { value: "jlpt-desc", label: "N1 → N5 (Zor → Kolay)", group: "jlpt" },
-  { value: "level-asc", label: "Seviye ↑", group: "level" },
-  { value: "level-desc", label: "Seviye ↓", group: "level" },
-  { value: "date-asc", label: "Tarih: Eski → Yeni", group: "date" },
-  { value: "date-desc", label: "Tarih: Yeni → Eski", group: "date" },
-  { value: "kanji-cluster", label: "Ortak Kanji Kümeleme", group: "kanji" },
-];
 
 const JLPT_RANK: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
 function jlptRank(w: Word): number {
@@ -81,13 +72,6 @@ function sortWords(words: Word[], sort: SortMode): Word[] {
   return arr;
 }
 
-const GROUPS: { key: SortGroup; label: string }[] = [
-  { key: "jlpt", label: "JLPT" },
-  { key: "level", label: "Seviye" },
-  { key: "date", label: "Tarih" },
-  { key: "kanji", label: "Kümeleme" },
-];
-
 function PronCard({
   word,
   index,
@@ -111,6 +95,7 @@ function PronCard({
   cardRef?: (el: HTMLDivElement | null) => void;
   allWords?: Word[];
 }) {
+  const { t } = useTranslation();
   const [showRelated, setShowRelated] = useState(false);
   useEffect(() => {
     if (!isOpen) setShowRelated(false);
@@ -156,7 +141,7 @@ function PronCard({
           <p className="text-base font-semibold text-gray-700 leading-none truncate">
             {word.pronunciation || (
               <span className="text-gray-300 italic font-normal text-sm">
-                Okunuş yok
+                {t("common.noPronunciation")}
               </span>
             )}
           </p>
@@ -210,8 +195,26 @@ function PronCard({
 }
 
 export function PronunciationPage() {
+  const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { words, isLoading, updateWord, deleteWords } = useWords();
+
+  const sortOptions: { value: SortMode; label: string; group: SortGroup }[] = [
+    { value: "jlpt-asc", label: t("words.sort.jlptAsc"), group: "jlpt" },
+    { value: "jlpt-desc", label: t("words.sort.jlptDesc"), group: "jlpt" },
+    { value: "level-asc", label: t("words.sort.levelAsc"), group: "level" },
+    { value: "level-desc", label: t("words.sort.levelDesc"), group: "level" },
+    { value: "date-asc", label: t("words.sort.dateAsc"), group: "date" },
+    { value: "date-desc", label: t("words.sort.dateDesc"), group: "date" },
+    { value: "kanji-cluster", label: t("words.sort.kanjiCluster"), group: "kanji" },
+  ];
+
+  const groups: { key: SortGroup; label: string }[] = [
+    { key: "jlpt", label: t("common.jlpt") },
+    { key: "level", label: t("common.level") },
+    { key: "date", label: t("common.date") },
+    { key: "kanji", label: t("common.clustering") },
+  ];
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("level-asc");
@@ -269,9 +272,7 @@ export function PronunciationPage() {
 
   async function handleBulkDelete() {
     if (
-      !window.confirm(
-        `${selectedIds.size} kelimeyi silmek istediğinizden emin misiniz?`,
-      )
+      !window.confirm(t("common.confirmBulkDelete", { count: selectedIds.size }))
     )
       return;
     await deleteWords(Array.from(selectedIds));
@@ -296,13 +297,13 @@ export function PronunciationPage() {
             >
               <ArrowLeft size={18} />
               <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
-                Okunuş
+                {t("nav.pronunciation")}
               </span>
             </button>
             <button
               onClick={() => {
                 if (displayed.length === 0) return;
-                startStudy(displayed, "okunuş", "Okunuş", "/pronunciation");
+                startStudy(displayed, "okunuş", t("nav.pronunciation"), "/pronunciation");
                 navigate("/study");
               }}
               disabled={displayed.length === 0}
@@ -313,7 +314,7 @@ export function PronunciationPage() {
           </div>
           <div className="flex items-center gap-2">
             <p className="text-sm text-gray-400 shrink-0">
-              {isLoading ? "…" : `${displayed.length} kelime`}
+              {isLoading ? t("common.loading") : t("common.wordCount", { count: displayed.length })}
             </p>
             <div className="flex-1">
               <SearchBar value={query} onChange={setQuery} />
@@ -325,11 +326,11 @@ export function PronunciationPage() {
                 className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-main-400 bg-main-50 hover:bg-main-100 transition-colors"
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
-                <span className="text-xs font-medium">Sırala</span>
+                <span className="text-xs font-medium">{t("common.sort")}</span>
               </button>
               {showSortMenu && (
                 <div className="absolute right-0 top-full mt-1.5 z-50 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden w-56">
-                  {GROUPS.map((group, gi) => (
+                  {groups.map((group, gi) => (
                     <div key={group.key}>
                       {gi > 0 && (
                         <div className="mx-3 my-1.5 border-t border-gray-100" />
@@ -339,7 +340,7 @@ export function PronunciationPage() {
                           {group.label}
                         </p>
                       </div>
-                      {SORT_OPTIONS.filter((o) => o.group === group.key).map(
+                      {sortOptions.filter((o) => o.group === group.key).map(
                         (opt) => (
                           <button
                             key={opt.value}
@@ -387,7 +388,7 @@ export function PronunciationPage() {
               }
               className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50" : "text-gray-400 hover:bg-gray-50"}`}
             >
-              {selectMode ? "İptal" : "Seç"}
+              {selectMode ? t("common.cancel") : t("common.select")}
             </button>
           </div>
         </div>
@@ -397,10 +398,10 @@ export function PronunciationPage() {
             <div className="flex flex-col items-center justify-center py-24 text-center">
               {query ? (
                 <p className="text-gray-400 text-sm">
-                  "{query}" için sonuç bulunamadı
+                  {t("common.noResultsForQuery", { query })}
                 </p>
               ) : (
-                <p className="text-gray-400">Henüz kelime yok</p>
+                <p className="text-gray-400">{t("words.empty")}</p>
               )}
             </div>
           ) : (
@@ -446,12 +447,12 @@ export function PronunciationPage() {
             onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))}
             className="text-xs text-gray-500 shrink-0"
           >
-            Tümünü Seç
+            {t("common.selectAll")}
           </button>
           <span className="flex-1 text-center text-sm text-gray-500 font-medium">
             {selectedIds.size > 0
-              ? `${selectedIds.size} seçildi`
-              : "Satır seçin"}
+              ? t("common.selectedCount", { count: selectedIds.size })
+              : t("common.selectRows")}
           </span>
           <button
             onClick={handleBulkDelete}
@@ -460,7 +461,7 @@ export function PronunciationPage() {
             style={{ background: "rgb(239,68,68)" }}
           >
             <Trash2 size={14} />
-            Sil
+            {t("common.delete")}
           </button>
         </div>
       )}
