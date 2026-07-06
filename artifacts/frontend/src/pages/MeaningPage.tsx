@@ -6,6 +6,8 @@ import { Word, WordUpdate } from "../types";
 import { LevelChart } from "../components/LevelChart";
 import { RelatedWordsList, RelatedWordsButton } from "../components/RelatedWordsList";
 import { SearchBar } from "../components/SearchBar";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
 import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import { startStudy } from "../store/studyStore";
@@ -192,7 +194,13 @@ export function MeaningPage() {
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-400 shrink-0">{isLoading ? t("common.loading") : t("common.wordCount", { count: displayed.length })}</p>
+            <p className="text-sm text-gray-400 shrink-0 min-w-[1.25rem] flex items-center justify-center">
+              {isLoading ? (
+                <LoadingSpinner size={18} />
+              ) : (
+                t("common.wordCount", { count: displayed.length })
+              )}
+            </p>
             <div className="flex-1"><SearchBar value={query} onChange={setQuery} /></div>
 
             <div className="relative shrink-0" ref={sortMenuRef}>
@@ -232,7 +240,9 @@ export function MeaningPage() {
         </div>
 
         <div>
-          {!isLoading && displayed.length === 0 ? (
+          {isLoading ? (
+            <LoadingPlaceholder padding="lg" />
+          ) : displayed.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               {query ? <p className="text-gray-400 text-sm">{t("common.noResultsForQuery", { query })}</p> : <p className="text-gray-400">{t("words.empty")}</p>}
             </div>

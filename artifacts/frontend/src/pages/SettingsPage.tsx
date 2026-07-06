@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowLeft, Check, Palette, BookOpen, Database, Download, Link2, Loader2, Languages } from "lucide-react";
+import { ArrowLeft, Check, Palette, BookOpen, Database, Download, Link2, Languages } from "lucide-react";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useLocation } from "wouter";
 import {
   applyTheme,
@@ -393,7 +394,7 @@ export function SettingsPage() {
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-main-500 text-white text-sm font-semibold hover:bg-main-600 disabled:opacity-50"
                 >
                   {backupBusy ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <LoadingSpinner size={16} className="text-white" />
                   ) : (
                     <Download size={16} />
                   )}
@@ -417,7 +418,7 @@ export function SettingsPage() {
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:border-main-300 hover:text-main-600 disabled:opacity-50"
                 >
                   {relinkBusy ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <LoadingSpinner size={16} className="text-main-500" />
                   ) : (
                     <Link2 size={16} />
                   )}

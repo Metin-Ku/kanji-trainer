@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTranslation } from "../i18n/I18nProvider";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
 import { srsDeckLabel } from "../i18n/srsDeckLabels";
 import {
   useDismissTroubleWord,
@@ -214,9 +216,7 @@ export function TroubleWordsPage() {
 
       <div className="flex-1 overflow-y-auto pb-24">
         {isLoading ? (
-          <p className="text-center text-sm text-gray-400 py-16">
-            {t("common.loading")}
-          </p>
+          <LoadingPlaceholder />
         ) : isError ? (
           <p className="text-center text-sm text-red-500 py-16">
             {t("troubleWords.loadFailed")}
@@ -247,8 +247,14 @@ export function TroubleWordsPage() {
           onClick={handleStudyClick}
           className="pointer-events-auto w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-main-500 text-white font-bold text-base shadow-lg disabled:opacity-50 active:scale-[0.98] transition-transform"
         >
-          <Dices size={20} />
-          {starting ? t("common.loading") : t("troubleWords.study")}
+          {starting ? (
+            <LoadingSpinner size={20} className="text-white" />
+          ) : (
+            <>
+              <Dices size={20} />
+              {t("troubleWords.study")}
+            </>
+          )}
         </button>
       </div>
 

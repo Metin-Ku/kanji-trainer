@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { X, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 import { useTranslation } from "../i18n/I18nProvider";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 function getKanjiChars(str: string): string[] {
   return [...str].filter((c) => {
@@ -319,9 +320,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
           className="mx-4 mb-4 rounded-xl flex items-center justify-center"
           style={{ height: 248, background: "#f9f9f9" }}
         >
-          {loading && (
-            <p className="text-gray-300 text-sm">{t("kanjiStroke.loading")}</p>
-          )}
+          {loading && <LoadingSpinner size={32} className="text-gray-300" />}
           {error && (
             <div className="text-center px-6">
               <p className="text-3xl text-gray-200 mb-2">{currentChar}</p>

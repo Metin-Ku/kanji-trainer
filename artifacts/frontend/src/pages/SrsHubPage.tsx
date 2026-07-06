@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "../i18n/I18nProvider";
 import { srsDeckLabel } from "../i18n/srsDeckLabels";
 import { DailyGoalCard } from "../components/DailyGoalCard";
+import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useTroubleWordCount } from "../hooks/useTroubleWords";
 
 const DECK_ICONS: Record<SrsDeckType, typeof Languages> = {
@@ -25,7 +26,7 @@ export function SrsHubPage() {
   const [, navigate] = useLocation();
   const { data: decks = [], isLoading } = useSrsDecks();
   const sync = useSrsSync();
-  const { data: troubleCount = 0 } = useTroubleWordCount();
+  const { data: troubleCount = 0, isLoading: troubleLoading } = useTroubleWordCount();
 
   const sortOptions: { value: SrsSortMode; label: string }[] = [
     { value: "due-asc", label: t("srs.sort.dueAsc") },
@@ -99,8 +100,12 @@ export function SrsHubPage() {
             <p className="text-base font-bold text-gray-900">
               {t("srs.hub.troubleWordsTile")}
             </p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {t("srs.hub.troubleWordsCount", { count: troubleCount })}
+            <p className="text-xs text-gray-400 mt-0.5 min-h-[1rem] flex items-center">
+              {troubleLoading ? (
+                <LoadingSpinner size={14} className="text-gray-400" />
+              ) : (
+                t("srs.hub.troubleWordsCount", { count: troubleCount })
+              )}
             </p>
           </div>
           <ChevronRight size={18} className="text-gray-300 shrink-0" />
@@ -172,9 +177,15 @@ export function SrsHubPage() {
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{label.subtitle}</p>
                   <p className="text-base font-bold text-gray-900">{label.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {reviewCount > 0 ? t("srs.hub.cardsReady", { count: reviewCount }) : t("srs.hub.noCardsToday")}
-                    {stats.total > 0 && t("srs.hub.totalCards", { count: stats.total })}
+                  <p className="text-xs text-gray-400 mt-0.5 min-h-[1rem] flex items-center">
+                    {isLoading ? (
+                      <LoadingSpinner size={14} className="text-gray-400" />
+                    ) : (
+                      <>
+                        {reviewCount > 0 ? t("srs.hub.cardsReady", { count: reviewCount }) : t("srs.hub.noCardsToday")}
+                        {stats.total > 0 && t("srs.hub.totalCards", { count: stats.total })}
+                      </>
+                    )}
                   </p>
                 </div>
                 <ChevronRight size={18} className="text-gray-300 shrink-0" />

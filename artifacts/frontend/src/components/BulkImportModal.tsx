@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
-import { X, Upload, Loader2 } from "lucide-react";
+import { X, Upload } from "lucide-react";
+import { LoadingSpinner } from "./LoadingSpinner";
 import type { SrsExample, Word } from "../types";
 import { parseBulkDescriptionHtml, elementSurfaceText } from "../lib/srsExamples";
 import { linkSrsExamples } from "../lib/wordLinking";
@@ -229,7 +230,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                   >
                     {loading ? (
                       <>
-                        <Loader2 size={15} className="animate-spin" />{" "}
+                        <LoadingSpinner size={15} className="text-white" />{" "}
                         {linking
                           ? t("bulkImport.linking")
                           : t("bulkImport.adding")}

@@ -12,6 +12,8 @@ import { useWords } from "../hooks/useWords";
 import { WordCard } from "../components/WordCard";
 import { WordFormModal } from "../components/WordFormModal";
 import { SearchBar } from "../components/SearchBar";
+import { LoadingSpinner } from "../components/LoadingSpinner";
+import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
 import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import { Word } from "../types";
@@ -260,10 +262,12 @@ export function WordListPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-400 shrink-0">
-              {isLoading
-                ? t("common.loading")
-                : t("common.wordCount", { count: displayed.length })}
+            <p className="text-sm text-gray-400 shrink-0 min-w-[1.25rem] flex items-center justify-center">
+              {isLoading ? (
+                <LoadingSpinner size={18} />
+              ) : (
+                t("common.wordCount", { count: displayed.length })
+              )}
             </p>
             <div className="flex-1 min-w-0">
               <SearchBar value={query} onChange={setQuery} />
@@ -362,7 +366,9 @@ export function WordListPage() {
         )}
 
         <div>
-          {!isLoading && displayed.length === 0 && !isError ? (
+          {isLoading ? (
+            <LoadingPlaceholder padding="lg" />
+          ) : displayed.length === 0 && !isError ? (
             <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
               {query ? (
                 <>

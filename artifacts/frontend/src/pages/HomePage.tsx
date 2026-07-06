@@ -20,6 +20,7 @@ import {
   RelatedWordsButton,
 } from "../components/RelatedWordsList";
 import { WordFormModal } from "../components/WordFormModal";
+import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
 import type { Word } from "../types";
 import { themeVars } from "../theme";
 import { useTranslation } from "../i18n/I18nProvider";
@@ -29,7 +30,7 @@ const SHADOW = "0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)";
 export function HomePage() {
   const { t, formatToday } = useTranslation();
   const [, navigate] = useLocation();
-  const { words, updateWord, deleteWord, addWord, bulkCreate } = useWords();
+  const { words, isLoading, updateWord, deleteWord, addWord, bulkCreate } = useWords();
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [relatedOpenIds, setRelatedOpenIds] = useState<Set<number>>(new Set());
@@ -117,7 +118,9 @@ export function HomePage() {
 
       {isSearching ? (
         <div className="flex-1 overflow-y-auto bg-white">
-          {results.length === 0 ? (
+          {isLoading ? (
+            <LoadingPlaceholder />
+          ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center px-8">
               <p className="text-4xl text-gray-200 mb-3">?</p>
               <p className="text-gray-400 text-sm">
@@ -287,6 +290,10 @@ export function HomePage() {
               })}
             </div>
           )}
+        </div>
+      ) : isLoading ? (
+        <div className="flex-1 flex items-center justify-center p-3">
+          <LoadingPlaceholder padding="lg" />
         </div>
       ) : (
         <div className="flex-1 flex flex-col gap-2.5 p-3 overflow-hidden min-h-[clamp(500px,70vh,600px)]">
