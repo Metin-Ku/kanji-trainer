@@ -47,6 +47,26 @@ function dateAtPoint(clientX: number, clientY: number): string | null {
   return cell?.getAttribute("data-heatmap-date") ?? null;
 }
 
+type GridPos = { col: number; row: number };
+
+/** Radial scale: active cell peaks, neighbors dip smoothly, far cells return to 1. */
+function scaleAtDistance(d: number, peak: number): number {
+  if (d < 0.01) return peak;
+  const boost = (peak - 1) * Math.exp(-d * d * 1.25);
+  const dip = 0.28 * Math.exp(-((d - 0.85) ** 2) / 0.35);
+  return Math.max(0.72, Math.min(peak, 1 + boost - dip));
+}
+
+function scaleForCell(
+  pos: GridPos,
+  active: GridPos | undefined,
+  peak: number,
+): number {
+  if (!active) return 1;
+  const d = Math.hypot(pos.col - active.col, pos.row - active.row);
+  return scaleAtDistance(d, peak);
+}
+
 export function StudyHeatmap({
   activityByDate,
   weeks = 26,
@@ -80,6 +100,16 @@ export function StudyHeatmap({
     () => new Map(cells.map((c) => [c.date, c])),
     [cells],
   );
+  const posByDate = useMemo(() => {
+    const map = new Map<string, GridPos>();
+    columns.forEach((col, colIdx) => {
+      col.forEach((cell, rowIdx) => {
+        map.set(cell.date, { col: colIdx, row: rowIdx });
+      });
+    });
+    return map;
+  }, [columns]);
+  const activePos = activeDate ? posByDate.get(activeDate) : undefined;
 
   const selectDate = useCallback((dateKey: string | null) => {
     activeDateRef.current = dateKey;
@@ -178,9 +208,10 @@ export function StudyHeatmap({
 
       <div
         ref={gridRef}
-        className={`rounded-xl border border-gray-200 bg-gray-50/80 overflow-x-auto touch-none select-none ${
-          compact ? "p-2" : "p-3"
-        }`}
+        // className={`rounded-xl border border-gray-200 bg-gray-50/80 overflow-x-auto touch-none select-none ${
+        //   compact ? "p-2" : "p-3"
+        // }`}
+        className={`overflow-x-auto touch-none select-none`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -197,7 +228,9 @@ export function StudyHeatmap({
               className="flex flex-col"
               style={{ gap: gapPx }}
             >
-              {col.map((cell) => {
+              {col.map((cell, rowIdx) => {
+                const pos = { col: wi, row: rowIdx };
+                const scale = scaleForCell(pos, activePos, activeScale);
                 const isActive = activeDate === cell.date;
                 return (
                   <div
@@ -208,13 +241,14 @@ export function StudyHeatmap({
                       date: formatTooltipDate(cell.date, dateLocale),
                       count: cell.count,
                     })}
-                    className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-transform duration-150 ease-out`}
+                    className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-transform duration-200 ease-out`}
                     style={{
                       width: cellPx,
                       height: cellPx,
-                      transform: isActive ? `scale(${activeScale})` : "scale(1)",
-                      zIndex: isActive ? 10 : 1,
+                      transform: `scale(${scale})`,
+                      zIndex: Math.round(scale * 10),
                       position: "relative",
+                      opacity: activePos && !isActive && scale < 0.92 ? 0.88 : 1,
                     }}
                   />
                 );
