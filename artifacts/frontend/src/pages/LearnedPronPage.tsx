@@ -179,7 +179,7 @@ export function LearnedPronPage() {
   return (
     <div className="min-h-dvh bg-white">
       <div className="max-w-2xl mx-auto pb-8 sm:border-l sm:border-r sm:border-gray-100">
-        <div ref={headerRef} className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 pt-4 pb-3 space-y-2">
+        <div ref={headerRef} className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 pt-4 pb-4 space-y-2">
           <div className="flex items-center justify-between">
             <button onClick={() => navigate("/learned")} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors">
               <ArrowLeft size={18} />

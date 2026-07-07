@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Check, ChevronDown, Flame } from "lucide-react";
 import { useTranslation } from "../i18n/I18nProvider";
 import { useDailyGoal } from "../hooks/useDailyGoal";
@@ -31,7 +31,7 @@ function ProgressBar({
       className={`rounded-full bg-white overflow-hidden ${size === "sm" ? "h-1.5" : "h-2"}`}
     >
       <div
-        className={`h-full rounded-full transition-all duration-300 ${
+        className={`h-full rounded-full transition-[width] duration-300 ease-out ${
           goalMet ? "bg-main-500" : "bg-main-400"
         }`}
         style={{ width: `${Math.round(ratio * 100)}%` }}
@@ -40,7 +40,13 @@ function ProgressBar({
   );
 }
 
-function DeckRow({ deck, compact }: { deck: DeckDailyProgress; compact?: boolean }) {
+const DeckRow = memo(function DeckRow({
+  deck,
+  compact,
+}: {
+  deck: DeckDailyProgress;
+  compact?: boolean;
+}) {
   const { t } = useTranslation();
   if (!deck.enabled) return null;
 
@@ -72,13 +78,14 @@ function DeckRow({ deck, compact }: { deck: DeckDailyProgress; compact?: boolean
       <ProgressBar ratio={deck.progressRatio} goalMet={deck.goalMet} size="sm" />
     </div>
   );
-}
+});
 
 export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
   const { t } = useTranslation();
   const { count, target, remaining, goalMet, streak, progressRatio, decks } =
     useDailyGoal();
   const [expanded, setExpanded] = useState(false);
+  const [detailsMounted, setDetailsMounted] = useState(false);
 
   const progressLabel = t("dailyGoal.progress", { count, target });
   const statusLabel = goalMet
@@ -88,14 +95,20 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
   const enabledDecks = decks.filter((d) => d.enabled);
   const shellClass =
     variant === "banner"
-      ? `rounded-2xl border px-4 py-4 border-main-200 bg-main-50`
-      : `rounded-2xl border px-4 py-4 mt-3 border-main-200 bg-main-50/80`;
-
+      ? `rounded-sm border px-4 py-5 border-main-200 bg-main-50`
+      : `rounded-sm border px-4 py-5 mt-3 border-main-200 bg-main-50/80`;
+  // bg-[linear-gradient(135deg,color-mix(in_oklch,var(--main-400)_13%,transparent),color-mix(in_oklch,var(--main-600)_8%,transparent))]
   return (
     <div className={shellClass}>
       <button
         type="button"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() =>
+          setExpanded((v) => {
+            const next = !v;
+            if (next) setDetailsMounted(true);
+            return next;
+          })
+        }
         className="w-full text-left"
         aria-expanded={expanded}
       >
@@ -131,7 +144,7 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
             )}
             <ChevronDown
               size={18}
-              className={`text-gray-400 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+              className={`text-gray-400 transition-transform duration-200 ease-out ${expanded ? "rotate-180" : ""}`}
             />
           </div>
         </div>
@@ -146,24 +159,26 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
       </button>
 
       <div
-        className={`grid transition-all duration-200 ease-out ${
-          expanded ? "grid-rows-[1fr] opacity-100 pt-3 border-t border-gray-100/80" : "grid-rows-[0fr] opacity-0"
+        className={`overflow-hidden transition-[max-height] duration-200 ease-out motion-reduce:transition-none ${
+          expanded ? "max-h-80" : "max-h-0"
         }`}
       >
-        <div className="overflow-hidden">
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
-            {t("dailyGoal.byDeck")}
-          </p>
-          <div className="space-y-3">
-            {enabledDecks.length === 0 ? (
-              <p className="text-xs text-gray-400">{t("dailyGoal.noDeckTargets")}</p>
-            ) : (
-              enabledDecks.map((deck) => (
-                <DeckRow key={deck.deck} deck={deck} compact={variant === "banner"} />
-              ))
-            )}
+        {detailsMounted && (
+          <div className="pt-3 border-t border-gray-100/80">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+              {t("dailyGoal.byDeck")}
+            </p>
+            <div className="space-y-3">
+              {enabledDecks.length === 0 ? (
+                <p className="text-xs text-gray-400">{t("dailyGoal.noDeckTargets")}</p>
+              ) : (
+                enabledDecks.map((deck) => (
+                  <DeckRow key={deck.deck} deck={deck} compact={variant === "banner"} />
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

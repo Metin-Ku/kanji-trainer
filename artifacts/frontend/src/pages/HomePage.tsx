@@ -8,6 +8,8 @@ import {
   Languages,
   Pencil,
   Trash2,
+  BarChart2,
+  ChevronRight,
 } from "lucide-react";
 import { SearchBar } from "../components/SearchBar";
 import { DailyGoalCard } from "../components/DailyGoalCard";
@@ -21,16 +23,24 @@ import {
 } from "../components/RelatedWordsList";
 import { WordFormModal } from "../components/WordFormModal";
 import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
+import { MiniHeatmapStrip } from "../components/progress/MiniHeatmapStrip";
+import { useStudyHistory } from "../hooks/useStudyHistory";
 import type { Word } from "../types";
 import { themeVars } from "../theme";
 import { useTranslation } from "../i18n/I18nProvider";
 
-const SHADOW = "0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04)";
+const STUDY_LINKS = [
+  { path: "/words", Icon: Languages, titleKey: "nav.words" as const },
+  { path: "/pronunciation", Icon: Waves, titleKey: "nav.pronunciation" as const },
+  { path: "/meaning", Icon: BookOpen, titleKey: "nav.meaning" as const },
+  { path: "/learned", Icon: null, titleKey: "nav.learned" as const },
+] as const;
 
 export function HomePage() {
   const { t, formatToday } = useTranslation();
   const [, navigate] = useLocation();
   const { words, isLoading, updateWord, deleteWord, addWord, bulkCreate } = useWords();
+  const activityByDate = useStudyHistory();
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [relatedOpenIds, setRelatedOpenIds] = useState<Set<number>>(new Set());
@@ -66,6 +76,13 @@ export function HomePage() {
   const starredCount = words.filter((w) => w.starred).length;
   const nonStarredCount = words.filter((w) => !w.starred).length;
 
+  const studyCounts: Record<(typeof STUDY_LINKS)[number]["titleKey"], number> = {
+    "nav.words": nonStarredCount,
+    "nav.pronunciation": words.length,
+    "nav.meaning": words.length,
+    "nav.learned": starredCount,
+  };
+
   function toggleOpen(id: number) {
     setOpenIds((prev) => {
       const next = new Set(prev);
@@ -83,7 +100,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="bg-white border-b border-gray-100 px-5 pt-5 pb-3 shrink-0">
+      <div className="bg-white border-b border-gray-100 px-5 pt-4 pb-4 shrink-0">
         <div className="flex items-start justify-between gap-3 mb-0.5">
           <p className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
             {t("home.appSubtitle")}
@@ -95,6 +112,13 @@ export function HomePage() {
               aria-label={t("a11y.srs")}
             >
               <Layers size={20} strokeWidth={2} />
+            </button>
+            <button
+              onClick={() => navigate("/progress")}
+              className="p-2 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
+              aria-label={t("a11y.progress")}
+            >
+              <BarChart2 size={20} strokeWidth={2} />
             </button>
             <button
               onClick={() => navigate("/settings")}
@@ -113,7 +137,14 @@ export function HomePage() {
           onChange={setQuery}
           placeholder={t("home.searchPlaceholder")}
         />
-        {!isSearching && <DailyGoalCard />}
+        {!isSearching && (
+          <>
+            <DailyGoalCard />
+            <div className="mt-3">
+              <MiniHeatmapStrip activityByDate={activityByDate} />
+            </div>
+          </>
+        )}
       </div>
 
       {isSearching ? (
@@ -296,100 +327,39 @@ export function HomePage() {
           <LoadingPlaceholder padding="lg" />
         </div>
       ) : (
-        <div className="flex-1 flex flex-col gap-2.5 p-3 overflow-hidden min-h-[clamp(500px,70vh,600px)]">
-          <div className="flex-[2] flex flex-col gap-2.5 min-h-0">
-            <button
-              onClick={() => navigate("/words")}
-              className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
-              style={{ boxShadow: SHADOW }}
-            >
-              <div
-                className="w-12 h-12 rounded-xl flex items-center justify-center"
-                style={{ background: themeVars.iconBg }}
-              >
-                <Languages
-                  size={22}
-                  className="text-main-400"
-                  strokeWidth={1.8}
-                />
-              </div>
-              <div className="text-center">
-                <p className="text-xl font-bold text-gray-900 leading-tight">
-                  {t("home.tiles.wordsTitle")}
-                </p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {t("common.wordCount", { count: nonStarredCount })}
-                </p>
-              </div>
-            </button>
-
-            <div className="flex-1 flex gap-2.5 min-h-0">
+        <div className="flex-1 overflow-y-auto px-5 py-4 pb-24">
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5 px-1">
+            {t("home.studySection")}
+          </p>
+          <div className="space-y-2">
+            {STUDY_LINKS.map(({ path, Icon, titleKey }) => {
+              const star = titleKey === "nav.learned";
+              return (
               <button
-                onClick={() => navigate("/pronunciation")}
-                className="flex-1 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
-                style={{ boxShadow: SHADOW }}
+                key={path}
+                onClick={() => navigate(path)}
+                className="w-full flex items-center gap-4 bg-white rounded-2xl border border-gray-100 px-4 py-3.5 active:scale-[0.99] transition-transform"
               >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: themeVars.iconBg }}
-                >
-                  <Waves
-                    size={20}
-                    className="text-main-400"
-                    strokeWidth={1.8}
-                  />
+                <div className="w-10 h-10 rounded-xl bg-main-50 flex items-center justify-center shrink-0">
+                  {star ? (
+                    <span style={{ color: themeVars.star, fontSize: 18 }}>★</span>
+                  ) : (
+                    Icon && (
+                      <Icon size={18} className="text-main-500" strokeWidth={1.8} />
+                    )
+                  )}
                 </div>
-                <div className="text-center">
-                  <p className="text-base font-bold text-gray-900 leading-tight">
-                    {t("home.tiles.pronunciationTitle")}
+                <div className="flex-1 text-left min-w-0">
+                  <p className="text-base font-bold text-gray-900">{t(titleKey)}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {t("common.wordCount", { count: studyCounts[titleKey] })}
                   </p>
                 </div>
+                <ChevronRight size={18} className="text-gray-300 shrink-0" />
               </button>
-
-              <button
-                onClick={() => navigate("/meaning")}
-                className="flex-1 flex flex-col items-center justify-center gap-2 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
-                style={{ boxShadow: SHADOW }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: themeVars.iconBg }}
-                >
-                  <BookOpen
-                    size={20}
-                    className="text-main-400"
-                    strokeWidth={1.8}
-                  />
-                </div>
-                <div className="text-center">
-                  <p className="text-base font-bold text-gray-900 leading-tight">
-                    {t("home.tiles.meaningTitle")}
-                  </p>
-                </div>
-              </button>
-            </div>
+            );
+            })}
           </div>
-
-          <button
-            onClick={() => navigate("/learned")}
-            className="flex-1 flex flex-col items-center justify-center gap-1 bg-white rounded-2xl active:scale-[0.98] transition-transform min-h-0"
-            style={{ boxShadow: SHADOW }}
-          >
-            <div
-              className="w-12 h-12 rounded-xl flex items-center justify-center"
-              style={{ background: themeVars.iconBg }}
-            >
-              <span style={{ color: themeVars.level(1), fontSize: 20 }}>★</span>
-            </div>
-            <div className="text-center">
-              <p className="text-xl font-bold text-gray-900 leading-tight">
-                {t("home.tiles.learnedTitle")}
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                {t("common.wordCount", { count: starredCount })}
-              </p>
-            </div>
-          </button>
         </div>
       )}
 

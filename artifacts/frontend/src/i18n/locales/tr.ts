@@ -53,6 +53,7 @@ export const tr: Messages = {
   nav: {
     srs: "SRS",
     settings: "Ayarlar",
+    progress: "İlerleme",
     words: "Kelimeler",
     pronunciation: "Okunuş",
     meaning: "Anlam",
@@ -65,6 +66,7 @@ export const tr: Messages = {
     appSubtitle: "Japonca Kelime Defteri",
     searchPlaceholder: "Kelime, okunuş veya anlam ara…",
     confirmDelete: '"{kanji}" silinsin mi?',
+    studySection: "Çalışma",
     tiles: {
       wordsTitle: "Kelimeler",
       pronunciationTitle: "Okunuş",
@@ -355,6 +357,7 @@ export const tr: Messages = {
   a11y: {
     srs: "SRS",
     settings: "Ayarlar",
+    progress: "İlerleme",
     changeLevel: "Seviyeyi değiştir",
     markLearned: "Öğrenildi olarak işaretle",
     unmarkLearned: "Öğrenilenden çıkar",
@@ -399,5 +402,38 @@ export const tr: Messages = {
     sessionTitle: "Zor kelimeler · {label}",
     noCardsForDeck: "Bu deste için çalışılacak kart yok.",
     loadFailed: "Liste yüklenemedi.",
+  },
+
+  progress: {
+    title: "İlerleme",
+    subtitle: "Çalışma aktivitesi, seviyeler ve JLPT kapsamı",
+    sections: {
+      heatmap: "Çalışma takvimi",
+      deckActivity: "Deste aktivitesi",
+      levelDistribution: "Seviye dağılımı",
+      jlpt: "JLPT tamamlanma",
+    },
+    heatmap: {
+      tooltip: "{date} · {count} kelime çalışıldı",
+      less: "Az",
+      more: "Çok",
+    },
+    miniHeatmap: {
+      title: "Son 7 gün",
+    },
+    deckChart: {
+      weekTotal: "Bu hafta {count}",
+      empty: "Henüz çalışma kaydı yok.",
+    },
+    levelMode: {
+      word: "Kelime",
+      pron: "Okunuş",
+      meaning: "Anlam",
+    },
+    jlpt: {
+      untagged: "Etiketsiz",
+      noWords: "Kelime yok",
+      count: "{learned} / {total} öğrenildi",
+    },
   },
 };

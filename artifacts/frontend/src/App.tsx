@@ -12,12 +12,14 @@ import { SettingsPage } from "@/pages/SettingsPage";
 import { SrsHubPage } from "@/pages/SrsHubPage";
 import { SrsStudyPage } from "@/pages/SrsStudyPage";
 import { TroubleWordsPage } from "@/pages/TroubleWordsPage";
+import { ProgressPage } from "@/pages/ProgressPage";
 
 function App() {
   return (
     <Router>
       <Switch>
         <Route path="/" component={HomePage} />
+        <Route path="/progress" component={ProgressPage} />
         <Route path="/settings" component={SettingsPage} />
         <Route path="/srs/study" component={SrsStudyPage} />
         <Route path="/srs/trouble" component={TroubleWordsPage} />

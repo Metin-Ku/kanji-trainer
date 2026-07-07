@@ -159,7 +159,7 @@ export function SettingsPage() {
 
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-3 shrink-0">
+      <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-4 shrink-0">
         <button
           onClick={() => navigate("/")}
           className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"

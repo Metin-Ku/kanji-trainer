@@ -221,7 +221,7 @@ export function ExampleSrsStudyPage() {
   if (done) {
     return (
       <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-white sm:border-l sm:border-r sm:border-gray-100">
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3">
+        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-4">
           <button
             onClick={() => navigate(backPath)}
             className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400"
@@ -277,7 +277,7 @@ export function ExampleSrsStudyPage() {
 
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-3 flex items-center justify-between shrink-0">
+      <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-4 flex items-center justify-between shrink-0">
         <button
           onClick={() => navigate(backPath)}
           className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400"

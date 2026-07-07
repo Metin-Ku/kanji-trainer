@@ -51,6 +51,7 @@ export const en = {
   nav: {
     srs: "SRS",
     settings: "Settings",
+    progress: "Progress",
     words: "Words",
     pronunciation: "Pronunciation",
     meaning: "Meaning",
@@ -63,6 +64,7 @@ export const en = {
     appSubtitle: "Japanese Word Notebook",
     searchPlaceholder: "Search word, reading, or meaning…",
     confirmDelete: 'Delete "{kanji}"?',
+    studySection: "Study",
     tiles: {
       wordsTitle: "Words",
       pronunciationTitle: "Pronunciation",
@@ -353,6 +355,7 @@ export const en = {
   a11y: {
     srs: "SRS",
     settings: "Settings",
+    progress: "Progress",
     changeLevel: "Change level",
     markLearned: "Mark as learned",
     unmarkLearned: "Remove from learned",
@@ -397,6 +400,39 @@ export const en = {
     sessionTitle: "Trouble words · {label}",
     noCardsForDeck: "No cards to study for this deck.",
     loadFailed: "Could not load the list.",
+  },
+
+  progress: {
+    title: "Progress",
+    subtitle: "Study activity, levels, and JLPT coverage",
+    sections: {
+      heatmap: "Study calendar",
+      deckActivity: "Deck activity",
+      levelDistribution: "Level distribution",
+      jlpt: "JLPT completion",
+    },
+    heatmap: {
+      tooltip: "{date} · {count} words studied",
+      less: "Less",
+      more: "More",
+    },
+    miniHeatmap: {
+      title: "Last 7 days",
+    },
+    deckChart: {
+      weekTotal: "{count} this week",
+      empty: "No study activity recorded yet.",
+    },
+    levelMode: {
+      word: "Word",
+      pron: "Pronunciation",
+      meaning: "Meaning",
+    },
+    jlpt: {
+      untagged: "Untagged",
+      noWords: "No words",
+      count: "{learned} / {total} learned",
+    },
   },
 } as const;
 

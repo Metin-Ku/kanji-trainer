@@ -290,7 +290,7 @@ export function PronunciationPage() {
       <div className="max-w-2xl mx-auto pb-8 sm:border-l sm:border-r sm:border-gray-100">
         <div
           ref={headerRef}
-          className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 pt-4 pb-3 space-y-2"
+          className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 pt-4 pb-4 space-y-2"
         >
           <div className="flex items-center justify-between">
             <button
