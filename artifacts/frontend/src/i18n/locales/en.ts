@@ -259,6 +259,8 @@ export const en = {
     linking: "Linking…",
     adding: "Adding…",
     importFailed: "Word linking or import failed.",
+    linkingSkipped:
+      "Word linking was skipped; words were still imported. You can relink examples from Settings.",
     result: {
       totalGiven: "{count} words submitted",
       added: "✓ {count} new words added",

@@ -3,8 +3,10 @@ import path from "node:path";
 import type { Connect } from "vite";
 import type { Plugin } from "vite";
 
+const frontendDir = path.resolve(import.meta.dirname);
+
 const KUROMOJI_DICT_DIR = path.resolve(
-  import.meta.dirname,
+  frontendDir,
   "node_modules/kuromoji/dict",
 );
 
@@ -38,15 +40,40 @@ function kuromojiDictMiddleware(base: string): Connect.NextHandleFunction {
   };
 }
 
-/** Serve kuromoji dict in dev/preview (viteStaticCopy only runs on build). */
+function copyKuromojiDictTo(outDir: string) {
+  const destDir = path.join(outDir, "kuromoji/dict");
+  fs.mkdirSync(destDir, { recursive: true });
+
+  for (const name of fs.readdirSync(KUROMOJI_DICT_DIR)) {
+    if (!name.endsWith(".gz")) continue;
+    fs.copyFileSync(
+      path.join(KUROMOJI_DICT_DIR, name),
+      path.join(destDir, name),
+    );
+  }
+}
+
+/** Serve kuromoji dict in dev/preview; copy flat into build output for production. */
 export function kuromojiDictPlugin(base: string): Plugin {
+  let outDir = path.resolve(frontendDir, "dist/public");
+
   return {
     name: "kuromoji-dict",
+    configResolved(config) {
+      outDir = path.resolve(config.root, config.build.outDir);
+    },
     configureServer(server) {
       server.middlewares.use(kuromojiDictMiddleware(base));
     },
     configurePreviewServer(server) {
       server.middlewares.use(kuromojiDictMiddleware(base));
+    },
+    closeBundle() {
+      if (!fs.existsSync(KUROMOJI_DICT_DIR)) {
+        console.warn("[kuromoji-dict] dictionary not found:", KUROMOJI_DICT_DIR);
+        return;
+      }
+      copyKuromojiDictTo(outDir);
     },
   };
 }

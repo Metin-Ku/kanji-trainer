@@ -5,7 +5,7 @@
       "destination": "https://kanji-trainer-cv.onrender.com/api/:path*"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/((?!api/|kuromoji/).*)",
       "destination": "/index.html"
     }
   ]

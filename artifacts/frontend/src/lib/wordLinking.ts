@@ -84,24 +84,44 @@ const DIC_PATH = (() => {
   return `${base}kuromoji/dict/`;
 })();
 
+const KUROMOJI_LOAD_TIMEOUT_MS = 20_000;
+
+function loadKuromojiTokenizer(): Promise<KuromojiTokenizer> {
+  return new Promise((resolve, reject) => {
+    try {
+      kuromoji.builder({ dicPath: DIC_PATH }).build((err, tokenizer) => {
+        if (err) {
+          console.error("[kuromoji] dictionary load failed:", err, "dicPath:", DIC_PATH);
+          reject(err);
+        } else {
+          resolve(tokenizer);
+        }
+      });
+    } catch (err) {
+      console.error("[kuromoji] builder threw:", err, "dicPath:", DIC_PATH);
+      reject(err);
+    }
+  });
+}
+
 export function getKuromojiTokenizer(): Promise<KuromojiTokenizer> {
   if (!tokenizerPromise) {
-    tokenizerPromise = new Promise((resolve, reject) => {
-      try {
-        kuromoji.builder({ dicPath: DIC_PATH }).build((err, tokenizer) => {
-          if (err) {
-            tokenizerPromise = null;
-            console.error("[kuromoji] dictionary load failed:", err, "dicPath:", DIC_PATH);
-            reject(err);
-          } else {
-            resolve(tokenizer);
-          }
-        });
-      } catch (err) {
-        tokenizerPromise = null;
-        console.error("[kuromoji] builder threw:", err, "dicPath:", DIC_PATH);
-        reject(err);
-      }
+    tokenizerPromise = Promise.race([
+      loadKuromojiTokenizer(),
+      new Promise<never>((_, reject) => {
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                `Kuromoji dictionary load timed out (${KUROMOJI_LOAD_TIMEOUT_MS}ms) dicPath: ${DIC_PATH}`,
+              ),
+            ),
+          KUROMOJI_LOAD_TIMEOUT_MS,
+        );
+      }),
+    ]).catch((err) => {
+      tokenizerPromise = null;
+      throw err;
     });
   }
   return tokenizerPromise;

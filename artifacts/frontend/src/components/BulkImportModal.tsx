@@ -104,12 +104,18 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
     if (preview.length === 0) return;
     setLoading(true);
     setLinking(true);
+    let linkingSkipped = false;
     try {
       const linkedPreview: BulkWord[] = [];
       for (const w of preview) {
         if (w.srsExamples?.length) {
-          const srsExamples = await linkSrsExamples(w.srsExamples, allWords);
-          linkedPreview.push({ ...w, srsExamples });
+          try {
+            const srsExamples = await linkSrsExamples(w.srsExamples, allWords);
+            linkedPreview.push({ ...w, srsExamples });
+          } catch {
+            linkingSkipped = true;
+            linkedPreview.push(w);
+          }
         } else {
           linkedPreview.push(w);
         }
@@ -119,6 +125,9 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
       setResult(res);
       setPreview([]);
       setHtml("");
+      if (linkingSkipped) {
+        alert(t("bulkImport.linkingSkipped"));
+      }
     } catch {
       alert(t("bulkImport.importFailed"));
     } finally {

@@ -2,9 +2,8 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import { viteStaticCopy } from "vite-plugin-static-copy";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { kuromojiDictPlugin } from "./vite.kuromoji-dict";
+import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
 const frontendDir = path.resolve(import.meta.dirname);
 const repoRoot = path.resolve(frontendDir, "../..");
@@ -46,14 +45,6 @@ export default defineConfig(async ({ mode }) => {
       react(),
       tailwindcss(),
       kuromojiDictPlugin(basePath),
-      viteStaticCopy({
-        targets: [
-          {
-            src: "node_modules/kuromoji/dict/*",
-            dest: "kuromoji/dict",
-          },
-        ],
-      }),
       runtimeErrorOverlay(),
       ...(process.env.NODE_ENV !== "production" &&
       process.env.REPL_ID !== undefined

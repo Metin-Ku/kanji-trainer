@@ -261,6 +261,8 @@ export const tr: Messages = {
     linking: "Eşleştiriliyor…",
     adding: "Ekleniyor…",
     importFailed: "Kelime eşleştirme veya içe aktarma başarısız.",
+    linkingSkipped:
+      "Kelime eşleştirme atlandı; kelimeler yine de eklendi. Ayarlardan örnekleri yeniden eşleştirebilirsiniz.",
     result: {
       totalGiven: "{count} kelime gönderildi",
       added: "✓ {count} yeni kelime eklendi",
