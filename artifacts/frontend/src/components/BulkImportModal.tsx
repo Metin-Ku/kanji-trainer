@@ -224,7 +224,6 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                     ))}
                   </div>
                 </div>
-
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPreview([])}
