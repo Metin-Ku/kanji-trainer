@@ -40,31 +40,62 @@ function chunkIntoWeeks(cells: HeatmapCell[]): HeatmapCell[][] {
   return cols;
 }
 
-function dateAtPoint(clientX: number, clientY: number): string | null {
-  const el = document.elementFromPoint(clientX, clientY);
-  if (!el) return null;
-  const cell = (el as HTMLElement).closest("[data-heatmap-date]");
-  return cell?.getAttribute("data-heatmap-date") ?? null;
-}
 
 type GridPos = { col: number; row: number };
+type FocusPos = { col: number; row: number };
 
-/** Radial scale: active cell peaks, neighbors dip smoothly, far cells return to 1. */
-function scaleAtDistance(d: number, peak: number): number {
-  if (d < 0.01) return peak;
-  const boost = (peak - 1) * Math.exp(-d * d * 1.25);
-  const dip = 0.28 * Math.exp(-((d - 0.85) ** 2) / 0.35);
-  return Math.max(0.72, Math.min(peak, 1 + boost - dip));
+type MagnifyConfig = {
+  maxScale: number;
+  minScale: number;
+  sigma: number;
+};
+
+const MAGNIFY: Record<"full" | "compact", MagnifyConfig> = {
+  full: { maxScale: 1.55, minScale: 0.38, sigma: 1.9 },
+  compact: { maxScale: 1.42, minScale: 0.34, sigma: 1.7 },
+};
+
+/** Apple Dock–style Gaussian falloff: peak at focus, min at distance. */
+function dockScaleAtDistance(d: number, cfg: MagnifyConfig): number {
+  const t = Math.exp(-(d * d) / (2 * cfg.sigma * cfg.sigma));
+  return cfg.minScale + (cfg.maxScale - cfg.minScale) * t;
 }
 
 function scaleForCell(
   pos: GridPos,
-  active: GridPos | undefined,
-  peak: number,
+  focus: FocusPos | undefined,
+  cfg: MagnifyConfig,
 ): number {
-  if (!active) return 1;
-  const d = Math.hypot(pos.col - active.col, pos.row - active.row);
-  return scaleAtDistance(d, peak);
+  if (!focus) return 1;
+  const d = Math.hypot(pos.col - focus.col, pos.row - focus.row);
+  return dockScaleAtDistance(d, cfg);
+}
+
+function focusFromPointer(
+  clientX: number,
+  clientY: number,
+  gapPx: number,
+): { date: string | null; focus: FocusPos | null } {
+  const el = document.elementFromPoint(clientX, clientY);
+  const cell = (el as HTMLElement | null)?.closest(
+    "[data-heatmap-date]",
+  ) as HTMLElement | null;
+  if (!cell) return { date: null, focus: null };
+
+  const date = cell.getAttribute("data-heatmap-date");
+  const col = Number(cell.dataset.col);
+  const row = Number(cell.dataset.row);
+  if (Number.isNaN(col) || Number.isNaN(row)) {
+    return { date, focus: null };
+  }
+
+  const rect = cell.getBoundingClientRect();
+  const step = rect.width + gapPx;
+  const focus: FocusPos = {
+    col: col + (clientX - (rect.left + rect.width / 2)) / step,
+    row: row + (clientY - (rect.top + rect.height / 2)) / step,
+  };
+  return { date, focus };
 }
 
 export function StudyHeatmap({
@@ -85,6 +116,7 @@ export function StudyHeatmap({
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const [activeDate, setActiveDate] = useState<string | null>(null);
+  const [focusPos, setFocusPos] = useState<FocusPos | null>(null);
 
   const resolvedRange: HeatmapRange = range ?? { kind: "weeks", weeks };
 
@@ -100,20 +132,27 @@ export function StudyHeatmap({
     () => new Map(cells.map((c) => [c.date, c])),
     [cells],
   );
-  const posByDate = useMemo(() => {
-    const map = new Map<string, GridPos>();
-    columns.forEach((col, colIdx) => {
-      col.forEach((cell, rowIdx) => {
-        map.set(cell.date, { col: colIdx, row: rowIdx });
-      });
-    });
-    return map;
-  }, [columns]);
-  const activePos = activeDate ? posByDate.get(activeDate) : undefined;
 
-  const selectDate = useCallback((dateKey: string | null) => {
-    activeDateRef.current = dateKey;
-    setActiveDate(dateKey);
+  const cellPx = compact ? 10 : 12;
+  const gapPx = compact ? 2 : 4;
+  const magnify = compact ? MAGNIFY.compact : MAGNIFY.full;
+
+  const applyPointer = useCallback(
+    (clientX: number, clientY: number) => {
+      const { date, focus } = focusFromPointer(clientX, clientY, gapPx);
+      if (focus) setFocusPos(focus);
+      if (date) {
+        activeDateRef.current = date;
+        setActiveDate(date);
+      }
+    },
+    [gapPx],
+  );
+
+  const clearFocus = useCallback(() => {
+    activeDateRef.current = null;
+    setActiveDate(null);
+    setFocusPos(null);
   }, []);
 
   const handlePointerDown = useCallback(
@@ -123,10 +162,9 @@ export function StudyHeatmap({
       dragMovedRef.current = false;
       pointerStartRef.current = { x: e.clientX, y: e.clientY };
       gridRef.current?.setPointerCapture(e.pointerId);
-      const date = dateAtPoint(e.clientX, e.clientY);
-      if (date) selectDate(date);
+      applyPointer(e.clientX, e.clientY);
     },
-    [selectDate],
+    [applyPointer],
   );
 
   const handlePointerMove = useCallback(
@@ -138,16 +176,13 @@ export function StudyHeatmap({
         if (Math.hypot(dx, dy) > 6) dragMovedRef.current = true;
       }
 
-      const date = dateAtPoint(e.clientX, e.clientY);
-      if (!date) return;
-
       if (isDraggingRef.current || e.buttons > 0) {
-        if (date !== activeDateRef.current) selectDate(date);
+        applyPointer(e.clientX, e.clientY);
       } else if (e.pointerType === "mouse") {
-        selectDate(date);
+        applyPointer(e.clientX, e.clientY);
       }
     },
-    [selectDate],
+    [applyPointer],
   );
 
   const handlePointerUp = useCallback(
@@ -173,17 +208,13 @@ export function StudyHeatmap({
   const handlePointerLeave = useCallback(
     (e: React.PointerEvent) => {
       if (e.pointerType === "mouse" && !isDraggingRef.current) {
-        selectDate(null);
+        clearFocus();
       }
     },
-    [selectDate],
+    [clearFocus],
   );
 
   const activeCell = activeDate ? cellByDate.get(activeDate) : null;
-
-  const cellPx = compact ? 10 : 12;
-  const gapPx = compact ? 2 : 4;
-  const activeScale = compact ? 1.55 : 1.65;
 
   useEffect(() => {
     const el = gridRef.current;
@@ -230,25 +261,36 @@ export function StudyHeatmap({
             >
               {col.map((cell, rowIdx) => {
                 const pos = { col: wi, row: rowIdx };
-                const scale = scaleForCell(pos, activePos, activeScale);
+                const scale = scaleForCell(pos, focusPos ?? undefined, magnify);
                 const isActive = activeDate === cell.date;
+                const prominence =
+                  focusPos && magnify.maxScale > magnify.minScale
+                    ? (scale - magnify.minScale) /
+                      (magnify.maxScale - magnify.minScale)
+                    : 1;
                 return (
                   <div
                     key={cell.date}
                     data-heatmap-date={cell.date}
+                    data-col={wi}
+                    data-row={rowIdx}
                     role="img"
                     aria-label={t("progress.heatmap.tooltip", {
                       date: formatTooltipDate(cell.date, dateLocale),
                       count: cell.count,
                     })}
-                    className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-transform duration-200 ease-out`}
+                    className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-[transform,opacity,box-shadow] duration-200 ease-out ${
+                      isActive && focusPos
+                        ? "ring-2 ring-main-400/70 shadow-sm shadow-main-200/60"
+                        : ""
+                    }`}
                     style={{
                       width: cellPx,
                       height: cellPx,
                       transform: `scale(${scale})`,
-                      zIndex: Math.round(scale * 10),
+                      zIndex: Math.round(scale * 100),
                       position: "relative",
-                      opacity: activePos && !isActive && scale < 0.92 ? 0.88 : 1,
+                      opacity: focusPos ? 0.5 + prominence * 0.5 : 1,
                     }}
                   />
                 );
