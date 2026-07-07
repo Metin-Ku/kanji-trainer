@@ -50,7 +50,7 @@ export function LevelDistributionChart({ words }: LevelDistributionChartProps) {
             className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
               mode === m
                 ? "bg-main-700 text-white"
-                : "bg-gray-100 text-gray-600"
+                : "bg-app-muted text-app-text-secondary"
             }`}
           >
             {modeLabel(m)}
@@ -61,10 +61,10 @@ export function LevelDistributionChart({ words }: LevelDistributionChartProps) {
       <div className="space-y-2.5">
         {buckets.map((b) => (
           <div key={b.key} className="flex items-center gap-3">
-            <span className="w-6 text-xs font-bold text-gray-500 text-center shrink-0">
+            <span className="w-6 text-xs font-bold text-app-text-secondary text-center shrink-0">
               {b.label}
             </span>
-            <div className="flex-1 h-2.5 rounded-full bg-gray-100 overflow-hidden">
+            <div className="flex-1 h-2.5 rounded-full bg-app-muted overflow-hidden">
               <div
                 className="h-full rounded-full transition-[width] duration-300"
                 style={{
@@ -74,7 +74,7 @@ export function LevelDistributionChart({ words }: LevelDistributionChartProps) {
                 }}
               />
             </div>
-            <span className="w-8 text-xs tabular-nums text-gray-500 text-right shrink-0">
+            <span className="w-8 text-xs tabular-nums text-app-text-secondary text-right shrink-0">
               {b.count}
             </span>
           </div>

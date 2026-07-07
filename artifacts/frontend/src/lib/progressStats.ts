@@ -225,7 +225,7 @@ export const SRS_DECK_CHART_COLORS: Record<SrsDeckType, string> = {
 };
 
 export const HEATMAP_LEVEL_CLASSES = [
-  "bg-gray-100",
+  "bg-app-muted",
   "bg-main-100",
   "bg-main-200",
   "bg-main-400",

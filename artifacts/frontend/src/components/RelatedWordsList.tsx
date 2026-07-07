@@ -62,8 +62,8 @@ export function RelatedWordsList({ word, allWords }: Props) {
 
   if (allRelated.length === 0) {
     return (
-      <div className="border border-gray-100 rounded-lg bg-white px-4 py-3">
-        <p className="text-xs text-gray-300 text-center">
+      <div className="border border-app-border rounded-lg bg-app-surface px-4 py-3">
+        <p className="text-xs text-app-text-muted text-center">
           {t("common.relatedWordsNotFound")}
         </p>
       </div>
@@ -74,7 +74,7 @@ export function RelatedWordsList({ word, allWords }: Props) {
 
   return (
     <div
-      className="border border-gray-100 rounded-lg bg-white overflow-y-auto"
+      className="border border-app-border rounded-lg bg-app-surface overflow-y-auto"
       style={{ maxHeight: 280 }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -82,14 +82,14 @@ export function RelatedWordsList({ word, allWords }: Props) {
         const isOpen = openIds.has(w.id);
         const isManual = manualSet.has(w.id);
         return (
-          <div key={w.id} className="border-b border-gray-50 last:border-b-0">
+          <div key={w.id} className="border-b border-app-border last:border-b-0">
             <div
               className="flex items-center gap-3 px-4 py-2.5 cursor-pointer select-none"
               onClick={() => toggle(w.id)}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 leading-none">
-                  <p className="text-sm font-bold text-gray-800">{w.kanji}</p>
+                  <p className="text-sm font-bold text-app-text">{w.kanji}</p>
                   {isManual && (
                     <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-main-100 text-main-600">
                       {t("common.manualLinkBadge")}
@@ -97,15 +97,15 @@ export function RelatedWordsList({ word, allWords }: Props) {
                   )}
                 </div>
                 {w.pronunciation && (
-                  <p className="text-xs text-gray-500 mt-0.5">{w.pronunciation}</p>
+                  <p className="text-xs text-app-text-secondary mt-0.5">{w.pronunciation}</p>
                 )}
                 {w.meaning && (
-                  <p className="text-xs text-gray-400 mt-0.5 truncate">{w.meaning}</p>
+                  <p className="text-xs text-app-text-muted mt-0.5 truncate">{w.meaning}</p>
                 )}
               </div>
               <div className="flex items-center gap-1 shrink-0">
                 {w.jlptLevel && (
-                  <span className="text-[10px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
+                  <span className="text-[10px] bg-app-muted text-app-text-secondary font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
                     {w.jlptLevel}
                   </span>
                 )}
@@ -119,9 +119,9 @@ export function RelatedWordsList({ word, allWords }: Props) {
                   ).map(({ Icon, starred, level }, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-gray-100"
+                      className="flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-app-muted"
                     >
-                      <Icon size={10} strokeWidth={2} className="text-gray-500" />
+                      <Icon size={10} strokeWidth={2} className="text-app-text-secondary" />
                       {starred ? (
                         <div
                           className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold"
@@ -141,9 +141,9 @@ export function RelatedWordsList({ word, allWords }: Props) {
             {isOpen && (
               <div className="px-4 pb-3 pt-0">
                 {w.description ? (
-                  <p className="whitespace-pre-wrap text-xs text-gray-600 leading-relaxed">{w.description}</p>
+                  <p className="whitespace-pre-wrap text-xs text-app-text-secondary leading-relaxed">{w.description}</p>
                 ) : (
-                  <p className="text-xs text-gray-300 italic">
+                  <p className="text-xs text-app-text-muted italic">
                     {t("common.noDescription")}
                   </p>
                 )}

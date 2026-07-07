@@ -8,12 +8,12 @@ export function LearnedHubPage() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-4 shrink-0">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col sm:border-l sm:border-r sm:border-app-border">
+      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
           >
             <ArrowLeft size={18} />
             <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
@@ -26,7 +26,7 @@ export function LearnedHubPage() {
       <div className="flex-1 flex">
         <button
           onClick={() => navigate("/learned/words")}
-          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-gray-50 transition-colors border-r border-gray-100"
+          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-app-muted transition-colors border-r border-app-border"
         >
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center"
@@ -35,7 +35,7 @@ export function LearnedHubPage() {
             <Languages size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-base font-bold text-gray-900 leading-tight">
+            <p className="text-base font-bold text-app-text leading-tight">
               {t("learned.wordsTitle")}
             </p>
           </div>
@@ -43,7 +43,7 @@ export function LearnedHubPage() {
 
         <button
           onClick={() => navigate("/learned/pronunciation")}
-          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-gray-50 transition-colors border-r border-gray-100"
+          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-app-muted transition-colors border-r border-app-border"
         >
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center"
@@ -52,7 +52,7 @@ export function LearnedHubPage() {
             <Waves size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-base font-bold text-gray-900 leading-tight">
+            <p className="text-base font-bold text-app-text leading-tight">
               {t("learned.pronunciationTitle")}
             </p>
           </div>
@@ -60,7 +60,7 @@ export function LearnedHubPage() {
 
         <button
           onClick={() => navigate("/learned/meaning")}
-          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-gray-50 transition-colors"
+          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-app-muted transition-colors"
         >
           <div
             className="w-12 h-12 rounded-xl flex items-center justify-center"
@@ -69,7 +69,7 @@ export function LearnedHubPage() {
             <BookOpen size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-base font-bold text-gray-900 leading-tight">
+            <p className="text-base font-bold text-app-text leading-tight">
               {t("learned.meaningTitle")}
             </p>
           </div>

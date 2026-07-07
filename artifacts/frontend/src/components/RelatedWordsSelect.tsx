@@ -71,7 +71,7 @@ export function RelatedWordsSelect({
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="min-h-[44px] w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-main-300 focus-within:border-transparent transition-all cursor-text"
+        className="min-h-[44px] w-full rounded-xl border border-app-border-strong bg-app-muted px-3 py-2 flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-main-300 focus-within:border-transparent transition-all cursor-text"
         onClick={() => {
           setIsOpen(true);
           inputRef.current?.focus();
@@ -110,17 +110,17 @@ export function RelatedWordsSelect({
           placeholder={
             selectedWords.length === 0 ? t("a11y.searchWords") : ""
           }
-          className="flex-1 min-w-[90px] bg-transparent text-sm text-gray-700 focus:outline-none placeholder:text-gray-300"
+          className="flex-1 min-w-[90px] bg-transparent text-sm text-app-text focus:outline-none placeholder:text-app-text-muted"
         />
       </div>
 
       {showDropdown && (
         <div
-          className="absolute z-50 w-full mt-1 rounded-xl border border-gray-100 bg-white shadow-lg overflow-y-auto"
+          className="absolute z-50 w-full mt-1 rounded-xl border border-app-border bg-app-surface shadow-lg overflow-y-auto"
           style={{ maxHeight: 220 }}
         >
           {filteredWords.length === 0 ? (
-            <p className="px-4 py-3 text-xs text-gray-300 text-center">
+            <p className="px-4 py-3 text-xs text-app-text-muted text-center">
               {t("search.relatedNotFound", { query })}
             </p>
           ) : (
@@ -130,12 +130,12 @@ export function RelatedWordsSelect({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => addWord(w)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-main-50 active:bg-main-100 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-app-accent active:bg-main-100 transition-colors text-left"
               >
-                <span className="text-base font-bold text-gray-800 shrink-0">
+                <span className="text-base font-bold text-app-text shrink-0">
                   {w.kanji}
                 </span>
-                <span className="text-xs text-gray-400 truncate flex-1">
+                <span className="text-xs text-app-text-muted truncate flex-1">
                   {w.meaning || w.pronunciation}
                 </span>
               </button>

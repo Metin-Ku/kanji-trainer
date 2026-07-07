@@ -16,7 +16,7 @@ export function SearchBar({ value, onChange, placeholder = "" }: Props) {
       <Search
         size={17}
         strokeWidth={2}
-        className={`absolute left-2.5 pointer-events-none shrink-0 ${focused ? "text-main-500 transition-colors duration-100" : "text-gray-300 transition-colors duration-100"}`}
+        className={`absolute left-2.5 pointer-events-none shrink-0 ${focused ? "text-main-500 transition-colors duration-100" : "text-app-text-muted transition-colors duration-100"}`}
         // style={{
         //   color: focused ? "rgb(251,146,60)" : "rgb(209,213,219)",
         //   transition: "color 0.12s ease",
@@ -37,11 +37,11 @@ export function SearchBar({ value, onChange, placeholder = "" }: Props) {
           pr-7
           py-1.5
           border
-          border-gray-200
-          bg-gray-50
+          border-app-border-strong
+          bg-app-muted
           text-sm
-          text-gray-700
-          placeholder-gray-300
+          text-app-text
+          placeholder-app-text-muted
           outline-none
           transition-all
           duration-150

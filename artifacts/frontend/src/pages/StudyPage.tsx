@@ -272,8 +272,8 @@ export function StudyPage() {
 
   if (!word && !done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-white sm:border-l sm:border-r sm:border-gray-100">
-        <p className="text-gray-400">{t("study.notFound")}</p>
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+        <p className="text-app-text-muted">{t("study.notFound")}</p>
         <button onClick={() => navigate(backPath)} className="mt-4 text-main-400 text-sm">{t("study.backToList")}</button>
       </div>
     );
@@ -281,9 +281,9 @@ export function StudyPage() {
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-white sm:border-l sm:border-r sm:border-gray-100">
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-4 flex items-center">
-          <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+        <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center">
+          <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted">
             <ArrowLeft size={18} />
             <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
           </button>
@@ -291,8 +291,8 @@ export function StudyPage() {
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
           <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl" style={{ background: themeVars.star }}>★</div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 mb-1">{t("common.completed")}</p>
-            <p className="text-sm text-gray-400">{t("study.finishedCount", { count: words.length })}</p>
+            <p className="text-2xl font-bold text-app-text mb-1">{t("common.completed")}</p>
+            <p className="text-sm text-app-text-muted">{t("study.finishedCount", { count: words.length })}</p>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
@@ -305,7 +305,7 @@ export function StudyPage() {
             </button>
             <button
               onClick={() => navigate(backPath)}
-              className="w-full py-3 rounded-2xl font-semibold text-sm border border-gray-200 text-gray-600"
+              className="w-full py-3 rounded-2xl font-semibold text-sm border border-app-border-strong text-app-text-secondary"
             >
               {t("study.backToList")}
             </button>
@@ -331,13 +331,13 @@ export function StudyPage() {
   const cardTransition = isFlying ? "transform 0.18s ease" : dragX !== 0 ? "none" : "transform 0.22s ease";
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col select-none sm:border-l sm:border-r sm:border-gray-100">
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-4 flex items-center justify-between shrink-0">
-        <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:border-l sm:border-r sm:border-app-border">
+      <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
+        <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted">
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
         </button>
-        <span className="text-sm text-gray-400 font-medium tabular-nums">{t("common.cardProgress", { current: index + 1, total: words.length })}</span>
+        <span className="text-sm text-app-text-muted p-1.5 font-medium tabular-nums">{t("common.cardProgress", { current: index + 1, total: words.length })}</span>
       </div>
 
       <div ref={mainRef} className="flex-1 relative overflow-hidden" style={{ touchAction: "none" }}>
@@ -353,7 +353,7 @@ export function StudyPage() {
           >
             <p
               ref={wordRef}
-              className="font-bold text-gray-900 text-center leading-tight"
+              className="font-bold text-app-text text-center leading-tight"
               style={{ fontSize: mode === "anlam" ? "1.4rem" : "3rem" }}
             >
               {getPrimary(word, mode, t("common.emDash"))}
@@ -361,12 +361,12 @@ export function StudyPage() {
 
             <div className="flex items-center gap-2 flex-wrap justify-center">
               {word.date && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-500">
+                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-app-muted text-app-text-secondary">
                   {formatStudyDate(word.date)}
                 </span>
               )}
               {word.jlptLevel && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-gray-100 text-gray-500">
+                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-app-muted text-app-text-secondary">
                   {word.jlptLevel}
                 </span>
               )}
@@ -387,7 +387,7 @@ export function StudyPage() {
         </div>
 
         <div
-          className="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 rounded-t-2xl shadow-xl"
+          className="absolute bottom-0 left-0 right-0 bg-app-surface border-t border-app-border rounded-t-2xl shadow-xl"
           style={{
             transform: showDetails ? "translateY(0)" : "translateY(100%)",
             transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
@@ -400,31 +400,31 @@ export function StudyPage() {
           onTouchEnd={e => e.stopPropagation()}
         >
           <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 rounded-full bg-gray-200" />
+            <div className="w-10 h-1 rounded-full bg-app-border-strong" />
           </div>
           <div className="px-6 pb-6 pt-2 space-y-4">
             {mode !== "kelime" && word.kanji && (
               <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{t("study.detailLabels.word")}</p>
-                <p className="text-3xl font-bold text-gray-800">{word.kanji}</p>
+                <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">{t("study.detailLabels.word")}</p>
+                <p className="text-3xl font-bold text-app-text">{word.kanji}</p>
               </div>
             )}
             {mode !== "okunuş" && word.pronunciation && (
               <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{t("study.detailLabels.pronunciation")}</p>
-                <p className="text-lg font-medium text-gray-700">{word.pronunciation}</p>
+                <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">{t("study.detailLabels.pronunciation")}</p>
+                <p className="text-lg font-medium text-app-text">{word.pronunciation}</p>
               </div>
             )}
             {mode !== "anlam" && word.meaning && (
               <div>
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{t("study.detailLabels.meaning")}</p>
-                <p className="text-base text-gray-700">{word.meaning}</p>
+                <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">{t("study.detailLabels.meaning")}</p>
+                <p className="text-base text-app-text">{word.meaning}</p>
               </div>
             )}
             {word.description && (
-              <div className="pt-3 border-t border-gray-100">
-                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">{t("study.detailLabels.description")}</p>
-                <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">{word.description}</p>
+              <div className="pt-3 border-t border-app-border">
+                <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">{t("study.detailLabels.description")}</p>
+                <p className="whitespace-pre-wrap text-sm text-app-text-secondary leading-relaxed">{word.description}</p>
               </div>
             )}
           </div>

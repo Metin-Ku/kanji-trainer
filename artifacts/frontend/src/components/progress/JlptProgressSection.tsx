@@ -35,7 +35,7 @@ export function JlptProgressSection({ words }: JlptProgressSectionProps) {
             className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
               mode === m
                 ? "bg-main-700 text-white"
-                : "bg-gray-100 text-gray-600"
+                : "bg-app-muted text-app-text-secondary"
             }`}
           >
             {modeLabel(m)}
@@ -47,10 +47,10 @@ export function JlptProgressSection({ words }: JlptProgressSectionProps) {
         {bands.map((band) => (
           <div key={band.jlpt}>
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-semibold text-gray-800">
+              <span className="text-sm font-semibold text-app-text">
                 {jlptLabel(band.jlpt)}
               </span>
-              <span className="text-xs text-gray-500 tabular-nums">
+              <span className="text-xs text-app-text-secondary tabular-nums">
                 {band.total === 0
                   ? t("progress.jlpt.noWords")
                   : t("progress.jlpt.count", {
@@ -60,7 +60,7 @@ export function JlptProgressSection({ words }: JlptProgressSectionProps) {
                     })}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div className="h-2 rounded-full bg-app-muted overflow-hidden">
               <div
                 className="h-full rounded-full bg-main-500 transition-[width] duration-300"
                 style={{

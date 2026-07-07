@@ -54,7 +54,7 @@ export function DeckActivityChart({
     <div>
       <div className="flex flex-wrap gap-3 mb-4">
         {DAILY_GOAL_DECK_IDS.map((deck) => (
-          <div key={deck} className="flex items-center gap-1.5 text-xs text-gray-600">
+          <div key={deck} className="flex items-center gap-1.5 text-xs text-app-text-secondary">
             <span
               className="w-2.5 h-2.5 rounded-sm shrink-0"
               style={{ background: SRS_DECK_CHART_COLORS[deck] }}
@@ -73,7 +73,7 @@ export function DeckActivityChart({
             title={t("progress.deckChart.weekTotal", { count: week.total })}
           >
             <div
-              className="w-full flex flex-col-reverse rounded-sm overflow-hidden bg-gray-100"
+              className="w-full flex flex-col-reverse rounded-sm overflow-hidden bg-app-muted"
               style={{
                 height: `${Math.max(week.total > 0 ? 4 : 0, (week.total / maxWeek) * 100)}%`,
                 minHeight: week.total > 0 ? 4 : 0,
@@ -94,13 +94,13 @@ export function DeckActivityChart({
                 );
               })}
             </div>
-            <span className="text-[9px] text-gray-400 tabular-nums">{week.label}</span>
+            <span className="text-[9px] text-app-text-muted tabular-nums">{week.label}</span>
           </div>
         ))}
       </div>
 
       {maxTotal <= 1 && weeks.every((w) => w.total === 0) && (
-        <p className="text-xs text-gray-400 text-center mt-2">
+        <p className="text-xs text-app-text-muted text-center mt-2">
           {t("progress.deckChart.empty")}
         </p>
       )}

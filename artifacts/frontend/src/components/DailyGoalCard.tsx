@@ -28,7 +28,7 @@ function ProgressBar({
 }) {
   return (
     <div
-      className={`rounded-full bg-white overflow-hidden ${size === "sm" ? "h-1.5" : "h-2"}`}
+      className={`rounded-full bg-app-surface overflow-hidden ${size === "sm" ? "h-1.5" : "h-2"}`}
     >
       <div
         className={`h-full rounded-full transition-[width] duration-300 ease-out ${
@@ -61,7 +61,7 @@ const DeckRow = memo(function DeckRow({
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           <span
-            className={`truncate font-medium text-gray-700 ${compact ? "text-xs" : "text-sm"}`}
+            className={`truncate font-medium text-app-text ${compact ? "text-xs" : "text-sm"}`}
           >
             {label}
           </span>
@@ -70,7 +70,7 @@ const DeckRow = memo(function DeckRow({
           )}
         </div>
         <span
-          className={`tabular-nums shrink-0 ${compact ? "text-xs text-gray-500" : "text-sm font-semibold text-gray-800"}`}
+          className={`tabular-nums shrink-0 ${compact ? "text-xs text-app-text-secondary" : "text-sm font-semibold text-app-text"}`}
         >
           {progressLabel}
         </span>
@@ -95,8 +95,8 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
   const enabledDecks = decks.filter((d) => d.enabled);
   const shellClass =
     variant === "banner"
-      ? `rounded-sm border px-4 py-5 border-main-200 bg-main-50`
-      : `rounded-sm border px-4 py-5 mt-3 border-main-200 bg-main-50/80`;
+      ? `rounded-sm border px-4 py-5 border-main-200 bg-app-accent`
+      : `rounded-sm border px-4 py-5 mt-3 border-main-200 bg-app-accent/80`;
   // bg-[linear-gradient(135deg,color-mix(in_oklch,var(--main-400)_13%,transparent),color-mix(in_oklch,var(--main-600)_8%,transparent))]
   return (
     <div className={shellClass}>
@@ -115,7 +115,7 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-app-text-secondary uppercase tracking-wider">
                 {t("dailyGoal.title")}
               </p>
               {goalMet && (
@@ -123,28 +123,28 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
               )}
             </div>
             <p
-              className={`font-bold text-gray-900 leading-tight ${variant === "banner" ? "text-sm" : "text-lg"}`}
+              className={`font-bold text-app-text leading-tight ${variant === "banner" ? "text-sm" : "text-lg"}`}
             >
               {progressLabel}
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">{statusLabel}</p>
+            <p className="text-xs text-app-text-secondary mt-0.5">{statusLabel}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {streak > 0 ? (
-              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white/80 border border-main-100">
+              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-surface/80 border border-main-100">
                 <Flame size={variant === "banner" ? 14 : 16} className="text-main-500" />
                 <span className="text-sm font-bold text-main-600">{streak}</span>
               </div>
             ) : (
               variant !== "banner" && (
-                <p className="text-[11px] text-gray-400 max-w-20 leading-snug text-right">
+                <p className="text-[11px] text-app-text-muted max-w-24 leading-snug text-right">
                   {t("dailyGoal.streakNone")}
                 </p>
               )
             )}
             <ChevronDown
               size={18}
-              className={`text-gray-400 transition-transform duration-200 ease-out ${expanded ? "rotate-180" : ""}`}
+              className={`text-app-text-muted transition-transform duration-200 ease-out ${expanded ? "rotate-180" : ""}`}
             />
           </div>
         </div>
@@ -164,13 +164,13 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
         }`}
       >
         {detailsMounted && (
-          <div className="pt-3 border-t border-gray-100/80">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2.5">
+          <div className="pt-3 border-t border-app-border/80">
+            <p className="text-[10px] font-semibold text-app-text-muted uppercase tracking-wider mb-2.5">
               {t("dailyGoal.byDeck")}
             </p>
             <div className="space-y-3">
               {enabledDecks.length === 0 ? (
-                <p className="text-xs text-gray-400">{t("dailyGoal.noDeckTargets")}</p>
+                <p className="text-xs text-app-text-muted">{t("dailyGoal.noDeckTargets")}</p>
               ) : (
                 enabledDecks.map((deck) => (
                   <DeckRow key={deck.deck} deck={deck} compact={variant === "banner"} />

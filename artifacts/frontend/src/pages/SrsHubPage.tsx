@@ -72,55 +72,55 @@ export function SrsHubPage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-4 shrink-0">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
+      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
         >
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{t("nav.srs")}</span>
         </button>
-        <h1 className="text-xl font-bold text-gray-900 mt-2">{t("srs.hub.title")}</h1>
-        <p className="text-sm text-gray-500 mt-1">{t("srs.hub.subtitle")}</p>
+        <h1 className="text-xl font-bold text-app-text mt-2">{t("srs.hub.title")}</h1>
+        <p className="text-sm text-app-text-secondary mt-1">{t("srs.hub.subtitle")}</p>
       </div>
 
-      <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+      <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto">
         <DailyGoalCard variant="banner" />
 
         <button
           type="button"
           onClick={() => navigate("/srs/trouble")}
-          className="w-full flex items-center gap-4 bg-white rounded-2xl border border-gray-100 px-4 py-4 active:scale-[0.99] transition-transform"
+          className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-4 active:scale-[0.99] transition-transform"
         >
           <div className="w-11 h-11 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
             <AlertCircle size={20} className="text-red-500" strokeWidth={1.8} />
           </div>
           <div className="flex-1 text-left min-w-0">
-            <p className="text-base font-bold text-gray-900">
+            <p className="text-base font-bold text-app-text">
               {t("srs.hub.troubleWordsTile")}
             </p>
-            <p className="text-xs text-gray-400 mt-0.5 min-h-[1rem] flex items-center">
+            <p className="text-xs text-app-text-muted mt-0.5 min-h-[1rem] flex items-center">
               {troubleLoading ? (
-                <LoadingSpinner size={14} className="text-gray-400" />
+                <LoadingSpinner size={14} className="text-app-text-muted" />
               ) : (
                 t("srs.hub.troubleWordsCount", { count: troubleCount })
               )}
             </p>
           </div>
-          <ChevronRight size={18} className="text-gray-300 shrink-0" />
+          <ChevronRight size={18} className="text-app-text-muted shrink-0" />
         </button>
 
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 space-y-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t("srs.hub.filters")}</p>
+        <div className="bg-app-surface rounded-2xl border border-app-border p-4 space-y-3">
+          <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wider">{t("srs.hub.filters")}</p>
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-xs text-gray-500 mb-1 block">{t("srs.hub.jlptMin")}</span>
+              <span className="text-xs text-app-text-secondary mb-1 block">{t("srs.hub.jlptMin")}</span>
               <select
                 value={jlptMin}
                 onChange={(e) => setJlptMin(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800"
+                className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3 py-2 text-sm text-app-text"
               >
                 <option value="">{t("common.all")}</option>
                 {JLPT_LEVELS.map((l) => (
@@ -129,11 +129,11 @@ export function SrsHubPage() {
               </select>
             </label>
             <label className="block">
-              <span className="text-xs text-gray-500 mb-1 block">{t("srs.hub.jlptMax")}</span>
+              <span className="text-xs text-app-text-secondary mb-1 block">{t("srs.hub.jlptMax")}</span>
               <select
                 value={jlptMax}
                 onChange={(e) => setJlptMax(e.target.value)}
-                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800"
+                className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3 py-2 text-sm text-app-text"
               >
                 <option value="">{t("common.all")}</option>
                 {JLPT_LEVELS.map((l) => (
@@ -144,11 +144,11 @@ export function SrsHubPage() {
           </div>
 
           <label className="block">
-            <span className="text-xs text-gray-500 mb-1 block">{t("srs.hub.sortLabel")}</span>
+            <span className="text-xs text-app-text-secondary mb-1 block">{t("srs.hub.sortLabel")}</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SrsSortMode)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-800"
+              className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3 py-2 text-sm text-app-text"
             >
               {sortOptions.map((o) => (
                 <option key={o.value} value={o.value}>{o.label}</option>
@@ -169,17 +169,17 @@ export function SrsHubPage() {
                 key={deck}
                 onClick={() => startDeck(deck)}
                 disabled={starting === deck || isLoading}
-                className="w-full flex items-center gap-4 bg-white rounded-2xl border border-gray-100 px-4 py-4 active:scale-[0.99] transition-transform disabled:opacity-60"
+                className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-4 active:scale-[0.99] transition-transform disabled:opacity-60"
               >
-                <div className="w-11 h-11 rounded-xl bg-main-50 flex items-center justify-center shrink-0">
+                <div className="w-11 h-11 rounded-xl bg-app-accent flex items-center justify-center shrink-0">
                   <Icon size={20} className="text-main-500" strokeWidth={1.8} />
                 </div>
                 <div className="flex-1 text-left min-w-0">
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{label.subtitle}</p>
-                  <p className="text-base font-bold text-gray-900">{label.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5 min-h-[1rem] flex items-center">
+                  <p className="text-[10px] font-semibold text-app-text-muted uppercase tracking-wider">{label.subtitle}</p>
+                  <p className="text-base font-bold text-app-text">{label.title}</p>
+                  <p className="text-xs text-app-text-muted mt-0.5 min-h-[1rem] flex items-center">
                     {isLoading ? (
-                      <LoadingSpinner size={14} className="text-gray-400" />
+                      <LoadingSpinner size={14} className="text-app-text-muted" />
                     ) : (
                       <>
                         {reviewCount > 0 ? t("srs.hub.cardsReady", { count: reviewCount }) : t("srs.hub.noCardsToday")}
@@ -188,7 +188,7 @@ export function SrsHubPage() {
                     )}
                   </p>
                 </div>
-                <ChevronRight size={18} className="text-gray-300 shrink-0" />
+                <ChevronRight size={18} className="text-app-text-muted shrink-0" />
               </button>
             );
           })}

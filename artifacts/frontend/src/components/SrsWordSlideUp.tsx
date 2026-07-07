@@ -55,7 +55,7 @@ export function SrsWordSlideUp({
         aria-hidden
       />
       <div
-        className="fixed left-0 right-0 z-40 max-w-2xl mx-auto bg-white border-t border-gray-100 rounded-t-2xl shadow-xl sm:border-l sm:border-r pointer-events-auto"
+        className="fixed left-0 right-0 z-40 max-w-2xl mx-auto bg-app-surface border-t border-app-border rounded-t-2xl shadow-xl sm:border-l sm:border-r pointer-events-auto"
         style={{
           bottom,
           maxHeight: "55vh",
@@ -65,7 +65,7 @@ export function SrsWordSlideUp({
         }}
       >
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-gray-200" />
+          <div className="w-10 h-1 rounded-full bg-app-border-strong" />
         </div>
         <div
           className={`px-6 pb-4 pt-2 relative ${showRelated && word.meaning ? "" : "pr-24"}`}
@@ -75,7 +75,7 @@ export function SrsWordSlideUp({
               <button
                 type="button"
                 onClick={() => setShowEdit(true)}
-                className="flex items-center justify-center px-3 py-1.5 w-10 h-8 rounded-lg bg-gray-100 text-gray-600"
+                className="flex items-center justify-center px-3 py-1.5 w-10 h-8 rounded-lg bg-app-muted text-app-text-secondary"
               >
                 <Pencil size={13} />
               </button>
@@ -100,36 +100,36 @@ export function SrsWordSlideUp({
             <div className="space-y-4">
               {word.kanji && (
                 <div>
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("common.word")}
                   </p>
-                  <p className="text-3xl font-bold text-gray-800">{word.kanji}</p>
+                  <p className="text-3xl font-bold text-app-text">{word.kanji}</p>
                 </div>
               )}
               {word.pronunciation && (
                 <div>
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("common.pronunciation")}
                   </p>
-                  <p className="text-lg font-medium text-gray-700">
+                  <p className="text-lg font-medium text-app-text">
                     {word.pronunciation}
                   </p>
                 </div>
               )}
               {word.meaning && (
                 <div>
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("common.meaning")}
                   </p>
-                  <p className="text-base text-gray-700">{word.meaning}</p>
+                  <p className="text-base text-app-text">{word.meaning}</p>
                 </div>
               )}
               {word.description && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                <div className="pt-3 border-t border-app-border">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("common.description")}
                   </p>
-                  <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">
+                  <p className="whitespace-pre-wrap text-sm text-app-text-secondary leading-relaxed">
                     {word.description}
                   </p>
                 </div>

@@ -202,8 +202,8 @@ export function SrsExamplesEditor({
 
   if (examples.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/80 px-4 py-8 text-center space-y-3">
-        <p className="text-sm text-gray-500 leading-relaxed">
+      <div className="rounded-xl border border-dashed border-app-border-strong bg-app-muted/80 px-4 py-8 text-center space-y-3">
+        <p className="text-sm text-app-text-secondary leading-relaxed">
           {t("srs.editor.emptyHint")}
         </p>
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -219,7 +219,7 @@ export function SrsExamplesEditor({
               type="button"
               onClick={importFromDescription}
               disabled={linkingAll}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-white disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl border border-app-border-strong text-app-text-secondary text-sm font-semibold hover:bg-app-surface disabled:opacity-50"
             >
               {linkingAll ? (
                 <LoadingSpinner size={15} />
@@ -237,7 +237,7 @@ export function SrsExamplesEditor({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+        <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wide">
           {t("srs.editor.exampleSentences")}
         </p>
         <div className="flex items-center gap-2">
@@ -245,7 +245,7 @@ export function SrsExamplesEditor({
             type="button"
             onClick={linkAllExamples}
             disabled={linkingAll || allWords.length === 0}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-main-600 disabled:opacity-40"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-app-text-secondary hover:text-main-600 disabled:opacity-40"
           >
             {linkingAll ? (
               <LoadingSpinner size={13} />
@@ -270,15 +270,15 @@ export function SrsExamplesEditor({
         return (
           <div
             key={exIndex}
-            className="rounded-xl border border-gray-100 bg-gray-50/60 overflow-hidden"
+            className="rounded-xl border border-app-border bg-app-muted/60 overflow-hidden"
           >
-            <div className="flex items-center gap-1 px-3 py-2 bg-white border-b border-gray-100">
+            <div className="flex items-center gap-1 px-3 py-2 bg-app-surface border-b border-app-border">
               <div className="flex flex-col">
                 <button
                   type="button"
                   disabled={exIndex === 0}
                   onClick={() => moveExample(exIndex, -1)}
-                  className="p-0.5 text-gray-300 hover:text-gray-500 disabled:opacity-30"
+                  className="p-0.5 text-app-text-muted hover:text-app-text-secondary disabled:opacity-30"
                 >
                   <ChevronUp size={14} />
                 </button>
@@ -286,7 +286,7 @@ export function SrsExamplesEditor({
                   type="button"
                   disabled={exIndex === examples.length - 1}
                   onClick={() => moveExample(exIndex, 1)}
-                  className="p-0.5 text-gray-300 hover:text-gray-500 disabled:opacity-30"
+                  className="p-0.5 text-app-text-muted hover:text-app-text-secondary disabled:opacity-30"
                 >
                   <ChevronDown size={14} />
                 </button>
@@ -299,11 +299,11 @@ export function SrsExamplesEditor({
                     [exIndex]: !isCollapsed,
                   }))
                 }
-                className="flex-1 text-left text-sm font-semibold text-gray-700"
+                className="flex-1 text-left text-sm font-semibold text-app-text"
               >
                 {t("srs.editor.exampleN", { n: exIndex + 1 })}
                 {ex.sentence && (
-                  <span className="ml-2 font-normal text-gray-400 truncate">
+                  <span className="ml-2 font-normal text-app-text-muted truncate">
                     {renderClozeSentence(ex.sentence, ex.hiddenWord).slice(
                       0,
                       24,
@@ -327,7 +327,7 @@ export function SrsExamplesEditor({
                     return;
                   removeExample(exIndex);
                 }}
-                className="p-1.5 text-gray-300 hover:text-red-500"
+                className="p-1.5 text-app-text-muted hover:text-red-500"
               >
                 <Trash2 size={15} />
               </button>
@@ -336,7 +336,7 @@ export function SrsExamplesEditor({
             {!isCollapsed && (
               <div className="p-3 space-y-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                  <label className="block text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("srs.editor.japaneseSentence")}
                   </label>
                   <input
@@ -355,7 +355,7 @@ export function SrsExamplesEditor({
                       })
                     }
                     placeholder={t("srs.editor.placeholders.sentence")}
-                    className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-lg font-bold text-gray-800 focus:outline-none focus:ring-2 focus:ring-main-300"
+                    className="w-full rounded-lg border border-app-border-strong bg-app-surface px-3 py-2 text-lg font-bold text-app-text focus:outline-none focus:ring-2 focus:ring-main-300"
                   />
                 </div>
 
@@ -363,7 +363,7 @@ export function SrsExamplesEditor({
                   <button
                     type="button"
                     onClick={() => setHiddenFromSelection(exIndex)}
-                    className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-gray-600 hover:border-main-300"
+                    className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-app-surface border border-app-border-strong text-app-text-secondary hover:border-main-300"
                   >
                     {t("srs.editor.hideSelection")}
                   </button>
@@ -376,7 +376,7 @@ export function SrsExamplesEditor({
                           linkedTokens: undefined,
                         })
                       }
-                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-gray-600 hover:border-main-300"
+                      className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-app-surface border border-app-border-strong text-app-text-secondary hover:border-main-300"
                     >
                       {t("srs.editor.selectHeadword", { headword })}
                     </button>
@@ -389,7 +389,7 @@ export function SrsExamplesEditor({
                       linkingIndex === exIndex ||
                       allWords.length === 0
                     }
-                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-white border border-gray-200 text-gray-600 hover:border-main-300 disabled:opacity-40"
+                    className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-lg bg-app-surface border border-app-border-strong text-app-text-secondary hover:border-main-300 disabled:opacity-40"
                   >
                     {linkingIndex === exIndex ? (
                       <LoadingSpinner size={12} />
@@ -404,7 +404,7 @@ export function SrsExamplesEditor({
                 </div>
 
                 {ex.sentence && (
-                  <div className="rounded-lg bg-main-50 border border-main-100 px-3 py-2">
+                  <div className="rounded-lg bg-app-accent border border-main-100 px-3 py-2">
                     <p className="text-[10px] font-bold text-main-400 uppercase tracking-widest mb-0.5">
                       {t("srs.editor.srsPreview")}
                     </p>
@@ -419,7 +419,7 @@ export function SrsExamplesEditor({
                 )}
 
                 <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
                     {t("srs.editor.hintLines")}
                   </p>
                   {ex.hints.map((hint, hintIndex) => {
@@ -439,12 +439,12 @@ export function SrsExamplesEditor({
                               })
                             }
                             placeholder={t("srs.editor.placeholders.hint")}
-                            className="flex-1 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300"
+                            className="flex-1 rounded-lg border border-app-border-strong bg-app-surface px-3 py-1.5 text-sm text-app-text focus:outline-none focus:ring-2 focus:ring-main-300"
                           />
                           <button
                             type="button"
                             onClick={() => addHighlight(exIndex, hintIndex)}
-                            className="shrink-0 p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:text-main-500 hover:border-main-300"
+                            className="shrink-0 p-2 rounded-lg border border-app-border-strong bg-app-surface text-app-text-secondary hover:text-main-500 hover:border-main-300"
                             title={t("srs.editor.highlightSelection")}
                           >
                             <Highlighter size={14} />
@@ -453,7 +453,7 @@ export function SrsExamplesEditor({
                             <button
                               type="button"
                               onClick={() => removeHint(exIndex, hintIndex)}
-                              className="shrink-0 p-2 rounded-lg border border-gray-200 bg-white text-gray-300 hover:text-red-500"
+                              className="shrink-0 p-2 rounded-lg border border-app-border-strong bg-app-surface text-app-text-muted hover:text-red-500"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -476,13 +476,13 @@ export function SrsExamplesEditor({
                           </div>
                         )}
                         {hint.text && (
-                          <p className="text-xs text-gray-500 pl-0.5">
+                          <p className="text-xs text-app-text-secondary pl-0.5">
                             {renderHintParts(hint.text, hint.highlights).map(
                               (p, i) =>
                                 p.highlight ? (
                                   <span
                                     key={i}
-                                    className="font-semibold text-main-600 bg-main-50 px-0.5 rounded"
+                                    className="font-semibold text-main-600 bg-app-accent px-0.5 rounded"
                                   >
                                     {p.text}
                                   </span>
@@ -498,7 +498,7 @@ export function SrsExamplesEditor({
                   <button
                     type="button"
                     onClick={() => addHint(exIndex)}
-                    className="text-xs font-semibold text-gray-400 hover:text-main-500"
+                    className="text-xs font-semibold text-app-text-muted hover:text-main-500"
                   >
                     {t("srs.editor.addLine")}
                   </button>
@@ -512,7 +512,7 @@ export function SrsExamplesEditor({
       <button
         type="button"
         onClick={addExample}
-        className="w-full py-2 rounded-xl border border-dashed border-gray-200 text-sm font-semibold text-gray-400 hover:border-main-300 hover:text-main-500"
+        className="w-full py-2 rounded-xl border border-dashed border-app-border-strong text-sm font-semibold text-app-text-muted hover:border-main-300 hover:text-main-500"
       >
         + {t("srs.editor.addExample")}
       </button>

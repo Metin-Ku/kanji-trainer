@@ -108,25 +108,25 @@ export function WordFormModal({
     >
       <div className="modal-sheet max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between mb-4 shrink-0">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-lg font-bold text-app-text">
             {initial ? t("wordForm.editTitle") : t("wordForm.addTitle")}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400"
+            className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="flex gap-1 p-1 rounded-xl bg-gray-100 mb-4 shrink-0">
+        <div className="flex gap-1 p-1 rounded-xl bg-app-muted mb-4 shrink-0">
           <button
             type="button"
             onClick={() => setTab("general")}
             className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
               tab === "general"
-                ? "bg-white text-gray-800 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-app-surface text-app-text shadow-sm"
+                : "text-app-text-secondary hover:text-app-text"
             }`}
           >
             {t("wordForm.tabs.general")}
@@ -136,8 +136,8 @@ export function WordFormModal({
             onClick={() => setTab("srs")}
             className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
               tab === "srs"
-                ? "bg-white text-gray-800 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-app-surface text-app-text shadow-sm"
+                : "text-app-text-secondary hover:text-app-text"
             }`}
           >
             {t("wordForm.tabs.srsExamples")}
@@ -157,7 +157,7 @@ export function WordFormModal({
             {tab === "general" ? (
               <>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                  <label className="block text-xs font-semibold text-app-text-muted mb-1.5 uppercase tracking-wide">
                     {t("wordForm.labels.kanji")}
                   </label>
                   <input
@@ -165,13 +165,13 @@ export function WordFormModal({
                     value={kanji}
                     onChange={(e) => setKanji(e.target.value)}
                     placeholder={t("wordForm.placeholders.kanji")}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xl text-gray-800 font-bold focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
+                    className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 text-xl text-app-text font-bold focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                  <label className="block text-xs font-semibold text-app-text-muted mb-1.5 uppercase tracking-wide">
                     {t("wordForm.labels.pronunciation")}
                   </label>
                   <input
@@ -179,12 +179,12 @@ export function WordFormModal({
                     value={pronunciation}
                     onChange={(e) => setPronunciation(e.target.value)}
                     placeholder={t("wordForm.placeholders.pronunciation")}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
+                    className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 text-sm text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                  <label className="block text-xs font-semibold text-app-text-muted mb-1.5 uppercase tracking-wide">
                     {t("wordForm.labels.meaning")}
                   </label>
                   <input
@@ -192,13 +192,13 @@ export function WordFormModal({
                     value={meaning}
                     onChange={(e) => setMeaning(e.target.value)}
                     placeholder={t("wordForm.placeholders.meaning")}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
+                    className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 text-sm text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
                   />
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                    <label className="text-xs font-semibold text-app-text-muted uppercase tracking-wide">
                       {t("wordForm.labels.examplesAndNotes")}
                     </label>
                     {srsExamples.length > 0 && (
@@ -216,15 +216,15 @@ export function WordFormModal({
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder={t("wordForm.placeholders.description")}
                     rows={5}
-                    className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 leading-relaxed focus:outline-none focus:ring-2 focus:ring-main-300 transition-all font-mono"
+                    className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 text-sm text-app-text leading-relaxed focus:outline-none focus:ring-2 focus:ring-main-300 transition-all font-mono"
                   />
                 </div>
 
                 {allWords.length > 0 && (
                   <div>
-                    <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-app-text-muted mb-1.5 uppercase tracking-wide">
                       {t("wordForm.labels.relatedWords")}{" "}
-                      <span className="normal-case font-normal text-gray-300">
+                      <span className="normal-case font-normal text-app-text-muted">
                         {t("wordForm.labels.relatedWordsHint")}
                       </span>
                     </label>
@@ -238,9 +238,9 @@ export function WordFormModal({
                 )}
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                  <label className="block text-xs font-semibold text-app-text-muted mb-1.5 uppercase tracking-wide">
                     {t("wordForm.labels.jlptLevel")}{" "}
-                    <span className="normal-case font-normal text-gray-300">
+                    <span className="normal-case font-normal text-app-text-muted">
                       {t("wordForm.labels.jlptOptional")}
                     </span>
                   </label>
@@ -252,7 +252,7 @@ export function WordFormModal({
                           key={lvl}
                           type="button"
                           onClick={() => setJlptLevel(active ? null : lvl)}
-                          className={`flex-1 h-[38px] rounded-xl font-semibold text-sm border-2 ${active ? "bg-main-400 border-main-400 text-white" : "bg-transparent border-gray-200 text-gray-400"}`}
+                          className={`flex-1 h-[38px] rounded-xl font-semibold text-sm border-2 ${active ? "bg-main-400 border-main-400 text-white" : "bg-transparent border-app-border-strong text-app-text-muted"}`}
                         >
                           {lvl}
                         </button>
@@ -263,18 +263,18 @@ export function WordFormModal({
 
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-app-text-muted mb-1.5 uppercase tracking-wide">
                       {t("wordForm.labels.date")}
                     </label>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
+                      className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 text-sm text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wide">
+                    <label className="block text-xs font-semibold text-app-text-muted mb-1.5 uppercase tracking-wide">
                       {t("wordForm.labels.level")}
                     </label>
                     <div className="flex gap-1.5">

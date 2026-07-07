@@ -69,7 +69,7 @@ function LinkedTextSpan({
               key={i}
               type="button"
               onClick={() => onWordTap?.(word)}
-              className="underline decoration-dotted underline-offset-4 decoration-gray-500 hover:decoration-main-500 text-gray-900"
+              className="underline decoration-dotted underline-offset-4 decoration-app-text-muted hover:decoration-main-500 text-app-text"
             >
               <RubyParts parts={parts} />
             </button>
@@ -151,7 +151,7 @@ function SecondaryHiddenChunk({
           <button
             type="button"
             onClick={() => onWordTap?.(word)}
-            className="underline decoration-dotted underline-offset-4 decoration-gray-500 hover:decoration-main-500 text-gray-900"
+            className="underline decoration-dotted underline-offset-4 decoration-app-text-muted hover:decoration-main-500 text-app-text"
           >
             <RubyParts parts={parts} />
           </button>
@@ -230,7 +230,7 @@ export function ExampleSentenceDisplay({
     let offset = 0;
     return (
       <p
-        className={`text-2xl font-bold text-gray-900 leading-loose ${className}`}
+        className={`text-2xl font-bold text-app-text leading-loose ${className}`}
       >
         {chunks.map((chunk, i) => {
           const chunkOffset = offset;
@@ -289,7 +289,7 @@ export function ExampleSentenceDisplay({
 
   if (answerState === "correct") {
     return (
-      <p className={`text-2xl font-bold text-gray-900 leading-relaxed ${className}`}>
+      <p className={`text-2xl font-bold text-app-text leading-relaxed ${className}`}>
         {wordLinksEnabled && linkedTokens?.length ? (
           <LinkedTextSpan
             text={sentence}
@@ -312,7 +312,7 @@ export function ExampleSentenceDisplay({
   const afterOffset = beforeLen + hiddenWord.length;
 
   return (
-    <p className={`text-2xl font-bold text-gray-900 leading-relaxed ${className}`}>
+    <p className={`text-2xl font-bold text-app-text leading-relaxed ${className}`}>
       <LinkedTextSpan
         text={before}
         chunkOffset={0}

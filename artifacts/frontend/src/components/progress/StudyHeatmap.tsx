@@ -250,7 +250,7 @@ export function StudyHeatmap({
   return (
     <div className={className}>
       <div
-        className={`min-h-[1.25rem] mb-2 text-gray-600 tabular-nums ${
+        className={`min-h-[1.25rem] mb-2 text-app-text-secondary tabular-nums ${
           compact ? "text-[10px]" : "text-xs"
         }`}
       >
@@ -306,7 +306,7 @@ export function StudyHeatmap({
       </div>
 
       {!compact && (
-        <div className="flex items-center gap-1.5 mt-3 text-[10px] text-gray-400">
+        <div className="flex items-center gap-1.5 mt-3 text-[10px] text-app-text-muted">
           <span>{t("progress.heatmap.less")}</span>
           {HEATMAP_LEVEL_CLASSES.map((cls, i) => (
             <div key={i} className={`w-3 h-3 rounded-sm ${cls}`} />

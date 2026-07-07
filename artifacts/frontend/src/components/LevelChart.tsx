@@ -66,11 +66,11 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
 
       {open && (
         <div
-          className="absolute left-0 top-full mt-2 z-50 bg-white rounded-2xl shadow-2xl border border-gray-100 p-3"
+          className="absolute left-0 top-full mt-2 z-50 bg-app-surface rounded-2xl shadow-2xl border border-app-border p-3"
           style={{ minWidth: 216 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <p className="text-xs text-gray-400 mb-2.5 font-medium text-center">
+          <p className="text-xs text-app-text-muted mb-2.5 font-medium text-center">
             {t("levelChart.title")}
           </p>
           <div className="flex gap-2 justify-center items-center">
@@ -120,7 +120,7 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
             </button>
           </div>
           {!starEnabled && (
-            <p className="text-[10px] text-gray-300 text-center mt-2">
+            <p className="text-[10px] text-app-text-muted text-center mt-2">
               {t("levelChart.starAtLevel5Hint")}
             </p>
           )}

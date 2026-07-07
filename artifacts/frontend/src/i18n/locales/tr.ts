@@ -282,6 +282,10 @@ export const tr: Messages = {
       description:
         "Ana tema rengini seçin. Seviye renkleri, yıldız ve vurgular buna göre güncellenir.",
       selected: "Seçili",
+      darkMode: {
+        label: "Karanlık mod",
+        description: "Uygulama genelinde koyu arka plan kullan.",
+      },
     },
     srs: {
       nav: "SRS",

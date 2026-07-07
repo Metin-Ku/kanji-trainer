@@ -280,6 +280,10 @@ export const en = {
       description:
         "Choose the main theme color. Level colors, star, and accents update accordingly.",
       selected: "Selected",
+      darkMode: {
+        label: "Dark mode",
+        description: "Use a dark background across the app.",
+      },
     },
     srs: {
       nav: "SRS",

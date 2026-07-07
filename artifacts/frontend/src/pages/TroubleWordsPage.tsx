@@ -66,23 +66,23 @@ function TroubleWordRow({
       : item.decks.filter((d) => d.deckType === deckFilter);
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3 border-b border-gray-100 last:border-b-0 bg-white">
+    <div className="flex items-start gap-3 px-4 py-3 border-b border-app-border last:border-b-0 bg-app-surface">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-base font-bold text-gray-900 leading-tight">
+          <p className="text-base font-bold text-app-text leading-tight">
             {item.kanji}
           </p>
           {item.jlptLevel && (
-            <span className="text-[10px] bg-gray-100 text-gray-500 font-semibold px-1.5 py-0.5 rounded-md">
+            <span className="text-[10px] bg-app-muted text-app-text-secondary font-semibold px-1.5 py-0.5 rounded-md">
               {item.jlptLevel}
             </span>
           )}
         </div>
         {item.pronunciation && (
-          <p className="text-xs text-gray-500 mt-0.5">{item.pronunciation}</p>
+          <p className="text-xs text-app-text-secondary mt-0.5">{item.pronunciation}</p>
         )}
         {item.meaning && (
-          <p className="text-xs text-gray-400 mt-0.5 truncate">{item.meaning}</p>
+          <p className="text-xs text-app-text-muted mt-0.5 truncate">{item.meaning}</p>
         )}
         <div className="flex flex-wrap gap-1.5 mt-2">
           {visibleDecks.map((d) => (
@@ -95,7 +95,7 @@ function TroubleWordRow({
             </span>
           ))}
         </div>
-        <p className="text-[10px] text-gray-400 mt-1.5">
+        <p className="text-[10px] text-app-text-muted mt-1.5">
           {t("troubleWords.lastMistake", {
             when: formatRelativeDate(item.lastMistakeAt, t),
           })}
@@ -104,7 +104,7 @@ function TroubleWordRow({
       <button
         type="button"
         onClick={() => onDismiss(item.wordId)}
-        className="p-2 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+        className="p-2 rounded-lg text-app-text-muted hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
         aria-label={t("troubleWords.dismiss")}
       >
         <X size={16} />
@@ -180,21 +180,21 @@ export function TroubleWordsPage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-4 shrink-0">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
+      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
         <button
           onClick={() => navigate("/srs")}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
         >
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
             {t("nav.srs")}
           </span>
         </button>
-        <h1 className="text-xl font-bold text-gray-900 mt-2">
+        <h1 className="text-xl font-bold text-app-text mt-2">
           {t("troubleWords.title")}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">{t("troubleWords.subtitle")}</p>
+        <p className="text-sm text-app-text-secondary mt-1">{t("troubleWords.subtitle")}</p>
       </div>
 
       <div className="px-4 py-3 flex gap-2 overflow-x-auto shrink-0 scrollbar-none">
@@ -206,7 +206,7 @@ export function TroubleWordsPage() {
             className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
               deckFilter === filter
                 ? "bg-main-500 text-white"
-                : "bg-white text-gray-600 border border-gray-200"
+                : "bg-app-surface text-app-text-secondary border border-app-border-strong"
             }`}
           >
             {deckFilterLabel(t, filter)}
@@ -223,11 +223,11 @@ export function TroubleWordsPage() {
           </p>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
-            <p className="text-4xl text-gray-200 mb-3">✓</p>
-            <p className="text-gray-500 text-sm">{t("troubleWords.empty")}</p>
+            <p className="text-4xl text-app-border-strong mb-3">✓</p>
+            <p className="text-app-text-secondary text-sm">{t("troubleWords.empty")}</p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-gray-100 overflow-hidden mx-3">
+          <div className="rounded-2xl border border-app-border overflow-hidden mx-3">
             {items.map((item) => (
               <TroubleWordRow
                 key={item.wordId}
@@ -264,10 +264,10 @@ export function TroubleWordsPage() {
           onClick={() => setDeckPickerOpen(false)}
         >
           <div
-            className="w-full max-w-2xl bg-white rounded-t-2xl p-4 pb-8 space-y-2"
+            className="w-full max-w-2xl bg-app-surface rounded-t-2xl p-4 pb-8 space-y-2"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-sm font-semibold text-gray-700 mb-3">
+            <p className="text-sm font-semibold text-app-text mb-3">
               {t("troubleWords.pickDeck")}
             </p>
             {(["word", "pronunciation", "meaning", "example"] as SrsDeckType[]).map(
@@ -280,17 +280,17 @@ export function TroubleWordsPage() {
                     type="button"
                     disabled={count === 0 || starting}
                     onClick={() => startStudy(deck)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-100 disabled:opacity-40 active:bg-gray-50"
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-app-border disabled:opacity-40 active:bg-app-muted"
                   >
                     <div className="flex-1 text-left">
-                      <p className="text-sm font-bold text-gray-900">
+                      <p className="text-sm font-bold text-app-text">
                         {label.title}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-app-text-muted">
                         {t("troubleWords.deckWordCount", { count })}
                       </p>
                     </div>
-                    <ChevronRight size={18} className="text-gray-300" />
+                    <ChevronRight size={18} className="text-app-text-muted" />
                   </button>
                 );
               },

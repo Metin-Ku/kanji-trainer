@@ -3,6 +3,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html.theme-switching,
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
 @theme inline {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -26,6 +34,15 @@
   --color-main-800: var(--main-800);
   --color-main-900: var(--main-900);
   --color-main-950: var(--main-950);
+  --color-app-bg: var(--app-bg);
+  --color-app-surface: var(--app-surface);
+  --color-app-muted: var(--app-muted);
+  --color-app-border: var(--app-border);
+  --color-app-border-strong: var(--app-border-strong);
+  --color-app-text: var(--app-text);
+  --color-app-text-secondary: var(--app-text-secondary);
+  --color-app-text-muted: var(--app-text-muted);
+  --color-app-accent: var(--app-accent);
   --font-sans: var(--app-font-sans);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -67,12 +84,51 @@
   --level-5: var(--main-700);
   --star-color: var(--main-300);
   --icon-bg: linear-gradient(135deg, color-mix(in oklch, var(--main-400) 13%, transparent), color-mix(in oklch, var(--main-600) 8%, transparent));
+
+  --app-bg: #f9fafb;
+  --app-surface: #ffffff;
+  --app-muted: #f3f4f6;
+  --app-border: #f3f4f6;
+  --app-border-strong: #e5e7eb;
+  --app-text: #111827;
+  --app-text-secondary: #6b7280;
+  --app-text-muted: #9ca3af;
+  --app-accent: color-mix(in oklch, var(--main-500) 10%, #ffffff);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --background: 222 16% 8%;
+  --foreground: 210 15% 93%;
+  --border: 220 12% 20%;
+  --card: 222 16% 11%;
+  --card-foreground: 210 15% 93%;
+  --muted: 220 12% 16%;
+  --muted-foreground: 215 10% 55%;
+  --input: 220 12% 22%;
+
+  --app-bg: #0f1117;
+  --app-surface: #181b24;
+  --app-muted: #1f2430;
+  --app-border: #252a36;
+  --app-border-strong: #323845;
+  --app-text: #f3f4f6;
+  --app-text-secondary: #9ca3af;
+  --app-text-muted: #6b7280;
+  --app-accent: color-mix(in oklch, var(--main-500) 16%, #181b24);
+
+  --icon-bg: linear-gradient(
+    135deg,
+    color-mix(in oklch, var(--main-400) 22%, transparent),
+    color-mix(in oklch, var(--main-600) 14%, transparent)
+  );
 }
 
 @layer base {
   * { @apply border-border box-border; }
   body {
-    @apply font-sans antialiased bg-white text-foreground;
+    @apply font-sans antialiased bg-app-bg text-app-text;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
@@ -122,7 +178,7 @@
 .modal-sheet {
   width: 100%;
   max-width: 480px;
-  background: white;
+  background: var(--app-surface);
   border-radius: 1.25rem 1.25rem 0 0;
   padding: 1.5rem;
   max-height: 90dvh;
@@ -150,4 +206,4 @@ textarea {
 /* Scrollbar minimal */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--app-border-strong); border-radius: 2px; }

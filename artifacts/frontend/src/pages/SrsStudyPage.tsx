@@ -46,25 +46,25 @@ const RATING_KEYS: {
     rating: 1,
     labelKey: "again",
     key: "again",
-    className: "bg-gray-100 hover:bg-red-600",
+    className: "bg-app-muted hover:bg-red-600",
   },
   {
     rating: 2,
     labelKey: "hard",
     key: "hard",
-    className: "bg-gray-100 hover:bg-main-800",
+    className: "bg-app-muted hover:bg-main-800",
   },
   {
     rating: 3,
     labelKey: "good",
     key: "good",
-    className: "bg-gray-100 hover:bg-main-600",
+    className: "bg-app-muted hover:bg-main-600",
   },
   {
     rating: 4,
     labelKey: "easy",
     key: "easy",
-    className: "bg-gray-100 hover:bg-green-500",
+    className: "bg-app-muted hover:bg-green-500",
   },
 ];
 
@@ -411,8 +411,8 @@ function SrsStudyPageInner({
 
   if (!item && !done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-white sm:border-l sm:border-r sm:border-gray-100">
-        <p className="text-gray-400">{t("srs.study.cardNotFound")}</p>
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+        <p className="text-app-text-muted">{t("srs.study.cardNotFound")}</p>
         <button
           onClick={() => navigate(backPath)}
           className="mt-4 text-main-400 text-sm"
@@ -425,11 +425,11 @@ function SrsStudyPageInner({
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-white sm:border-l sm:border-r sm:border-gray-100">
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-4 flex items-center">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+        <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center">
           <button
             onClick={() => navigate(backPath)}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400"
+            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
           >
             <ArrowLeft size={18} />
             <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
@@ -445,15 +445,15 @@ function SrsStudyPageInner({
             ★
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 mb-1">{t("common.completed")}</p>
-            <p className="text-sm text-gray-400">
+            <p className="text-2xl font-bold text-app-text mb-1">{t("common.completed")}</p>
+            <p className="text-sm text-app-text-muted">
               {t("srs.study.sessionComplete")}
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
               onClick={handleRestart}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-gray-500 text-sm"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-app-text-secondary text-sm"
               style={{ background: themeVars.level(1) }}
             >
               <Dices size={16} strokeWidth={2} />
@@ -461,7 +461,7 @@ function SrsStudyPageInner({
             </button>
             <button
               onClick={() => navigate(backPath)}
-              className="w-full py-3 rounded-2xl font-semibold text-sm border border-gray-200 text-gray-600"
+              className="w-full py-3 rounded-2xl font-semibold text-sm border border-app-border-strong text-app-text-secondary"
             >
               {t("srs.study.backToDecks")}
             </button>
@@ -489,18 +489,18 @@ function SrsStudyPageInner({
   const liveWord = words.find((w) => w.id === word.id) ?? queueWordToWord(item);
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col select-none sm:border-l sm:border-r sm:border-gray-100">
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-4 flex items-center justify-between shrink-0">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:border-l sm:border-r sm:border-app-border">
+      <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
         <button
           onClick={() => navigate(backPath)}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400"
+          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
         >
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
             {title}
           </span>
         </button>
-        <span className="text-sm text-gray-400 font-medium tabular-nums">
+        <span className="text-sm text-app-text-muted font-medium tabular-nums">
           {t("common.cardProgress", { current: index + 1, total: items.length })}
         </span>
       </div>
@@ -525,7 +525,7 @@ function SrsStudyPageInner({
           >
             <p
               ref={wordRef}
-              className="font-bold text-gray-900 text-center leading-tight"
+              className="font-bold text-app-text text-center leading-tight"
               style={{ fontSize: deck === "meaning" ? "1.4rem" : "3rem" }}
             >
               {getPrimary(item, deck, t("common.emDash"))}
@@ -533,12 +533,12 @@ function SrsStudyPageInner({
 
             <div className="flex items-center gap-2 flex-wrap justify-center">
               {word.date && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-gray-100 text-gray-500">
+                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-app-muted text-app-text-secondary">
                   {formatStudyDate(word.date)}
                 </span>
               )}
               {word.jlptLevel && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-gray-100 text-gray-500">
+                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-app-muted text-app-text-secondary">
                   {word.jlptLevel}
                 </span>
               )}
@@ -560,7 +560,7 @@ function SrsStudyPageInner({
 
       {/* SRS-only: fixed above rating bar so it is not covered and taps do not hit mainRef */}
       <div
-        className="fixed left-0 right-0 z-20 max-w-2xl mx-auto bg-white border-t border-gray-100 rounded-t-2xl shadow-xl sm:border-l sm:border-r pointer-events-auto"
+        className="fixed left-0 right-0 z-20 max-w-2xl mx-auto bg-app-surface border-t border-app-border rounded-t-2xl shadow-xl sm:border-l sm:border-r pointer-events-auto"
         style={{
           bottom: ratingBarHeight,
           transform: showDetails ? "translateY(0)" : "translateY(100%)",
@@ -571,14 +571,14 @@ function SrsStudyPageInner({
         }}
       >
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-gray-200" />
+          <div className="w-10 h-1 rounded-full bg-app-border-strong" />
         </div>
         <div className={`px-6 pb-4 pt-2 relative ${showRelated && liveWord.meaning ? "" : "pr-24"}`}>
           <div className="absolute top-2 right-6 flex flex-row items-center gap-2">
             <button
               type="button"
               onClick={() => setShowEdit(true)}
-              className="flex items-center justify-center px-3 py-1.5 w-10 h-8 rounded-lg bg-gray-100 text-gray-600"
+              className="flex items-center justify-center px-3 py-1.5 w-10 h-8 rounded-lg bg-app-muted text-app-text-secondary"
             >
               <Pencil size={13} />
             </button>
@@ -601,36 +601,36 @@ function SrsStudyPageInner({
             <div className="space-y-4">
               {deck !== "word" && word.kanji && (
                 <div>
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("study.detailLabels.word")}
                   </p>
-                  <p className="text-3xl font-bold text-gray-800">{word.kanji}</p>
+                  <p className="text-3xl font-bold text-app-text">{word.kanji}</p>
                 </div>
               )}
               {deck !== "pronunciation" && word.pronunciation && (
                 <div>
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("study.detailLabels.pronunciation")}
                   </p>
-                  <p className="text-lg font-medium text-gray-700">
+                  <p className="text-lg font-medium text-app-text">
                     {word.pronunciation}
                   </p>
                 </div>
               )}
               {deck !== "meaning" && word.meaning && (
                 <div>
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("study.detailLabels.meaning")}
                   </p>
-                  <p className="text-base text-gray-700">{word.meaning}</p>
+                  <p className="text-base text-app-text">{word.meaning}</p>
                 </div>
               )}
               {word.description && (
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mb-1">
+                <div className="pt-3 border-t border-app-border">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
                     {t("study.detailLabels.description")}
                   </p>
-                  <p className="whitespace-pre-wrap text-sm text-gray-600 leading-relaxed">
+                  <p className="whitespace-pre-wrap text-sm text-app-text-secondary leading-relaxed">
                     {word.description}
                   </p>
                 </div>
@@ -642,7 +642,7 @@ function SrsStudyPageInner({
 
       <div
         ref={ratingBarRef}
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 px-3 py-3 max-w-2xl mx-auto sm:border-l sm:border-r"
+        className="fixed bottom-0 left-0 right-0 z-30 bg-app-surface border-t border-app-border px-3 py-3 max-w-2xl mx-auto sm:border-l sm:border-r"
       >
         <div className="grid grid-cols-4 gap-2">
           {RATING_KEYS.map(({ rating, labelKey, key, className }) => (
@@ -650,7 +650,7 @@ function SrsStudyPageInner({
               key={rating}
               onClick={() => handleReviewClick(rating)}
               disabled={reviewing}
-              className={`flex flex-col items-center justify-center py-2.5 rounded-xl text-gray-500 text-xs font-semibold transition-opacity disabled:opacity-50 ${className}`}
+              className={`flex flex-col items-center justify-center py-2.5 rounded-xl text-app-text-secondary text-xs font-semibold transition-opacity disabled:opacity-50 ${className}`}
             >
               <span>{t(`srs.study.ratings.${labelKey}`)}</span>
               {intervals && (

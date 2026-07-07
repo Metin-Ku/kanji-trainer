@@ -171,16 +171,16 @@ export function LearnedPage() {
   const displayed = filterWords(sortLearned(starred, sort), query);
 
   return (
-    <div className="min-h-dvh bg-white">
-      <div className="max-w-2xl mx-auto pb-28 sm:border-l sm:border-r sm:border-gray-100">
+    <div className="min-h-dvh bg-app-surface">
+      <div className="max-w-2xl mx-auto pb-28 sm:border-l sm:border-r sm:border-app-border">
         <div
           ref={headerRef}
-          className="sticky top-0 z-10 bg-white border-b border-gray-100 px-4 pt-4 pb-4 space-y-2"
+          className="sticky top-0 z-10 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 space-y-2"
         >
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate("/learned")}
-              className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
             >
               <ArrowLeft size={18} />
               <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
@@ -199,13 +199,13 @@ export function LearnedPage() {
                 navigate("/study");
               }}
               disabled={displayed.length === 0}
-              className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-30"
+              className="p-1.5 rounded-lg text-app-text-muted hover:bg-app-muted transition-colors disabled:opacity-30"
             >
               <Dices size={17} strokeWidth={2} />
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <p className="text-sm text-gray-400 shrink-0 min-w-[1.25rem] flex items-center justify-center">
+            <p className="text-sm text-app-text-muted shrink-0 min-w-[1.25rem] flex items-center justify-center">
               {isLoading ? (
                 <LoadingSpinner size={18} />
               ) : (
@@ -219,20 +219,20 @@ export function LearnedPage() {
             <div className="relative shrink-0" ref={sortMenuRef}>
               <button
                 onClick={() => setShowSortMenu((v) => !v)}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-main-400 bg-main-50 hover:bg-main-100 transition-colors"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-main-400 bg-app-accent hover:bg-main-100 transition-colors"
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
                 <span className="text-xs font-medium">{t("common.sort")}</span>
               </button>
               {showSortMenu && (
-                <div className="absolute right-0 top-full mt-1.5 z-50 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden w-56">
+                <div className="absolute right-0 top-full mt-1.5 z-50 bg-app-surface rounded-xl shadow-xl border border-app-border overflow-hidden w-56">
                   {groups.map((group, gi) => (
                     <div key={group.key}>
                       {gi > 0 && (
-                        <div className="mx-3 my-1.5 border-t border-gray-100" />
+                        <div className="mx-3 my-1.5 border-t border-app-border" />
                       )}
                       <div className="px-3 pt-2.5 pb-1">
-                        <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                        <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
                           {group.label}
                         </p>
                       </div>
@@ -245,7 +245,7 @@ export function LearnedPage() {
                               setSort(opt.value);
                               setShowSortMenu(false);
                             }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-gray-50"
+                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-app-muted"
                           >
                             {sort === opt.value ? (
                               <CheckSquare
@@ -256,15 +256,15 @@ export function LearnedPage() {
                             ) : (
                               <Square
                                 size={15}
-                                className="text-gray-300 shrink-0"
+                                className="text-app-text-muted shrink-0"
                                 strokeWidth={2}
                               />
                             )}
                             <span
                               className={
                                 sort === opt.value
-                                  ? "text-gray-800 font-medium"
-                                  : "text-gray-500"
+                                  ? "text-app-text font-medium"
+                                  : "text-app-text-secondary"
                               }
                             >
                               {opt.label}
@@ -282,7 +282,7 @@ export function LearnedPage() {
               onClick={() =>
                 selectMode ? exitSelectMode() : setSelectMode(true)
               }
-              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50" : "text-gray-400 hover:bg-gray-50"}`}
+              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-app-accent" : "text-app-text-muted hover:bg-app-muted"}`}
             >
               {selectMode ? t("common.cancel") : t("common.select")}
             </button>
@@ -293,13 +293,13 @@ export function LearnedPage() {
           <LoadingPlaceholder padding="lg" />
         ) : displayed.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <p className="text-5xl text-gray-200 mb-3">★</p>
+            <p className="text-5xl text-app-border-strong mb-3">★</p>
             {query ? (
-              <p className="text-gray-400 text-sm">
+              <p className="text-app-text-muted text-sm">
                 {t("common.noResultsForQuery", { query })}
               </p>
             ) : (
-              <p className="text-gray-400 text-sm">
+              <p className="text-app-text-muted text-sm">
                 {t("learned.empty")}
                 <br />
                 {t("learned.emptyHint")}
@@ -307,7 +307,7 @@ export function LearnedPage() {
             )}
           </div>
         ) : (
-          <div className="bg-white overflow-hidden">
+          <div className="bg-app-surface overflow-hidden">
             {displayed.map((word, i) => (
               <WordCard
                 key={word.id}
@@ -348,14 +348,14 @@ export function LearnedPage() {
       </div>
 
       {selectMode && (
-        <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-gray-100 fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 px-4 py-3 flex items-center gap-3">
+        <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-app-border fixed bottom-0 left-0 right-0 z-50 bg-app-surface border-t border-app-border-strong px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))}
-            className="text-xs text-gray-500 shrink-0"
+            className="text-xs text-app-text-secondary shrink-0"
           >
             {t("common.selectAll")}
           </button>
-          <span className="flex-1 text-center text-sm text-gray-500 font-medium">
+          <span className="flex-1 text-center text-sm text-app-text-secondary font-medium">
             {selectedIds.size > 0
               ? t("common.selectedCount", { count: selectedIds.size })
               : t("common.selectRows")}

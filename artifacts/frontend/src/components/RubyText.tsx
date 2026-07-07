@@ -15,7 +15,7 @@ export function RubyInline({
   return (
     <ruby className={`align-baseline ${className}`}>
       {base}
-      <rt className="text-[0.45em] font-normal text-gray-500 leading-none">
+      <rt className="text-[0.45em] font-normal text-app-text-secondary leading-none">
         {reading}
       </rt>
     </ruby>

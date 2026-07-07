@@ -17,8 +17,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-white rounded-2xl border border-gray-100 p-4">
-      <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+    <section className="bg-app-surface rounded-2xl border border-app-border p-4">
+      <h2 className="text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-4">
         {title}
       </h2>
       {children}
@@ -33,24 +33,24 @@ export function ProgressPage() {
   const activityByDate = useStudyHistory();
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-4 shrink-0">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
+      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
         >
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
             {t("nav.progress")}
           </span>
         </button>
-        <h1 className="text-xl font-bold text-gray-900 mt-2">
+        <h1 className="text-xl font-bold text-app-text mt-2">
           {t("progress.title")}
         </h1>
-        <p className="text-sm text-gray-500 mt-1">{t("progress.subtitle")}</p>
+        <p className="text-sm text-app-text-secondary mt-1">{t("progress.subtitle")}</p>
       </div>
 
-      <div className="p-4 space-y-4 flex-1 overflow-y-auto pb-8">
+      <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto pb-8">
         {isLoading ? (
           <LoadingPlaceholder padding="lg" />
         ) : (

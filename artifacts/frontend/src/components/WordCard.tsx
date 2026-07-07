@@ -64,14 +64,14 @@ export function WordCard({
 
   return (
     <>
-      <div ref={cardRef} className="border-b border-gray-100 last:border-b-0">
+      <div ref={cardRef} className="border-b border-app-border last:border-b-0">
         <div
           className="flex items-center gap-2.5 px-4 py-3 select-none cursor-pointer"
           onClick={handleRowClick}
         >
           {selectMode ? (
             <div
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors border-gray-200 ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
+              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors border-app-border-strong ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
             >
               {isSelected && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -86,7 +86,7 @@ export function WordCard({
               )}
             </div>
           ) : (
-            <span className="text-gray-300 font-medium text-sm w-5 text-right shrink-0 tabular-nums">
+            <span className="text-app-text-muted font-medium text-sm w-5 text-right shrink-0 tabular-nums">
               {index}
             </span>
           )}
@@ -106,8 +106,8 @@ export function WordCard({
             className={[
               "text-lg font-bold leading-none shrink-0",
               kanjiClickable
-                ? "text-gray-800 active:text-main-400 transition-colors"
-                : "text-gray-800",
+                ? "text-app-text active:text-main-400 transition-colors"
+                : "text-app-text",
             ].join(" ")}
             style={kanjiClickable ? { cursor: "zoom-in" } : {}}
             onClick={
@@ -124,7 +124,7 @@ export function WordCard({
 
           {word.jlptLevel && !selectMode && (
             <span
-              className="text-[10px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0"
+              className="text-[10px] bg-app-muted text-app-text-secondary font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0"
             >
               {word.jlptLevel}
             </span>
@@ -138,14 +138,14 @@ export function WordCard({
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="p-1.5 rounded-lg text-gray-300 hover:text-blue-400 transition-colors"
+                className="p-1.5 rounded-lg text-app-text-muted hover:text-blue-400 transition-colors"
                 onClick={() => onEdit(word)}
                 aria-label={t("a11y.edit")}
               >
                 <Pencil size={14} />
               </button>
               <button
-                className="p-1.5 rounded-lg text-gray-300 hover:text-red-400 transition-colors"
+                className="p-1.5 rounded-lg text-app-text-muted hover:text-red-400 transition-colors"
                 onClick={() => onDelete(word.id)}
                 aria-label={t("common.delete")}
               >
@@ -159,7 +159,7 @@ export function WordCard({
           <div className={`word-detail ${isOpen ? "open" : ""}`}>
             <div className="px-5 pb-4 space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-gray-400 font-medium">
+                <p className="text-xs text-app-text-muted font-medium">
                   {showRelated ? "" : formatCardDate(word.date)}
                 </p>
                 {word.meaning && allWords && (
@@ -177,24 +177,24 @@ export function WordCard({
               ) : (
                 <>
                   {word.pronunciation && (
-                    <p className="text-sm text-gray-500">
-                      <span className="font-medium text-gray-400 text-xs uppercase tracking-wide mr-2">
+                    <p className="text-sm text-app-text-secondary">
+                      <span className="font-medium text-app-text-muted text-xs uppercase tracking-wide mr-2">
                         {t("common.pronunciation")}
                       </span>
                       {word.pronunciation}
                     </p>
                   )}
                   {word.meaning && (
-                    <p className="text-sm text-gray-600">
-                      <span className="font-medium text-gray-400 text-xs uppercase tracking-wide mr-2">
+                    <p className="text-sm text-app-text-secondary">
+                      <span className="font-medium text-app-text-muted text-xs uppercase tracking-wide mr-2">
                         {t("common.meaning")}
                       </span>
                       {word.meaning}
                     </p>
                   )}
                   {word.description && (
-                    <div className="pt-1 border-t border-gray-100">
-                      <div className="whitespace-pre-wrap text-[15px] text-gray-700 leading-relaxed font-[inherit]">
+                    <div className="pt-1 border-t border-app-border">
+                      <div className="whitespace-pre-wrap text-[15px] text-app-text leading-relaxed font-[inherit]">
                         {word.description}
                       </div>
                     </div>
@@ -202,7 +202,7 @@ export function WordCard({
                   {!word.pronunciation &&
                     !word.meaning &&
                     !word.description && (
-                      <span className="text-gray-300 italic text-sm">
+                      <span className="text-app-text-muted italic text-sm">
                         {t("common.noDescription")}
                       </span>
                     )}

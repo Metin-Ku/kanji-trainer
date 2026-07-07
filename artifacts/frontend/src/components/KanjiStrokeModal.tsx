@@ -229,7 +229,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-white shadow-2xl overflow-hidden"
+        className="bg-app-surface shadow-2xl overflow-hidden"
         style={
           variant === "sheet"
             ? {
@@ -244,14 +244,14 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-widest">
+          <p className="text-[11px] font-semibold text-app-text-muted uppercase tracking-widest">
             {t("kanjiStroke.title")}
           </p>
           <div className="flex items-center gap-0.5">
             {svgContent && !loading && (
               <button
                 onClick={runAnimation}
-                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
+                className="p-1.5 rounded-lg hover:bg-app-muted text-app-text-muted transition-colors"
                 title={t("a11y.replayAnimation")}
               >
                 <RefreshCw size={13} />
@@ -259,7 +259,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
             )}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
+              className="p-1.5 rounded-lg hover:bg-app-muted text-app-text-muted transition-colors"
             >
               <X size={16} />
             </button>
@@ -272,7 +272,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
             <button
               onClick={() => setCharIndex((i) => Math.max(0, i - 1))}
               disabled={charIndex === 0}
-              className="p-1 text-gray-300 hover:text-gray-500 disabled:opacity-30 transition-colors"
+              className="p-1 text-app-text-muted hover:text-app-text-secondary disabled:opacity-30 transition-colors"
             >
               <ChevronLeft size={16} />
             </button>
@@ -299,7 +299,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
                 setCharIndex((i) => Math.min(chars.length - 1, i + 1))
               }
               disabled={charIndex === chars.length - 1}
-              className="p-1 text-gray-300 hover:text-gray-500 disabled:opacity-30 transition-colors"
+              className="p-1 text-app-text-muted hover:text-app-text-secondary disabled:opacity-30 transition-colors"
             >
               <ChevronRight size={16} />
             </button>
@@ -309,7 +309,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
         {/* Single char big display */}
         {chars.length === 1 && (
           <div className="text-center pb-1">
-            <span className="text-5xl font-bold text-gray-800">
+            <span className="text-5xl font-bold text-app-text">
               {currentChar}
             </span>
           </div>
@@ -320,11 +320,11 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
           className="mx-4 mb-4 rounded-xl flex items-center justify-center"
           style={{ height: 248, background: "#f9f9f9" }}
         >
-          {loading && <LoadingSpinner size={32} className="text-gray-300" />}
+          {loading && <LoadingSpinner size={32} className="text-app-text-muted" />}
           {error && (
             <div className="text-center px-6">
-              <p className="text-3xl text-gray-200 mb-2">{currentChar}</p>
-              <p className="text-xs text-gray-300">{t("kanjiStroke.svgNotFound")}</p>
+              <p className="text-3xl text-app-border-strong mb-2">{currentChar}</p>
+              <p className="text-xs text-app-text-muted">{t("kanjiStroke.svgNotFound")}</p>
             </div>
           )}
           {svgContent && !loading && (

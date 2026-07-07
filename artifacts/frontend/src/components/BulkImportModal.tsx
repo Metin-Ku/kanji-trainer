@@ -144,12 +144,12 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
     >
       <div className="modal-sheet">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-lg font-bold text-app-text">
             {t("bulkImport.title")}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400"
+            className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted"
           >
             <X size={18} />
           </button>
@@ -157,7 +157,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
 
         {!result ? (
           <>
-            <p className="text-xs text-gray-400 mb-3 leading-relaxed">
+            <p className="text-xs text-app-text-muted mb-3 leading-relaxed">
               {t("bulkImport.instructions")}
             </p>
 
@@ -169,32 +169,32 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
               }}
               placeholder={t("bulkImport.placeholder")}
               rows={6}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-xs text-gray-600 font-mono focus:outline-none focus:ring-2 focus:ring-main-300 transition-all mb-3"
+              className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 text-xs text-app-text-secondary font-mono focus:outline-none focus:ring-2 focus:ring-main-300 transition-all mb-3"
             />
 
             {preview.length === 0 ? (
               <button
                 onClick={handleParse}
                 disabled={!html.trim()}
-                className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 border-gray-200 text-gray-500 hover:border-main-300 hover:text-main-500 transition-colors disabled:opacity-40"
+                className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 border-app-border-strong text-app-text-secondary hover:border-main-300 hover:text-main-500 transition-colors disabled:opacity-40"
               >
                 {html.trim() ? t("common.preview") : t("bulkImport.pasteTable")}
               </button>
             ) : (
               <div className="space-y-3">
-                <div className="bg-main-50 border border-main-100 rounded-xl px-4 py-3 text-sm text-gray-700">
+                <div className="bg-app-accent border border-main-100 rounded-xl px-4 py-3 text-sm text-app-text">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-gray-800">
+                    <p className="font-semibold text-app-text">
                       {t("bulkImport.wordsDetected", { count: preview.length })}
                     </p>
                   </div>
                   <div className="max-h-36 overflow-y-auto space-y-1.5">
                     {preview.map((w, i) => (
                       <div key={i} className="flex gap-2 text-xs items-center">
-                        <span className="font-bold text-gray-700 w-16 shrink-0">
+                        <span className="font-bold text-app-text w-16 shrink-0">
                           {w.kanji}
                         </span>
-                        <span className="text-gray-500 truncate flex-1">
+                        <span className="text-app-text-secondary truncate flex-1">
                           {w.pronunciation}
                         </span>
                         {w.jlptLevel && (
@@ -207,7 +207,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                         )}
                         {w.description && (
                           <span
-                            className="text-gray-300 shrink-0"
+                            className="text-app-text-muted shrink-0"
                             title={t("bulkImport.descriptionTitle")}
                           >
                             ✓
@@ -227,7 +227,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setPreview([])}
-                    className="flex-1 py-2.5 rounded-xl font-semibold text-sm border-2 border-gray-200 text-gray-400 hover:border-gray-300 transition-colors"
+                    className="flex-1 py-2.5 rounded-xl font-semibold text-sm border-2 border-app-border-strong text-app-text-muted hover:border-app-border-strong transition-colors"
                   >
                     {t("common.cancel")}
                   </button>
@@ -256,23 +256,23 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
           </>
         ) : (
           <div className="space-y-4">
-            <div className="bg-gray-50 border border-gray-100 rounded-xl px-4 py-4 space-y-2">
-              <p className="text-sm text-gray-500">
+            <div className="bg-app-muted border border-app-border rounded-xl px-4 py-4 space-y-2">
+              <p className="text-sm text-app-text-secondary">
                 {t("bulkImport.result.totalGiven", { count: result.total })}
               </p>
-              <p className="text-base font-bold text-gray-800">
+              <p className="text-base font-bold text-app-text">
                 {t("bulkImport.result.added", { count: result.added })}
               </p>
               {result.updated > 0 && (
                 <>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-app-text-muted">
                     {t("bulkImport.result.updated", { count: result.updated })}
                   </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {result.updatedWords.map((w) => (
                       <span
                         key={w}
-                        className="text-sm font-medium text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg"
+                        className="text-sm font-medium text-app-text-secondary bg-app-muted px-2 py-0.5 rounded-lg"
                       >
                         {w}
                       </span>

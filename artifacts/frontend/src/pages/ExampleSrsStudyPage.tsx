@@ -206,8 +206,8 @@ export function ExampleSrsStudyPage() {
 
   if (!item && !done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-white">
-        <p className="text-gray-400">{t("srs.study.cardNotFound")}</p>
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface">
+        <p className="text-app-text-muted">{t("srs.study.cardNotFound")}</p>
         <button
           onClick={() => navigate(backPath)}
           className="mt-4 text-main-400 text-sm"
@@ -220,11 +220,11 @@ export function ExampleSrsStudyPage() {
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-white sm:border-l sm:border-r sm:border-gray-100">
-        <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-4">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+        <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
           <button
             onClick={() => navigate(backPath)}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400"
+            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
           >
             <ArrowLeft size={18} />
             <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
@@ -240,22 +240,22 @@ export function ExampleSrsStudyPage() {
             ★
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900 mb-1">{t("common.completed")}</p>
-            <p className="text-sm text-gray-400">
+            <p className="text-2xl font-bold text-app-text mb-1">{t("common.completed")}</p>
+            <p className="text-sm text-app-text-muted">
               {t("srs.study.examplesComplete")}
             </p>
           </div>
           <div className="flex flex-col gap-3 w-full max-w-xs">
             <button
               onClick={handleRestart}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-gray-500 text-sm"
+              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-app-text-secondary text-sm"
               style={{ background: themeVars.level(1) }}
             >
               <Dices size={16} /> {t("srs.study.restart")}
             </button>
             <button
               onClick={() => navigate(backPath)}
-              className="w-full py-3 rounded-2xl font-semibold text-sm border border-gray-200 text-gray-600"
+              className="w-full py-3 rounded-2xl font-semibold text-sm border border-app-border-strong text-app-text-secondary"
             >
               {t("srs.study.backToDecks")}
             </button>
@@ -276,11 +276,11 @@ export function ExampleSrsStudyPage() {
   const answerState: AnswerPhase = answerPhase;
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-white flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-100 px-4 pt-4 pb-4 flex items-center justify-between shrink-0">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col sm:border-l sm:border-r sm:border-app-border">
+      <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
         <button
           onClick={() => navigate(backPath)}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400"
+          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
         >
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
@@ -291,11 +291,11 @@ export function ExampleSrsStudyPage() {
           <button
             type="button"
             onClick={() => setShowCardDetails(true)}
-            className="p-2 rounded-lg bg-gray-100 text-gray-500"
+            className="p-2 rounded-lg bg-app-muted text-app-text-secondary"
           >
             <Pencil size={14} />
           </button>
-          <span className="text-sm text-gray-400 font-medium tabular-nums">
+          <span className="text-sm text-app-text-muted font-medium tabular-nums">
             {t("common.cardProgress", { current: index + 1, total: items.length })}
           </span>
         </div>
@@ -304,7 +304,7 @@ export function ExampleSrsStudyPage() {
       <div className="flex-1 flex flex-col px-6 py-6 gap-6 overflow-y-auto pb-8">
         {currentEx ? (
           <>
-            <div className="rounded-2xl bg-gray-50 border border-gray-100 px-5 py-6 text-center">
+            <div className="rounded-2xl bg-app-muted border border-app-border px-5 py-6 text-center">
               <ExampleSentenceDisplay
                 example={currentEx}
                 headwordKanji={liveWord.kanji}
@@ -319,7 +319,7 @@ export function ExampleSrsStudyPage() {
                 onWordTap={setSheetWord}
               />
               {examples.length > 1 && (
-                <p className="text-xs text-gray-400 mt-3">
+                <p className="text-xs text-app-text-muted mt-3">
                   {t("common.exampleProgress", { current: (cursor % examples.length) + 1, total: examples.length })}
                 </p>
               )}
@@ -327,12 +327,12 @@ export function ExampleSrsStudyPage() {
 
             <div className="space-y-2 text-center">
               {currentEx.hints.map((hint, i) => (
-                <p key={i} className="text-base text-gray-600 leading-relaxed">
+                <p key={i} className="text-base text-app-text-secondary leading-relaxed">
                   {renderHintParts(hint.text, hint.highlights).map((p, j) =>
                     p.highlight ? (
                       <span
                         key={j}
-                        className="font-semibold text-main-600 bg-main-50 px-0.5 rounded"
+                        className="font-semibold text-main-600 bg-app-accent px-0.5 rounded"
                       >
                         {p.text}
                       </span>
@@ -356,9 +356,9 @@ export function ExampleSrsStudyPage() {
                 onBlur={() => setFocused(false)}
                 disabled={reviewing}
                 placeholder={settings.srsRomajiInput ? "答え" : ""}
-                // className={`w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-xl font-bold text-center text-gray-800 focus:outline-none focus:ring-2 focus:ring-main-300 disabled:opacity-60 ${answerPhase === "revealed" ? "border-red-600" : ""} ${answerPhase === "correct" ? "border-green-500" : ""}`}
+                // className={`w-full rounded-xl border border-app-border-strong bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 disabled:opacity-60 ${answerPhase === "revealed" ? "border-red-600" : ""} ${answerPhase === "correct" ? "border-green-500" : ""}`}
                 className={`
-       w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-xl font-bold text-center text-gray-800 
+       w-full rounded-xl border border-app-border-strong bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text 
           outline-none
           transition-all
           duration-150
@@ -399,7 +399,7 @@ export function ExampleSrsStudyPage() {
             </div>
           </>
         ) : (
-          <p className="text-center text-gray-400">
+          <p className="text-center text-app-text-muted">
             {t("srs.example.noExample")}
           </p>
         )}

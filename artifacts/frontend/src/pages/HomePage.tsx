@@ -31,7 +31,11 @@ import { useTranslation } from "../i18n/I18nProvider";
 
 const STUDY_LINKS = [
   { path: "/words", Icon: Languages, titleKey: "nav.words" as const },
-  { path: "/pronunciation", Icon: Waves, titleKey: "nav.pronunciation" as const },
+  {
+    path: "/pronunciation",
+    Icon: Waves,
+    titleKey: "nav.pronunciation" as const,
+  },
   { path: "/meaning", Icon: BookOpen, titleKey: "nav.meaning" as const },
   { path: "/learned", Icon: null, titleKey: "nav.learned" as const },
 ] as const;
@@ -39,7 +43,8 @@ const STUDY_LINKS = [
 export function HomePage() {
   const { t, formatToday } = useTranslation();
   const [, navigate] = useLocation();
-  const { words, isLoading, updateWord, deleteWord, addWord, bulkCreate } = useWords();
+  const { words, isLoading, updateWord, deleteWord, addWord, bulkCreate } =
+    useWords();
   const activityByDate = useStudyHistory();
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
@@ -76,12 +81,13 @@ export function HomePage() {
   const starredCount = words.filter((w) => w.starred).length;
   const nonStarredCount = words.filter((w) => !w.starred).length;
 
-  const studyCounts: Record<(typeof STUDY_LINKS)[number]["titleKey"], number> = {
-    "nav.words": nonStarredCount,
-    "nav.pronunciation": words.length,
-    "nav.meaning": words.length,
-    "nav.learned": starredCount,
-  };
+  const studyCounts: Record<(typeof STUDY_LINKS)[number]["titleKey"], number> =
+    {
+      "nav.words": nonStarredCount,
+      "nav.pronunciation": words.length,
+      "nav.meaning": words.length,
+      "nav.learned": starredCount,
+    };
 
   function toggleOpen(id: number) {
     setOpenIds((prev) => {
@@ -99,37 +105,37 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="bg-white border-b border-gray-100 px-5 pt-4 pb-4 shrink-0">
-        <div className="flex items-start justify-between gap-3 mb-0.5">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
+      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
+        <div className="flex items-start items-center justify-between gap-3 mb-0.5">
           <p className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
             {t("home.appSubtitle")}
           </p>
           <div className="flex items-center gap-0.5 -mr-2 -mt-1">
             <button
               onClick={() => navigate("/srs")}
-              className="p-2 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
+              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 hover:bg-app-accent transition-colors"
               aria-label={t("a11y.srs")}
             >
               <Layers size={20} strokeWidth={2} />
             </button>
             <button
               onClick={() => navigate("/progress")}
-              className="p-2 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
+              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 hover:bg-app-accent transition-colors"
               aria-label={t("a11y.progress")}
             >
               <BarChart2 size={20} strokeWidth={2} />
             </button>
             <button
               onClick={() => navigate("/settings")}
-              className="p-2 rounded-xl text-gray-400 hover:text-main-500 hover:bg-main-50 transition-colors"
+              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 hover:bg-app-accent transition-colors"
               aria-label={t("a11y.settings")}
             >
               <Settings size={20} strokeWidth={2} />
             </button>
           </div>
         </div>
-        <h1 className="text-xl font-bold text-gray-900 mb-3">
+        <h1 className="text-xl font-bold text-app-text mb-3">
           {formatToday()}
         </h1>
         <SearchBar
@@ -148,19 +154,19 @@ export function HomePage() {
       </div>
 
       {isSearching ? (
-        <div className="flex-1 overflow-y-auto bg-white">
+        <div className="flex-1 overflow-y-auto bg-app-surface">
           {isLoading ? (
             <LoadingPlaceholder />
           ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center px-8">
-              <p className="text-4xl text-gray-200 mb-3">?</p>
-              <p className="text-gray-400 text-sm">
+              <p className="text-4xl text-app-border-strong mb-3">?</p>
+              <p className="text-app-text-muted text-sm">
                 {t("common.noResultsForQuery", { query })}
               </p>
             </div>
           ) : (
             <div>
-              <p className="px-5 pt-3 pb-1 text-xs text-gray-400 font-medium">
+              <p className="px-5 pt-3 pb-1 text-xs text-app-text-muted font-medium">
                 {t("common.resultCount", { count: results.length })}
               </p>
               {results.map((word) => {
@@ -174,30 +180,30 @@ export function HomePage() {
                 return (
                   <div
                     key={word.id}
-                    className="border-b border-gray-100 last:border-b-0"
+                    className="border-b border-app-border last:border-b-0"
                   >
                     <div
                       className="flex items-center gap-3 px-5 py-3 select-none cursor-pointer"
                       onClick={() => hasDetail && toggleOpen(word.id)}
                     >
                       <div className="flex-1 min-w-0">
-                        <p className="text-base font-bold text-gray-800 leading-none">
+                        <p className="text-base font-bold text-app-text leading-none">
                           {word.kanji}
                         </p>
                         {word.pronunciation && (
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-app-text-secondary mt-0.5">
                             {word.pronunciation}
                           </p>
                         )}
                         {word.meaning && (
-                          <p className="text-xs text-gray-400 mt-0.5 truncate">
+                          <p className="text-xs text-app-text-muted mt-0.5 truncate">
                             {word.meaning}
                           </p>
                         )}
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {word.jlptLevel && (
-                          <span className="text-[11px] bg-gray-100 text-gray-500 font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
+                          <span className="text-[11px] bg-app-muted text-app-text-secondary font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
                             {word.jlptLevel}
                           </span>
                         )}
@@ -223,12 +229,12 @@ export function HomePage() {
                           ).map(({ Icon, starred, level }, i) => (
                             <div
                               key={i}
-                              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white"
+                              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-app-surface"
                             >
                               <Icon
                                 size={13}
                                 strokeWidth={2}
-                                className="text-gray-500"
+                                className="text-app-text-secondary"
                               />
                               {starred ? (
                                 <div
@@ -257,22 +263,26 @@ export function HomePage() {
                             setEditingWord(word);
                             setShowForm(true);
                           }}
-                          className="p-1.5 rounded-lg bg-gray-100 active:opacity-60 transition-opacity"
-                          style={{ background: "bg-gray-100" }}
+                          className="p-1.5 rounded-lg bg-app-muted active:opacity-60 transition-opacity"
+                          style={{ background: "bg-app-muted" }}
                         >
                           <Pencil
                             size={13}
                             strokeWidth={2}
-                            className="text-gray-500"
+                            className="text-app-text-secondary"
                           />
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            if (confirm(t("home.confirmDelete", { kanji: word.kanji })))
+                            if (
+                              confirm(
+                                t("home.confirmDelete", { kanji: word.kanji }),
+                              )
+                            )
                               deleteWord(word.id);
                           }}
-                          className="p-1.5 rounded-lg bg-gray-100 active:opacity-60 transition-opacity"
+                          className="p-1.5 rounded-lg bg-app-muted active:opacity-60 transition-opacity"
                         >
                           <Trash2
                             size={13}
@@ -308,7 +318,7 @@ export function HomePage() {
                             <RelatedWordsList word={word} allWords={words} />
                           ) : (
                             word.description && (
-                              <div className="whitespace-pre-wrap text-[14px] text-gray-700 leading-relaxed font-[inherit]">
+                              <div className="whitespace-pre-wrap text-[14px] text-app-text leading-relaxed font-[inherit]">
                                 {word.description}
                               </div>
                             )
@@ -328,36 +338,44 @@ export function HomePage() {
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-5 py-4 pb-24">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2.5 px-1">
+          <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-2.5 px-1">
             {t("home.studySection")}
           </p>
           <div className="space-y-2">
             {STUDY_LINKS.map(({ path, Icon, titleKey }) => {
               const star = titleKey === "nav.learned";
               return (
-              <button
-                key={path}
-                onClick={() => navigate(path)}
-                className="w-full flex items-center gap-4 bg-white rounded-2xl border border-gray-100 px-4 py-3.5 active:scale-[0.99] transition-transform"
-              >
-                <div className="w-10 h-10 rounded-xl bg-main-50 flex items-center justify-center shrink-0">
-                  {star ? (
-                    <span style={{ color: themeVars.star, fontSize: 18 }}>★</span>
-                  ) : (
-                    Icon && (
-                      <Icon size={18} className="text-main-500" strokeWidth={1.8} />
-                    )
-                  )}
-                </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className="text-base font-bold text-gray-900">{t(titleKey)}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {t("common.wordCount", { count: studyCounts[titleKey] })}
-                  </p>
-                </div>
-                <ChevronRight size={18} className="text-gray-300 shrink-0" />
-              </button>
-            );
+                <button
+                  key={path}
+                  onClick={() => navigate(path)}
+                  className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-3.5 active:scale-[0.99] transition-transform"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-app-accent flex items-center justify-center shrink-0">
+                    {star ? (
+                      <span style={{ color: themeVars.star, fontSize: 18 }}>
+                        ★
+                      </span>
+                    ) : (
+                      Icon && (
+                        <Icon
+                          size={18}
+                          className="text-main-500"
+                          strokeWidth={1.8}
+                        />
+                      )
+                    )}
+                  </div>
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-base font-bold text-app-text">
+                      {t(titleKey)}
+                    </p>
+                    <p className="text-xs text-app-text-muted mt-0.5">
+                      {t("common.wordCount", { count: studyCounts[titleKey] })}
+                    </p>
+                  </div>
+                  <ChevronRight size={18} className="text-app-text-muted shrink-0" />
+                </button>
+              );
             })}
           </div>
         </div>

@@ -4,6 +4,7 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useLocation } from "wouter";
 import {
   applyTheme,
+  applyColorScheme,
   getPalette,
   getStoredPalette,
   PALETTE_NAMES,
@@ -44,10 +45,10 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-white p-4 cursor-pointer hover:border-gray-300">
+    <label className="flex items-start justify-between gap-4 rounded-xl border border-app-border-strong bg-app-surface p-4 cursor-pointer hover:border-app-border-strong">
       <div>
-        <p className="text-sm font-semibold text-gray-800">{label}</p>
-        <p className="text-xs text-gray-500 mt-1 leading-relaxed">{description}</p>
+        <p className="text-sm font-semibold text-app-text">{label}</p>
+        <p className="text-xs text-app-text-secondary mt-1 leading-relaxed">{description}</p>
       </div>
       <button
         type="button"
@@ -55,11 +56,11 @@ function Toggle({
         aria-checked={checked}
         onClick={() => onChange(!checked)}
         className={`relative shrink-0 w-11 h-6 rounded-full transition-colors ${
-          checked ? "bg-main-500" : "bg-gray-200"
+          checked ? "bg-main-500" : "bg-app-border-strong"
         }`}
       >
         <span
-          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-app-surface shadow transition-transform ${
             checked ? "translate-x-5" : "translate-x-0"
           }`}
         />
@@ -158,11 +159,11 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-gray-50 flex flex-col sm:border-l sm:border-r sm:border-gray-100">
-      <div className="bg-white border-b border-gray-100 px-4 pt-4 pb-4 shrink-0">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
+      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
         >
           <ArrowLeft size={18} />
           <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
@@ -172,16 +173,16 @@ export function SettingsPage() {
       </div>
 
       <div className="flex-1 flex min-h-0">
-        <aside className="w-44 shrink-0 bg-white border-r border-gray-100 p-3">
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2">
+        <aside className="w-44 shrink-0 bg-app-surface border-r border-app-border p-3">
+          <p className="text-[10px] font-semibold text-app-text-muted uppercase tracking-wider px-2 mb-2">
             {t("settings.sections")}
           </p>
           <button
             onClick={() => setSection("styling")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors ${
               section === "styling"
-                ? "bg-main-50 text-main-600"
-                : "text-gray-600 hover:bg-gray-50"
+                ? "bg-app-accent text-main-600"
+                : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
             <Palette size={16} strokeWidth={2} />
@@ -191,8 +192,8 @@ export function SettingsPage() {
             onClick={() => setSection("srs")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "srs"
-                ? "bg-main-50 text-main-600"
-                : "text-gray-600 hover:bg-gray-50"
+                ? "bg-app-accent text-main-600"
+                : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
             <BookOpen size={16} strokeWidth={2} />
@@ -202,8 +203,8 @@ export function SettingsPage() {
             onClick={() => setSection("database")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "database"
-                ? "bg-main-50 text-main-600"
-                : "text-gray-600 hover:bg-gray-50"
+                ? "bg-app-accent text-main-600"
+                : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
             <Database size={16} strokeWidth={2} />
@@ -213,8 +214,8 @@ export function SettingsPage() {
             onClick={() => setSection("language")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "language"
-                ? "bg-main-50 text-main-600"
-                : "text-gray-600 hover:bg-gray-50"
+                ? "bg-app-accent text-main-600"
+                : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
             <Languages size={16} strokeWidth={2} />
@@ -222,13 +223,26 @@ export function SettingsPage() {
           </button>
         </aside>
 
-        <main className="flex-1 overflow-y-auto p-4">
+        <main className="flex-1 overflow-y-auto px-5 py-4">
           {section === "styling" && (
             <div className="max-w-2xl">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">{t("settings.styling.title")}</h2>
-              <p className="text-sm text-gray-500 mb-5">
+              <h2 className="text-lg font-bold text-app-text mb-1">{t("settings.styling.title")}</h2>
+              <p className="text-sm text-app-text-secondary mb-5">
                 {t("settings.styling.description")}
               </p>
+
+              <div className="max-w-lg mb-5">
+                <Toggle
+                  label={t("settings.styling.darkMode.label")}
+                  description={t("settings.styling.darkMode.description")}
+                  checked={appSettings.colorScheme === "dark"}
+                  onChange={(v) => {
+                    const scheme = v ? "dark" : "light";
+                    applyColorScheme(scheme);
+                    patchSettings({ colorScheme: scheme });
+                  }}
+                />
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {PALETTE_NAMES.map((name) => {
@@ -240,12 +254,12 @@ export function SettingsPage() {
                       onClick={() => selectPalette(name)}
                       className={`text-left rounded-xl border p-3 transition-all active:scale-[0.99] ${
                         selected
-                          ? "border-main-400 ring-2 ring-main-200 bg-white"
-                          : "border-gray-200 bg-white hover:border-gray-300"
+                          ? "border-main-400 ring-2 ring-main-500/25 bg-app-surface"
+                          : "border-app-border-strong bg-app-surface hover:border-app-border-strong"
                       }`}
                     >
                       <div className="flex items-center justify-between mb-2.5">
-                        <span className="text-sm font-semibold text-gray-800 capitalize">
+                        <span className="text-sm font-semibold text-app-text capitalize">
                           {name}
                         </span>
                         {selected && (
@@ -274,8 +288,8 @@ export function SettingsPage() {
 
           {section === "srs" && (
             <div className="max-w-lg space-y-3">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">{t("settings.srs.title")}</h2>
-              <p className="text-sm text-gray-500 mb-5">
+              <h2 className="text-lg font-bold text-app-text mb-1">{t("settings.srs.title")}</h2>
+              <p className="text-sm text-app-text-secondary mb-5">
                 {t("settings.srs.description")}
               </p>
 
@@ -293,15 +307,15 @@ export function SettingsPage() {
                 onChange={(v) => patchSettings({ srsRomajiInput: v })}
               />
 
-              <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-4">
+              <div className="rounded-xl border border-app-border-strong bg-app-surface p-4 space-y-4">
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">
+                  <p className="text-sm font-semibold text-app-text">
                     {t("settings.srs.dailyGoal.label")}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  <p className="text-xs text-app-text-secondary mt-1 leading-relaxed">
                     {t("settings.srs.dailyGoal.description")}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                  <p className="text-xs text-app-text-muted mt-1 leading-relaxed">
                     {t("dailyGoal.settingsHint")}
                   </p>
                 </div>
@@ -318,9 +332,9 @@ export function SettingsPage() {
                   return (
                     <div
                       key={deckId}
-                      className="rounded-lg border border-gray-100 bg-gray-50/80 p-3 space-y-2"
+                      className="rounded-lg border border-app-border bg-app-muted/80 p-3 space-y-2"
                     >
-                      <p className="text-sm font-semibold text-gray-800">{deckName}</p>
+                      <p className="text-sm font-semibold text-app-text">{deckName}</p>
                       <div className="flex flex-wrap gap-2">
                         {DAILY_TARGET_PRESETS.map((preset) => (
                           <button
@@ -330,7 +344,7 @@ export function SettingsPage() {
                             className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
                               target === preset
                                 ? "bg-main-500 text-white"
-                                : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-200"
+                                : "bg-app-surface text-app-text-secondary hover:bg-app-muted border border-app-border-strong"
                             }`}
                           >
                             {preset}
@@ -342,7 +356,7 @@ export function SettingsPage() {
                           className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
                             target === 0
                               ? "bg-gray-600 text-white"
-                              : "bg-white text-gray-500 hover:bg-gray-100 border border-gray-200"
+                              : "bg-app-surface text-app-text-secondary hover:bg-app-muted border border-app-border-strong"
                           }`}
                         >
                           {t("dailyGoal.off")}
@@ -357,7 +371,7 @@ export function SettingsPage() {
                           const n = Number(e.target.value);
                           if (!Number.isNaN(n)) setDeckTarget(deckId, n);
                         }}
-                        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800"
+                        className="w-full rounded-xl border border-app-border-strong bg-app-surface px-3 py-2 text-sm text-app-text"
                         aria-label={t("dailyGoal.settingsTargetDeck", { deck: deckName })}
                       />
                     </div>
@@ -370,20 +384,20 @@ export function SettingsPage() {
           {section === "database" && (
             <div className="max-w-lg space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-gray-900 mb-1">
+                <h2 className="text-lg font-bold text-app-text mb-1">
                   {t("settings.database.title")}
                 </h2>
-                <p className="text-sm text-gray-500 mb-5">
+                <p className="text-sm text-app-text-secondary mb-5">
                   {t("settings.database.description")}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+              <div className="rounded-xl border border-app-border-strong bg-app-surface p-4 space-y-3">
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">
+                  <p className="text-sm font-semibold text-app-text">
                     {t("settings.database.backup.title")}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  <p className="text-xs text-app-text-secondary mt-1 leading-relaxed">
                     {t("settings.database.backup.description")}
                   </p>
                 </div>
@@ -402,12 +416,12 @@ export function SettingsPage() {
                 </button>
               </div>
 
-              <div className="rounded-xl border border-gray-200 bg-white p-4 space-y-3">
+              <div className="rounded-xl border border-app-border-strong bg-app-surface p-4 space-y-3">
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">
+                  <p className="text-sm font-semibold text-app-text">
                     {t("settings.database.relink.title")}
                   </p>
-                  <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                  <p className="text-xs text-app-text-secondary mt-1 leading-relaxed">
                     {t("settings.database.relink.description")}
                   </p>
                 </div>
@@ -415,7 +429,7 @@ export function SettingsPage() {
                   type="button"
                   onClick={relinkAllExamples}
                   disabled={relinkBusy || words.length === 0}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-semibold hover:border-main-300 hover:text-main-600 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-app-border-strong bg-app-surface text-app-text text-sm font-semibold hover:border-main-300 hover:text-main-600 disabled:opacity-50"
                 >
                   {relinkBusy ? (
                     <LoadingSpinner size={16} className="text-main-500" />
@@ -425,7 +439,7 @@ export function SettingsPage() {
                   {t("settings.database.relink.button")}
                 </button>
                 {relinkProgress && (
-                  <p className="text-xs text-gray-500 tabular-nums">
+                  <p className="text-xs text-app-text-secondary tabular-nums">
                     {t("settings.database.relink.progress", {
                       done: relinkProgress.done,
                       total: relinkProgress.total,
@@ -442,10 +456,10 @@ export function SettingsPage() {
 
           {section === "language" && (
             <div className="max-w-lg">
-              <h2 className="text-lg font-bold text-gray-900 mb-1">
+              <h2 className="text-lg font-bold text-app-text mb-1">
                 {t("settings.language.title")}
               </h2>
-              <p className="text-sm text-gray-500 mb-5">
+              <p className="text-sm text-app-text-secondary mb-5">
                 {t("settings.language.description")}
               </p>
 
@@ -460,22 +474,22 @@ export function SettingsPage() {
                         setLocale(id);
                         patchSettings({ locale: id });
                       }}
-                      className={`text-left rounded-xl border p-4 transition-all active:scale-[0.99] ${
+                      className={`rounded-xl border p-4 transition-all active:scale-[0.99] ${
                         selected
-                          ? "border-main-400 ring-2 ring-main-200 bg-white"
-                          : "border-gray-200 bg-white hover:border-gray-300"
+                          ? "border-main-400 ring-2 ring-main-500/25 bg-app-surface"
+                          : "border-app-border-strong bg-app-surface hover:border-app-border-strong"
                       }`}
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-800">
+                      <div className="sm:text-left">
+                        <span className="text-sm font-semibold text-app-text">
                           {t(labelKey)}
                         </span>
-                        {selected && (
+                        {/* {selected && (
                           <span className="flex items-center gap-1 text-xs font-medium text-main-500">
                             <Check size={14} strokeWidth={2.5} />
                             {t("settings.styling.selected")}
                           </span>
-                        )}
+                        )} */}
                       </div>
                     </button>
                   );
