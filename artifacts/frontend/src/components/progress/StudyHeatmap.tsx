@@ -40,25 +40,26 @@ function chunkIntoWeeks(cells: HeatmapCell[]): HeatmapCell[][] {
   return cols;
 }
 
-
 type GridPos = { col: number; row: number };
 type FocusPos = { col: number; row: number };
 
 type MagnifyConfig = {
   maxScale: number;
   minScale: number;
-  sigma: number;
+  radius: number;
+  power: number;
 };
 
 const MAGNIFY: Record<"full" | "compact", MagnifyConfig> = {
-  full: { maxScale: 1.55, minScale: 0.38, sigma: 1.9 },
-  compact: { maxScale: 1.42, minScale: 0.34, sigma: 1.7 },
+  full: { maxScale: 1.55, minScale: 0.76, radius: 2.9, power: 2.1 },
+  compact: { maxScale: 1.42, minScale: 0.74, radius: 2.6, power: 2.1 },
 };
 
-/** Apple Dock–style Gaussian falloff: peak at focus, min at distance. */
+/** Smooth polynomial falloff — center peaks, neighbors step down gently, far stays readable. */
 function dockScaleAtDistance(d: number, cfg: MagnifyConfig): number {
-  const t = Math.exp(-(d * d) / (2 * cfg.sigma * cfg.sigma));
-  return cfg.minScale + (cfg.maxScale - cfg.minScale) * t;
+  const t = Math.max(0, 1 - d / cfg.radius);
+  const falloff = Math.pow(t, cfg.power);
+  return cfg.minScale + (cfg.maxScale - cfg.minScale) * falloff;
 }
 
 function scaleForCell(
@@ -71,30 +72,40 @@ function scaleForCell(
   return dockScaleAtDistance(d, cfg);
 }
 
-function focusFromPointer(
+function pointerToFocus(
   clientX: number,
   clientY: number,
+  innerEl: HTMLElement,
+  columns: HeatmapCell[][],
+  cellPx: number,
   gapPx: number,
 ): { date: string | null; focus: FocusPos | null } {
-  const el = document.elementFromPoint(clientX, clientY);
-  const cell = (el as HTMLElement | null)?.closest(
-    "[data-heatmap-date]",
-  ) as HTMLElement | null;
-  if (!cell) return { date: null, focus: null };
+  if (columns.length === 0) return { date: null, focus: null };
 
-  const date = cell.getAttribute("data-heatmap-date");
-  const col = Number(cell.dataset.col);
-  const row = Number(cell.dataset.row);
-  if (Number.isNaN(col) || Number.isNaN(row)) {
-    return { date, focus: null };
-  }
+  const innerRect = innerEl.getBoundingClientRect();
+  const step = cellPx + gapPx;
+  const colCount = columns.length;
+  const rowCount = columns[0]?.length ?? 7;
+  const maxCol = colCount - 1;
+  const maxRow = rowCount - 1;
 
-  const rect = cell.getBoundingClientRect();
-  const step = rect.width + gapPx;
+  // Extended hit zone beyond visible dots (edge columns remain reachable)
+  const extend = step * 1.1;
+  const gridWidth = colCount * step - gapPx;
+  const gridHeight = rowCount * step - gapPx;
+
+  const x = Math.max(-extend, Math.min(gridWidth + extend, clientX - innerRect.left));
+  const y = Math.max(-extend, Math.min(gridHeight + extend, clientY - innerRect.top));
+
   const focus: FocusPos = {
-    col: col + (clientX - (rect.left + rect.width / 2)) / step,
-    row: row + (clientY - (rect.top + rect.height / 2)) / step,
+    col: Math.max(0, Math.min(maxCol, x / step)),
+    row: Math.max(0, Math.min(maxRow, y / step)),
   };
+
+  const nearCol = Math.round(focus.col);
+  const nearRow = Math.round(focus.row);
+  const date = columns[nearCol]?.[nearRow]?.date ?? null;
+
   return { date, focus };
 }
 
@@ -110,6 +121,7 @@ export function StudyHeatmap({
   const dateLocale = locale === "tr" ? "tr-TR" : "en-US";
 
   const gridRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
   const activeDateRef = useRef<string | null>(null);
   const isDraggingRef = useRef(false);
   const dragMovedRef = useRef(false);
@@ -136,17 +148,27 @@ export function StudyHeatmap({
   const cellPx = compact ? 10 : 12;
   const gapPx = compact ? 2 : 4;
   const magnify = compact ? MAGNIFY.compact : MAGNIFY.full;
+  const hitPad = Math.round((cellPx + gapPx) * 1.1);
 
   const applyPointer = useCallback(
     (clientX: number, clientY: number) => {
-      const { date, focus } = focusFromPointer(clientX, clientY, gapPx);
+      const inner = innerRef.current;
+      if (!inner) return;
+      const { date, focus } = pointerToFocus(
+        clientX,
+        clientY,
+        inner,
+        columns,
+        cellPx,
+        gapPx,
+      );
       if (focus) setFocusPos(focus);
       if (date) {
         activeDateRef.current = date;
         setActiveDate(date);
       }
     },
-    [gapPx],
+    [columns, cellPx, gapPx],
   );
 
   const clearFocus = useCallback(() => {
@@ -185,25 +207,28 @@ export function StudyHeatmap({
     [applyPointer],
   );
 
-  const handlePointerUp = useCallback(
-    (e: React.PointerEvent) => {
+  const endInteraction = useCallback(
+    (e: React.PointerEvent, fireTap: boolean) => {
       isDraggingRef.current = false;
       pointerStartRef.current = null;
       if (gridRef.current?.hasPointerCapture(e.pointerId)) {
         gridRef.current.releasePointerCapture(e.pointerId);
       }
-      if (!dragMovedRef.current && onTap) onTap();
+      if (fireTap && !dragMovedRef.current && onTap) onTap();
+      clearFocus();
     },
-    [onTap],
+    [clearFocus, onTap],
   );
 
-  const handlePointerCancel = useCallback((e: React.PointerEvent) => {
-    isDraggingRef.current = false;
-    pointerStartRef.current = null;
-    if (gridRef.current?.hasPointerCapture(e.pointerId)) {
-      gridRef.current.releasePointerCapture(e.pointerId);
-    }
-  }, []);
+  const handlePointerUp = useCallback(
+    (e: React.PointerEvent) => endInteraction(e, true),
+    [endInteraction],
+  );
+
+  const handlePointerCancel = useCallback(
+    (e: React.PointerEvent) => endInteraction(e, false),
+    [endInteraction],
+  );
 
   const handlePointerLeave = useCallback(
     (e: React.PointerEvent) => {
@@ -239,35 +264,20 @@ export function StudyHeatmap({
 
       <div
         ref={gridRef}
-        // className={`rounded-xl border border-gray-200 bg-gray-50/80 overflow-x-auto touch-none select-none ${
-        //   compact ? "p-2" : "p-3"
-        // }`}
-        className={`overflow-x-auto touch-none select-none`}
+        className="overflow-x-auto touch-none select-none"
+        style={{ padding: hitPad }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerCancel}
         onPointerLeave={handlePointerLeave}
       >
-        <div
-          className="flex"
-          style={{ gap: gapPx }}
-        >
+        <div ref={innerRef} className="flex w-max" style={{ gap: gapPx }}>
           {columns.map((col, wi) => (
-            <div
-              key={wi}
-              className="flex flex-col"
-              style={{ gap: gapPx }}
-            >
+            <div key={wi} className="flex flex-col" style={{ gap: gapPx }}>
               {col.map((cell, rowIdx) => {
                 const pos = { col: wi, row: rowIdx };
                 const scale = scaleForCell(pos, focusPos ?? undefined, magnify);
-                const isActive = activeDate === cell.date;
-                const prominence =
-                  focusPos && magnify.maxScale > magnify.minScale
-                    ? (scale - magnify.minScale) /
-                      (magnify.maxScale - magnify.minScale)
-                    : 1;
                 return (
                   <div
                     key={cell.date}
@@ -279,18 +289,13 @@ export function StudyHeatmap({
                       date: formatTooltipDate(cell.date, dateLocale),
                       count: cell.count,
                     })}
-                    className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-[transform,opacity,box-shadow] duration-200 ease-out ${
-                      isActive && focusPos
-                        ? "ring-2 ring-main-400/70 shadow-sm shadow-main-200/60"
-                        : ""
-                    }`}
+                    className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]`}
                     style={{
                       width: cellPx,
                       height: cellPx,
                       transform: `scale(${scale})`,
                       zIndex: Math.round(scale * 100),
                       position: "relative",
-                      opacity: focusPos ? 0.5 + prominence * 0.5 : 1,
                     }}
                   />
                 );
