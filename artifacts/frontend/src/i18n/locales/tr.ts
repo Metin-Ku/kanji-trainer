@@ -415,11 +415,12 @@ export const tr: Messages = {
     },
     heatmap: {
       tooltip: "{date} · {count} kelime çalışıldı",
+      hint: "Günler üzerinde basılı tutup kaydırın",
       less: "Az",
       more: "Çok",
     },
     miniHeatmap: {
-      title: "Son 7 gün",
+      title: "Bu yıl",
     },
     deckChart: {
       weekTotal: "Bu hafta {count}",

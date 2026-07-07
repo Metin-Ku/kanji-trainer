@@ -87,19 +87,16 @@ export function heatmapIntensity(count: number, maxCount: number): number {
   return 4;
 }
 
-export function getHeatmapCells(
+function startOfLocalDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function buildHeatmapGrid(
   activityByDate: Record<string, Partial<Record<DailyGoalDeckId, number>>>,
-  weeks = 26,
-  endDate = new Date(),
+  gridStart: Date,
+  gridDays: number,
+  end: Date,
 ): HeatmapCell[] {
-  const totalDays = weeks * 7;
-  const start = addDays(endDate, -(totalDays - 1));
-
-  // Align to Sunday (GitHub-style columns)
-  const startDow = start.getDay();
-  const gridStart = addDays(start, -startDow);
-  const gridDays = weeks * 7;
-
   const raw: HeatmapCell[] = [];
   for (let i = 0; i < gridDays; i++) {
     const date = addDays(gridStart, i);
@@ -108,19 +105,43 @@ export function getHeatmapCells(
     raw.push({ date: dateKey, count, level: 0 });
   }
 
-  const endMs = endDate.getTime();
-  const startMs = start.getTime();
-
-  const inRange = raw.filter((c) => {
-    const t = parseDateKey(c.date).getTime();
-    return t >= startMs && t <= endMs;
-  });
+  const endMs = end.getTime();
+  const inRange = raw.filter(
+    (c) => parseDateKey(c.date).getTime() <= endMs,
+  );
   const maxCount = Math.max(1, ...inRange.map((c) => c.count));
 
-  return raw.map((c) => ({
-    ...c,
-    level: heatmapIntensity(c.count, maxCount),
-  }));
+  return raw.map((c) => {
+    const isFuture = parseDateKey(c.date).getTime() > endMs;
+    return {
+      ...c,
+      level: isFuture ? 0 : heatmapIntensity(c.count, maxCount),
+    };
+  });
+}
+
+export function getHeatmapCells(
+  activityByDate: Record<string, Partial<Record<DailyGoalDeckId, number>>>,
+  weeks = 26,
+  endDate = new Date(),
+): HeatmapCell[] {
+  const end = startOfLocalDay(endDate);
+  const weekStartOfEnd = addDays(end, -end.getDay());
+  const gridStart = addDays(weekStartOfEnd, -(weeks - 1) * 7);
+  return buildHeatmapGrid(activityByDate, gridStart, weeks * 7, end);
+}
+
+export function getYearToDateHeatmapCells(
+  activityByDate: Record<string, Partial<Record<DailyGoalDeckId, number>>>,
+  endDate = new Date(),
+): HeatmapCell[] {
+  const end = startOfLocalDay(endDate);
+  const yearStart = new Date(end.getFullYear(), 0, 1);
+  const gridStart = addDays(yearStart, -yearStart.getDay());
+  const daysUntilEnd =
+    Math.floor((end.getTime() - gridStart.getTime()) / 86_400_000) + 1;
+  const gridDays = Math.ceil(daysUntilEnd / 7) * 7;
+  return buildHeatmapGrid(activityByDate, gridStart, gridDays, end);
 }
 
 export function getLevelDistribution(

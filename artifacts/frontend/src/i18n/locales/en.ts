@@ -413,11 +413,12 @@ export const en = {
     },
     heatmap: {
       tooltip: "{date} · {count} words studied",
+      hint: "Press and drag across days to explore",
       less: "Less",
       more: "More",
     },
     miniHeatmap: {
-      title: "Last 7 days",
+      title: "This year",
     },
     deckChart: {
       weekTotal: "{count} this week",
