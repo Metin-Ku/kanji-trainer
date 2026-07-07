@@ -6,6 +6,7 @@ export const en = {
     sort: "Sort",
     sortWithCount: "Sort ({count})",
     loading: "…",
+    words: "words",
     wordCount: "{count} words",
     resultCount: "{count} results",
     noResultsForQuery: 'No results for "{query}"',

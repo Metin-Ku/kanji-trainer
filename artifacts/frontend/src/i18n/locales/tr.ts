@@ -8,6 +8,7 @@ export const tr: Messages = {
     sort: "Sırala",
     sortWithCount: "Sırala ({count})",
     loading: "…",
+    words: "kelime",
     wordCount: "{count} kelime",
     resultCount: "{count} sonuç",
     noResultsForQuery: '"{query}" için sonuç bulunamadı',

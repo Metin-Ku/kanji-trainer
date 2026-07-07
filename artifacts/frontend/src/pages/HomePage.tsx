@@ -28,6 +28,7 @@ import { useStudyHistory } from "../hooks/useStudyHistory";
 import type { Word } from "../types";
 import { themeVars } from "../theme";
 import { useTranslation } from "../i18n/I18nProvider";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 
 const STUDY_LINKS = [
   { path: "/words", Icon: Languages, titleKey: "nav.words" as const },
@@ -333,8 +334,61 @@ export function HomePage() {
           )}
         </div>
       ) : isLoading ? (
-        <div className="flex-1 flex items-center justify-center p-3">
-          <LoadingPlaceholder padding="lg" />
+        // <div className="flex-1 flex items-center justify-center p-3">
+        //   <LoadingPlaceholder padding="lg" />
+        // </div>
+        <div className="flex-1 overflow-y-auto px-5 py-4 pb-24">
+          <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-2.5 px-1">
+            {t("home.studySection")}
+          </p>
+          <div className="space-y-2">
+            {STUDY_LINKS.map(({ path, Icon, titleKey }) => {
+              const star = titleKey === "nav.learned";
+              return (
+                <button
+                  key={path}
+                  onClick={() => navigate(path)}
+                  disabled={isLoading}
+                  className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-3.5 active:scale-[0.99] transition-transform disabled:opacity-60"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-app-accent flex items-center justify-center shrink-0">
+                    {star ? (
+                      <span style={{ color: themeVars.star, fontSize: 18 }}>
+                        ★
+                      </span>
+                    ) : (
+                      Icon && (
+                        <Icon
+                          size={18}
+                          className="text-main-500"
+                          strokeWidth={1.8}
+                        />
+                      )
+                    )}
+                  </div>
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-base font-bold text-app-text">
+                      {t(titleKey)}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <LoadingSpinner
+                        size={14}
+                        className="text-app-text-muted"
+                      />
+                      <p className="text-xs text-app-text-muted mt-0.5 invisible">
+                        {t("common.words")}
+                        {/* {t("common.wordCount", { count: studyCounts[titleKey] })} */}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight
+                    size={18}
+                    className="text-app-text-muted shrink-0"
+                  />
+                </button>
+              );
+            })}
+          </div>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto px-5 py-4 pb-24">
@@ -373,7 +427,10 @@ export function HomePage() {
                       {t("common.wordCount", { count: studyCounts[titleKey] })}
                     </p>
                   </div>
-                  <ChevronRight size={18} className="text-app-text-muted shrink-0" />
+                  <ChevronRight
+                    size={18}
+                    className="text-app-text-muted shrink-0"
+                  />
                 </button>
               );
             })}
