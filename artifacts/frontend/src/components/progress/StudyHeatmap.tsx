@@ -123,11 +123,17 @@ function pointerToFocus(
   return { date, focus };
 }
 
+function focusToRingCell(focus: FocusPos | null): GridPos | null {
+  if (!focus) return null;
+  return { col: Math.round(focus.col), row: Math.round(focus.row) };
+}
+
 function HeatmapGrid({
   columns,
   cellPx,
   gapPx,
   dockFocus,
+  ringCell,
   magnify,
   t,
   dateLocale,
@@ -136,6 +142,7 @@ function HeatmapGrid({
   cellPx: number;
   gapPx: number;
   dockFocus: FocusPos | null;
+  ringCell: GridPos | null;
   magnify: MagnifyConfig;
   t: (key: string, params?: Record<string, string | number>) => string;
   dateLocale: string;
@@ -147,6 +154,10 @@ function HeatmapGrid({
           {col.map((cell, rowIdx) => {
             const pos = { col: wi, row: rowIdx };
             const scale = scaleForCell(pos, dockFocus ?? undefined, magnify);
+            const isRing =
+              ringCell != null &&
+              ringCell.col === wi &&
+              ringCell.row === rowIdx;
 
             return (
               <div
@@ -159,12 +170,20 @@ function HeatmapGrid({
                   date: formatTooltipDate(cell.date, dateLocale),
                   count: cell.count,
                 })}
-                className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]`}
+                className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                  isRing
+                    ? "ring-2 ring-main-500 ring-offset-1 ring-offset-app-bg z-[300]"
+                    : ""
+                }`}
                 style={{
                   width: cellPx,
                   height: cellPx,
                   transform: `scale(${scale})`,
-                  zIndex: dockFocus ? Math.round(scale * 100) : 1,
+                  zIndex: isRing
+                    ? 300
+                    : dockFocus
+                      ? Math.round(scale * 100)
+                      : 1,
                   position: "relative",
                 }}
               />
@@ -403,12 +422,14 @@ export function StudyHeatmap({
   );
 
   const activeCell = activeDate ? cellByDate.get(activeDate) : null;
+  const ringCell = useMemo(() => focusToRingCell(focusPos), [focusPos]);
 
   const gridProps = {
     columns,
     cellPx,
     gapPx,
     magnify,
+    ringCell,
     t,
     dateLocale,
   };
@@ -480,7 +501,7 @@ export function StudyHeatmap({
           lensSize={lensSize}
           lensZoom={lensZoom}
           lift={touchLoupeLift}
-          gridProps={{ ...gridProps, dockFocus: null }}
+          gridProps={{ ...gridProps, dockFocus: null, ringCell }}
         />
       )}
 
