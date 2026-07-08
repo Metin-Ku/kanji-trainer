@@ -1,5 +1,6 @@
 import {
   useCallback,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -299,6 +300,7 @@ export function StudyHeatmap({
   const touchModeRef = useRef<"pending" | "scroll" | "loupe">("pending");
   const loupeHoldTimerRef = useRef<number | null>(null);
   const lastTouchRef = useRef<ViewportPoint | null>(null);
+  const lockedScrollLeftRef = useRef(0);
 
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [focusPos, setFocusPos] = useState<FocusPos | null>(null);
@@ -376,6 +378,9 @@ export function StudyHeatmap({
       if (!point) return;
 
       touchModeRef.current = "loupe";
+      if (gridRef.current) {
+        lockedScrollLeftRef.current = gridRef.current.scrollLeft;
+      }
       setTouchScrubbing(true);
       syncTouchLoupe(point.x, point.y);
       applyPointer(point.x, point.y);
@@ -396,6 +401,28 @@ export function StudyHeatmap({
     setTouchGridRect(null);
     gridRectRef.current = null;
   }, [clearLoupeHoldTimer]);
+
+  useLayoutEffect(() => {
+    const el = gridRef.current;
+    if (!el || !touchScrubbing) return;
+
+    el.scrollLeft = lockedScrollLeftRef.current;
+
+    const lockScroll = () => {
+      el.scrollLeft = lockedScrollLeftRef.current;
+    };
+
+    const blockTouchScroll = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
+    el.addEventListener("scroll", lockScroll, { passive: true });
+    el.addEventListener("touchmove", blockTouchScroll, { passive: false });
+    return () => {
+      el.removeEventListener("scroll", lockScroll);
+      el.removeEventListener("touchmove", blockTouchScroll);
+    };
+  }, [touchScrubbing]);
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -449,6 +476,10 @@ export function StudyHeatmap({
 
         if (touchModeRef.current === "loupe") {
           e.preventDefault();
+          e.stopPropagation();
+          if (gridRef.current) {
+            gridRef.current.scrollLeft = lockedScrollLeftRef.current;
+          }
           syncTouchLoupe(e.clientX, e.clientY);
           applyPointer(e.clientX, e.clientY);
         }
@@ -569,7 +600,11 @@ export function StudyHeatmap({
       <HorizontalScroll
         ref={gridRef}
         scrollDeps={[cells.length, compact, columns.length]}
-        className="touch-pan-x select-none"
+        className={
+          touchScrubbing
+            ? "touch-none overflow-x-hidden select-none"
+            : "touch-pan-x select-none"
+        }
         style={{ padding: hitPad }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
