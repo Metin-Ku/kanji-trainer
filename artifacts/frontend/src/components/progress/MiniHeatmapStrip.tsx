@@ -11,7 +11,7 @@ export function MiniHeatmapStrip({ activityByDate }: MiniHeatmapStripProps) {
   const [, navigate] = useLocation();
 
   return (
-    <div className="w-full rounded-sm border border-main-100 bg-app-surface/60 px-3 py-2.5">
+    <div className="w-full rounded-sm border border-main-200 dark:border-app-vibrant bg-app-accent/40 bg-app-surface/60 px-3 py-2.5">
       <p className="text-[10px] font-semibold text-app-text-muted uppercase tracking-wider mb-2">
         {t("progress.miniHeatmap.title")}
       </p>

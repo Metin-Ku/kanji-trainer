@@ -278,6 +278,8 @@ export function StudyHeatmap({
               {col.map((cell, rowIdx) => {
                 const pos = { col: wi, row: rowIdx };
                 const scale = scaleForCell(pos, focusPos ?? undefined, magnify);
+                // const isActive = activeDate === cell.date;
+
                 return (
                   <div
                     key={cell.date}
