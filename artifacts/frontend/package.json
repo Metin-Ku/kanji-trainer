@@ -79,6 +79,7 @@
   },
   "dependencies": {
     "kuromoji": "^0.1.2",
+    "motion": "^12.42.2",
     "ts-fsrs": "^5.4.1",
     "wanakana": "^5.3.1"
   }
