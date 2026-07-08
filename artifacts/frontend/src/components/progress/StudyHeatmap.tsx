@@ -570,8 +570,8 @@ export function StudyHeatmap({
       <HorizontalScroll
         ref={gridRef}
         scrollDeps={[cells.length, compact, columns.length]}
-        className="touch-pan-x select-none"
-        style={{ padding: hitPad }}
+        className="select-none"
+        //style={{ padding: hitPad }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}

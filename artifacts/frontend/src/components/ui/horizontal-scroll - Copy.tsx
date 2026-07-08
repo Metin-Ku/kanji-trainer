@@ -12,8 +12,6 @@ import { cn } from "@/lib/utils";
 type HorizontalScrollProps = ComponentPropsWithoutRef<"div"> & {
   /** Re-run scroll-to-end when these values change. */
   scrollDeps?: unknown[];
-  /** Whether the scroll is touchable. */
-  isTouchable?: boolean;
   /** `auto` shows a track on touch/coarse pointers (iOS/Android). */
   showTrack?: boolean | "auto";
   /** Allow dragging / tapping the mobile track to scroll. */
@@ -42,7 +40,6 @@ export const HorizontalScroll = forwardRef<
     children,
     className,
     scrollDeps = [],
-    isTouchable = false,
     showTrack = "auto",
     interactiveTrack = true,
     ...props
@@ -113,13 +110,14 @@ export const HorizontalScroll = forwardRef<
   const handleTrackPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
       if (!interactiveTrack) return;
+  
       e.preventDefault();
       e.stopPropagation();
+  
       trackDragRef.current = true;
       e.currentTarget.setPointerCapture(e.pointerId);
-      scrollFromClientX(e.clientX);
     },
-    [interactiveTrack, scrollFromClientX],
+    [interactiveTrack],
   );
 
   const handleTrackPointerMove = useCallback(
@@ -173,37 +171,36 @@ export const HorizontalScroll = forwardRef<
       <div
         ref={setRefs}
         className={cn(
-          "app-scroll-x w-full min-w-0 max-w-full overscroll-x-contain",
-          isTouchable ? "" : "touch-none",
+          "app-scroll-x w-full min-w-0 max-w-full overscroll-x-contain touch-none",
           className,
         )}
         {...props}
       >
         {children}
       </div>
+  
       {trackEnabled && track.visible && (
         <div
           ref={trackRef}
-          className={cn(
-            "mt-1.5 pb-2 touch-none select-none",
-            isTouchable ? "pt-2" : "pt-5",
-            interactiveTrack && "cursor-pointer",
-          )}
+          className="mt-1.5 py-2 touch-none select-none"
           aria-hidden={!interactiveTrack}
           role={interactiveTrack ? "scrollbar" : undefined}
           aria-orientation={interactiveTrack ? "horizontal" : undefined}
-          onPointerDown={handleTrackPointerDown}
-          onPointerMove={handleTrackPointerMove}
-          onPointerUp={handleTrackPointerUp}
-          onPointerCancel={handleTrackPointerUp}
         >
           <div className="relative h-1.5 rounded-full bg-app-muted">
             <div
-              className="absolute top-0 h-full rounded-full bg-app-border-strong"
+              className={cn(
+                "absolute top-0 h-full rounded-full bg-app-border-strong",
+                interactiveTrack && "cursor-pointer",
+              )}
               style={{
                 width: `${track.width}%`,
                 left: `${track.left}%`,
               }}
+              onPointerDown={handleTrackPointerDown}
+              onPointerMove={handleTrackPointerMove}
+              onPointerUp={handleTrackPointerUp}
+              onPointerCancel={handleTrackPointerUp}
             />
           </div>
         </div>

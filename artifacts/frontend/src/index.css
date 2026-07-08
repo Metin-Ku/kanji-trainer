@@ -222,15 +222,32 @@ textarea {
 
 /* Horizontal scroll regions (heatmap, charts) */
 .app-scroll-x {
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE */
+  -ms-overflow-style: none;
+}
+
+.app-scroll-x::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+/* .app-scroll-x {
   scrollbar-width: thin;
   scrollbar-color: var(--app-border-strong) var(--app-muted);
 }
 
 .app-scroll-x::-webkit-scrollbar {
   height: 6px;
-}
+} */
 
-.app-scroll-x::-webkit-scrollbar-track {
+/* .app-scroll-x::-webkit-scrollbar-track {
   background: var(--app-muted);
   border-radius: 3px;
 }
@@ -238,4 +255,4 @@ textarea {
 .app-scroll-x::-webkit-scrollbar-thumb {
   background: var(--app-border-strong);
   border-radius: 3px;
-}
+} */

@@ -65,7 +65,7 @@ export function DeckActivityChart({
         ))}
       </div>
 
-      <HorizontalScroll scrollDeps={[weeks.length, days]} className="pb-1">
+      <HorizontalScroll scrollDeps={[weeks.length, days]} isTouchable={true} className="pb-1">
         <div className="flex items-end gap-1 h-32 w-max min-w-full">
           {weeks.map((week) => (
             <div
