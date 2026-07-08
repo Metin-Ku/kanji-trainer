@@ -17,7 +17,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-app-surface rounded-2xl border border-app-border p-4">
+    <section className="bg-app-surface rounded-2xl border border-app-border p-4 min-w-0 overflow-hidden">
       <h2 className="text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-4">
         {title}
       </h2>
@@ -50,7 +50,7 @@ export function ProgressPage() {
         <p className="text-sm text-app-text-secondary mt-1">{t("progress.subtitle")}</p>
       </div>
 
-      <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto pb-8">
+      <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto overflow-x-hidden pb-8 min-w-0">
         {isLoading ? (
           <LoadingPlaceholder padding="lg" />
         ) : (

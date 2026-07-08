@@ -67,7 +67,7 @@ const MAGNIFY: Record<"full" | "compact", MagnifyConfig> = {
 };
 
 const LENS_SIZE = { full: 120, compact: 96 } as const;
-const LENS_ZOOM = { full: 2.4, compact: 2.6 } as const;
+const LENS_ZOOM = { full: 1.4, compact: 1.6 } as const;
 /** Viewport px: loupe center sits this far above the finger. */
 const TOUCH_LOUPE_LIFT = { full: 92, compact: 80 } as const;
 
@@ -466,8 +466,24 @@ export function StudyHeatmap({
   useEffect(() => {
     const el = gridRef.current;
     if (!el) return;
-    el.scrollLeft = el.scrollWidth;
-  }, [cells.length, compact]);
+
+    const scrollToEnd = () => {
+      el.scrollLeft = Math.max(0, el.scrollWidth - el.clientWidth);
+    };
+
+    scrollToEnd();
+    const raf = requestAnimationFrame(scrollToEnd);
+
+    const ro = new ResizeObserver(scrollToEnd);
+    ro.observe(el);
+    const inner = gridWrapRef.current;
+    if (inner) ro.observe(inner);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [cells.length, compact, columns.length]);
 
   const grid = (
     <div ref={gridWrapRef} className="inline-block w-max">
@@ -479,7 +495,7 @@ export function StudyHeatmap({
   );
 
   return (
-    <div className={className}>
+    <div className={`min-w-0 w-full max-w-full ${className}`.trim()}>
       <div
         className={`min-h-[1.25rem] mb-2 text-app-text-secondary tabular-nums ${
           compact ? "text-[10px]" : "text-xs"
@@ -495,7 +511,7 @@ export function StudyHeatmap({
 
       <div
         ref={gridRef}
-        className="overflow-x-auto touch-none select-none"
+        className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain touch-none select-none"
         style={{ padding: hitPad }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
