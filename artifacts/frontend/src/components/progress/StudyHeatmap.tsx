@@ -70,6 +70,8 @@ const LENS_SIZE = { full: 120, compact: 96 } as const;
 const LENS_ZOOM = { full: 1.4, compact: 1.6 } as const;
 /** Viewport px: loupe center sits this far above the finger. */
 const TOUCH_LOUPE_LIFT = { full: 92, compact: 80 } as const;
+const LOUPE_HOLD_MS = 220;
+const SCROLL_INTENT_PX = 10;
 
 function dockScaleAtDistance(d: number, cfg: MagnifyConfig): number {
   const t = Math.max(0, 1 - d / cfg.radius);
@@ -294,6 +296,9 @@ export function StudyHeatmap({
   const dragMovedRef = useRef(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
   const gridRectRef = useRef<DOMRect | null>(null);
+  const touchModeRef = useRef<"pending" | "scroll" | "loupe">("pending");
+  const loupeHoldTimerRef = useRef<number | null>(null);
+  const lastTouchRef = useRef<ViewportPoint | null>(null);
 
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [focusPos, setFocusPos] = useState<FocusPos | null>(null);
@@ -358,7 +363,31 @@ export function StudyHeatmap({
     [columns, cellPx, gapPx],
   );
 
+  const clearLoupeHoldTimer = useCallback(() => {
+    if (loupeHoldTimerRef.current != null) {
+      window.clearTimeout(loupeHoldTimerRef.current);
+      loupeHoldTimerRef.current = null;
+    }
+  }, []);
+
+  const activateTouchLoupe = useCallback(
+    (pointerId: number) => {
+      const point = lastTouchRef.current ?? pointerStartRef.current;
+      if (!point) return;
+
+      touchModeRef.current = "loupe";
+      setTouchScrubbing(true);
+      syncTouchLoupe(point.x, point.y);
+      applyPointer(point.x, point.y);
+      gridRef.current?.setPointerCapture(pointerId);
+    },
+    [applyPointer, syncTouchLoupe],
+  );
+
   const clearFocus = useCallback(() => {
+    clearLoupeHoldTimer();
+    touchModeRef.current = "pending";
+    lastTouchRef.current = null;
     activeDateRef.current = null;
     setActiveDate(null);
     setFocusPos(null);
@@ -366,26 +395,66 @@ export function StudyHeatmap({
     setTouchPoint(null);
     setTouchGridRect(null);
     gridRectRef.current = null;
-  }, []);
+  }, [clearLoupeHoldTimer]);
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
+      if (e.pointerType === "touch") {
+        isDraggingRef.current = true;
+        dragMovedRef.current = false;
+        touchModeRef.current = "pending";
+        pointerStartRef.current = { x: e.clientX, y: e.clientY };
+        lastTouchRef.current = { x: e.clientX, y: e.clientY };
+        clearLoupeHoldTimer();
+        loupeHoldTimerRef.current = window.setTimeout(() => {
+          if (touchModeRef.current !== "pending") return;
+          activateTouchLoupe(e.pointerId);
+        }, LOUPE_HOLD_MS);
+        return;
+      }
+
       e.preventDefault();
       isDraggingRef.current = true;
       dragMovedRef.current = false;
       pointerStartRef.current = { x: e.clientX, y: e.clientY };
       gridRef.current?.setPointerCapture(e.pointerId);
-      if (e.pointerType === "touch") {
-        setTouchScrubbing(true);
-        syncTouchLoupe(e.clientX, e.clientY);
-      }
       applyPointer(e.clientX, e.clientY);
     },
-    [applyPointer, syncTouchLoupe],
+    [activateTouchLoupe, applyPointer, clearLoupeHoldTimer],
   );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
+      if (e.pointerType === "touch") {
+        lastTouchRef.current = { x: e.clientX, y: e.clientY };
+        const start = pointerStartRef.current;
+        if (!start) return;
+
+        const dx = e.clientX - start.x;
+        const dy = e.clientY - start.y;
+        if (Math.hypot(dx, dy) > 6) dragMovedRef.current = true;
+
+        if (touchModeRef.current === "pending") {
+          if (
+            Math.abs(dx) > SCROLL_INTENT_PX &&
+            Math.abs(dx) > Math.abs(dy) * 1.2
+          ) {
+            touchModeRef.current = "scroll";
+            clearLoupeHoldTimer();
+          }
+          return;
+        }
+
+        if (touchModeRef.current === "scroll") return;
+
+        if (touchModeRef.current === "loupe") {
+          e.preventDefault();
+          syncTouchLoupe(e.clientX, e.clientY);
+          applyPointer(e.clientX, e.clientY);
+        }
+        return;
+      }
+
       const start = pointerStartRef.current;
       if (start) {
         const dx = e.clientX - start.x;
@@ -394,9 +463,7 @@ export function StudyHeatmap({
       }
 
       if (isDraggingRef.current || e.buttons > 0) {
-        if (e.pointerType === "touch") {
-          syncTouchLoupe(e.clientX, e.clientY);
-        } else if (e.pointerType === "mouse" && lensRef.current) {
+        if (lensRef.current) {
           const rect = lensRef.current.getBoundingClientRect();
           setMouseLensPos({
             x: e.clientX - rect.left,
@@ -415,20 +482,32 @@ export function StudyHeatmap({
         applyPointer(e.clientX, e.clientY);
       }
     },
-    [applyPointer, syncTouchLoupe],
+    [applyPointer, clearLoupeHoldTimer, syncTouchLoupe],
   );
 
   const endInteraction = useCallback(
     (e: React.PointerEvent, fireTap: boolean) => {
+      clearLoupeHoldTimer();
       isDraggingRef.current = false;
       pointerStartRef.current = null;
+
       if (gridRef.current?.hasPointerCapture(e.pointerId)) {
         gridRef.current.releasePointerCapture(e.pointerId);
       }
-      if (fireTap && !dragMovedRef.current && onTap) onTap();
+
+      const touchMode = touchModeRef.current;
+      if (
+        fireTap &&
+        !dragMovedRef.current &&
+        onTap &&
+        (touchMode === "pending" || touchMode === "loupe")
+      ) {
+        onTap();
+      }
+
       clearFocus();
     },
-    [clearFocus, onTap],
+    [clearFocus, clearLoupeHoldTimer, onTap],
   );
 
   const handlePointerUp = useCallback(
@@ -490,7 +569,7 @@ export function StudyHeatmap({
       <HorizontalScroll
         ref={gridRef}
         scrollDeps={[cells.length, compact, columns.length]}
-        className="touch-none select-none"
+        className="touch-pan-x select-none"
         style={{ padding: hitPad }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

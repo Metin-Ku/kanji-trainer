@@ -5,6 +5,7 @@ import {
   useRef,
   useState,
   type ComponentPropsWithoutRef,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,8 @@ type HorizontalScrollProps = ComponentPropsWithoutRef<"div"> & {
   scrollDeps?: unknown[];
   /** `auto` shows a track on touch/coarse pointers (iOS/Android). */
   showTrack?: boolean | "auto";
+  /** Allow dragging / tapping the mobile track to scroll. */
+  interactiveTrack?: boolean;
 };
 
 function useCoarsePointer() {
@@ -36,11 +39,14 @@ export const HorizontalScroll = forwardRef<HTMLDivElement, HorizontalScrollProps
       className,
       scrollDeps = [],
       showTrack = "auto",
+      interactiveTrack = true,
       ...props
     },
     ref,
   ) {
     const innerRef = useRef<HTMLDivElement>(null);
+    const trackRef = useRef<HTMLDivElement>(null);
+    const trackDragRef = useRef(false);
     const coarse = useCoarsePointer();
     const [track, setTrack] = useState({
       visible: false,
@@ -79,6 +85,53 @@ export const HorizontalScroll = forwardRef<HTMLDivElement, HorizontalScrollProps
       if (!el) return;
       el.scrollLeft = Math.max(0, el.scrollWidth - el.clientWidth);
     }, []);
+
+    const scrollFromClientX = useCallback((clientX: number) => {
+      const el = innerRef.current;
+      const trackEl = trackRef.current;
+      if (!el || !trackEl) return;
+
+      const rect = trackEl.getBoundingClientRect();
+      const scrollRange = el.scrollWidth - el.clientWidth;
+      if (scrollRange <= 0) return;
+
+      const thumbWidthPx = (track.width / 100) * rect.width;
+      const travel = Math.max(1, rect.width - thumbWidthPx);
+      const x = clientX - rect.left - thumbWidthPx / 2;
+      const ratio = Math.max(0, Math.min(1, x / travel));
+      el.scrollLeft = ratio * scrollRange;
+    }, [track.width]);
+
+    const handleTrackPointerDown = useCallback(
+      (e: ReactPointerEvent<HTMLDivElement>) => {
+        if (!interactiveTrack) return;
+        e.preventDefault();
+        e.stopPropagation();
+        trackDragRef.current = true;
+        e.currentTarget.setPointerCapture(e.pointerId);
+        scrollFromClientX(e.clientX);
+      },
+      [interactiveTrack, scrollFromClientX],
+    );
+
+    const handleTrackPointerMove = useCallback(
+      (e: ReactPointerEvent<HTMLDivElement>) => {
+        if (!trackDragRef.current) return;
+        e.preventDefault();
+        scrollFromClientX(e.clientX);
+      },
+      [scrollFromClientX],
+    );
+
+    const handleTrackPointerUp = useCallback(
+      (e: ReactPointerEvent<HTMLDivElement>) => {
+        trackDragRef.current = false;
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+          e.currentTarget.releasePointerCapture(e.pointerId);
+        }
+      },
+      [],
+    );
 
     useEffect(() => {
       scrollToEnd();
@@ -122,16 +175,28 @@ export const HorizontalScroll = forwardRef<HTMLDivElement, HorizontalScrollProps
         </div>
         {trackEnabled && track.visible && (
           <div
-            className="mt-1.5 h-1.5 rounded-full bg-app-muted"
-            aria-hidden
+            ref={trackRef}
+            className={cn(
+              "mt-1.5 py-2 touch-none select-none",
+              interactiveTrack && "cursor-pointer",
+            )}
+            aria-hidden={!interactiveTrack}
+            role={interactiveTrack ? "scrollbar" : undefined}
+            aria-orientation={interactiveTrack ? "horizontal" : undefined}
+            onPointerDown={handleTrackPointerDown}
+            onPointerMove={handleTrackPointerMove}
+            onPointerUp={handleTrackPointerUp}
+            onPointerCancel={handleTrackPointerUp}
           >
-            <div
-              className="h-full rounded-full bg-app-border-strong"
-              style={{
-                width: `${track.width}%`,
-                marginLeft: `${track.left}%`,
-              }}
-            />
+            <div className="relative h-1.5 rounded-full bg-app-muted">
+              <div
+                className="absolute top-0 h-full rounded-full bg-app-border-strong"
+                style={{
+                  width: `${track.width}%`,
+                  left: `${track.left}%`,
+                }}
+              />
+            </div>
           </div>
         )}
       </div>
