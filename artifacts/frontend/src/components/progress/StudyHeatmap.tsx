@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ComponentProps,
+  type CSSProperties,
+} from "react";
+import { createPortal } from "react-dom";
 import { Lens } from "@/components/ui/lens";
 import { useTranslation } from "../../i18n/I18nProvider";
 import {
@@ -43,6 +52,7 @@ function chunkIntoWeeks(cells: HeatmapCell[]): HeatmapCell[][] {
 
 type GridPos = { col: number; row: number };
 type FocusPos = { col: number; row: number };
+type ViewportPoint = { x: number; y: number };
 
 type MagnifyConfig = {
   maxScale: number;
@@ -57,9 +67,9 @@ const MAGNIFY: Record<"full" | "compact", MagnifyConfig> = {
 };
 
 const LENS_SIZE = { full: 120, compact: 96 } as const;
-const LENS_ZOOM = { full: 2.2, compact: 2.4 } as const;
-/** Lift lens center above finger so the dot stays visible under the glass. */
-const LENS_Y_LIFT = { full: 52, compact: 44 } as const;
+const LENS_ZOOM = { full: 2.4, compact: 2.6 } as const;
+/** Viewport px: loupe center sits this far above the finger. */
+const TOUCH_LOUPE_LIFT = { full: 92, compact: 80 } as const;
 
 function dockScaleAtDistance(d: number, cfg: MagnifyConfig): number {
   const t = Math.max(0, 1 - d / cfg.radius);
@@ -117,18 +127,16 @@ function HeatmapGrid({
   columns,
   cellPx,
   gapPx,
-  focusPos,
+  dockFocus,
   magnify,
-  compact,
   t,
   dateLocale,
 }: {
   columns: HeatmapCell[][];
   cellPx: number;
   gapPx: number;
-  focusPos: FocusPos | null;
+  dockFocus: FocusPos | null;
   magnify: MagnifyConfig;
-  compact: boolean;
   t: (key: string, params?: Record<string, string | number>) => string;
   dateLocale: string;
 }) {
@@ -138,7 +146,7 @@ function HeatmapGrid({
         <div key={wi} className="flex flex-col" style={{ gap: gapPx }}>
           {col.map((cell, rowIdx) => {
             const pos = { col: wi, row: rowIdx };
-            const scale = scaleForCell(pos, focusPos ?? undefined, magnify);
+            const scale = scaleForCell(pos, dockFocus ?? undefined, magnify);
 
             return (
               <div
@@ -156,7 +164,7 @@ function HeatmapGrid({
                   width: cellPx,
                   height: cellPx,
                   transform: `scale(${scale})`,
-                  zIndex: Math.round(scale * 100),
+                  zIndex: dockFocus ? Math.round(scale * 100) : 1,
                   position: "relative",
                 }}
               />
@@ -165,6 +173,57 @@ function HeatmapGrid({
         </div>
       ))}
     </div>
+  );
+}
+
+function TouchLoupe({
+  point,
+  gridRect,
+  lensSize,
+  lensZoom,
+  lift,
+  gridProps,
+}: {
+  point: ViewportPoint;
+  gridRect: DOMRect;
+  lensSize: number;
+  lensZoom: number;
+  lift: number;
+  gridProps: ComponentProps<typeof HeatmapGrid>;
+}) {
+  const loupeLeft = point.x - lensSize / 2;
+  const loupeTop = point.y - lift - lensSize / 2;
+  const originX = point.x - gridRect.left;
+  const originY = point.y - gridRect.top;
+  const offsetLeft = gridRect.left - loupeLeft;
+  const offsetTop = gridRect.top - loupeTop;
+
+  const loupeStyle: CSSProperties = {
+    left: loupeLeft,
+    top: loupeTop,
+    width: lensSize,
+    height: lensSize,
+  };
+
+  const contentStyle: CSSProperties = {
+    left: offsetLeft,
+    top: offsetTop,
+    transformOrigin: `${originX}px ${originY}px`,
+    transform: `scale(${lensZoom})`,
+  };
+
+  return createPortal(
+    <div
+      className="fixed z-[9999] pointer-events-none rounded-full overflow-hidden border-2 border-app-border-strong bg-app-surface shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
+      style={loupeStyle}
+      aria-hidden
+    >
+      <div className="absolute inset-0 bg-app-surface" />
+      <div className="absolute" style={contentStyle}>
+        <HeatmapGrid {...gridProps} dockFocus={null} />
+      </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -180,16 +239,20 @@ export function StudyHeatmap({
   const dateLocale = locale === "tr" ? "tr-TR" : "en-US";
 
   const gridRef = useRef<HTMLDivElement>(null);
+  const gridWrapRef = useRef<HTMLDivElement>(null);
   const lensRef = useRef<HTMLDivElement>(null);
   const activeDateRef = useRef<string | null>(null);
   const isDraggingRef = useRef(false);
   const dragMovedRef = useRef(false);
   const pointerStartRef = useRef<{ x: number; y: number } | null>(null);
+  const gridRectRef = useRef<DOMRect | null>(null);
 
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [focusPos, setFocusPos] = useState<FocusPos | null>(null);
   const [touchScrubbing, setTouchScrubbing] = useState(false);
-  const [lensPosition, setLensPosition] = useState({ x: 0, y: 0 });
+  const [touchPoint, setTouchPoint] = useState<ViewportPoint | null>(null);
+  const [touchGridRect, setTouchGridRect] = useState<DOMRect | null>(null);
+  const [mouseLensPos, setMouseLensPos] = useState({ x: 0, y: 0 });
 
   const resolvedRange: HeatmapRange = range ?? { kind: "weeks", weeks };
 
@@ -212,24 +275,23 @@ export function StudyHeatmap({
   const hitPad = Math.round((cellPx + gapPx) * 1.1);
   const lensSize = compact ? LENS_SIZE.compact : LENS_SIZE.full;
   const lensZoom = compact ? LENS_ZOOM.compact : LENS_ZOOM.full;
-  const lensYLift = compact ? LENS_Y_LIFT.compact : LENS_Y_LIFT.full;
+  const touchLoupeLift = compact ? TOUCH_LOUPE_LIFT.compact : TOUCH_LOUPE_LIFT.full;
 
-  const updateLensPosition = useCallback(
+  const syncTouchLoupe = useCallback(
     (clientX: number, clientY: number) => {
-      const lensEl = lensRef.current;
-      if (!lensEl) return;
-      const rect = lensEl.getBoundingClientRect();
-      setLensPosition({
-        x: clientX - rect.left,
-        y: Math.max(lensSize / 2, clientY - rect.top - lensYLift),
-      });
+      const wrap = gridWrapRef.current;
+      if (!wrap) return;
+      const rect = wrap.getBoundingClientRect();
+      gridRectRef.current = rect;
+      setTouchGridRect(rect);
+      setTouchPoint({ x: clientX, y: clientY });
     },
-    [lensSize, lensYLift],
+    [],
   );
 
   const applyPointer = useCallback(
     (clientX: number, clientY: number) => {
-      const inner = lensRef.current;
+      const inner = gridWrapRef.current;
       if (!inner) return;
       const { date, focus } = pointerToFocus(
         clientX,
@@ -253,6 +315,9 @@ export function StudyHeatmap({
     setActiveDate(null);
     setFocusPos(null);
     setTouchScrubbing(false);
+    setTouchPoint(null);
+    setTouchGridRect(null);
+    gridRectRef.current = null;
   }, []);
 
   const handlePointerDown = useCallback(
@@ -264,11 +329,11 @@ export function StudyHeatmap({
       gridRef.current?.setPointerCapture(e.pointerId);
       if (e.pointerType === "touch") {
         setTouchScrubbing(true);
-        updateLensPosition(e.clientX, e.clientY);
+        syncTouchLoupe(e.clientX, e.clientY);
       }
       applyPointer(e.clientX, e.clientY);
     },
-    [applyPointer, updateLensPosition],
+    [applyPointer, syncTouchLoupe],
   );
 
   const handlePointerMove = useCallback(
@@ -282,14 +347,27 @@ export function StudyHeatmap({
 
       if (isDraggingRef.current || e.buttons > 0) {
         if (e.pointerType === "touch") {
-          updateLensPosition(e.clientX, e.clientY);
+          syncTouchLoupe(e.clientX, e.clientY);
+        } else if (e.pointerType === "mouse" && lensRef.current) {
+          const rect = lensRef.current.getBoundingClientRect();
+          setMouseLensPos({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          });
         }
         applyPointer(e.clientX, e.clientY);
       } else if (e.pointerType === "mouse") {
+        if (lensRef.current) {
+          const rect = lensRef.current.getBoundingClientRect();
+          setMouseLensPos({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+          });
+        }
         applyPointer(e.clientX, e.clientY);
       }
     },
-    [applyPointer, updateLensPosition],
+    [applyPointer, syncTouchLoupe],
   );
 
   const endInteraction = useCallback(
@@ -330,9 +408,7 @@ export function StudyHeatmap({
     columns,
     cellPx,
     gapPx,
-    focusPos,
     magnify,
-    compact,
     t,
     dateLocale,
   };
@@ -342,6 +418,15 @@ export function StudyHeatmap({
     if (!el) return;
     el.scrollLeft = el.scrollWidth;
   }, [cells.length, compact]);
+
+  const grid = (
+    <div ref={gridWrapRef} className="inline-block w-max">
+      <HeatmapGrid
+        {...gridProps}
+        dockFocus={touchScrubbing ? null : focusPos}
+      />
+    </div>
+  );
 
   return (
     <div className={className}>
@@ -368,20 +453,36 @@ export function StudyHeatmap({
         onPointerCancel={handlePointerCancel}
         onPointerLeave={handlePointerLeave}
       >
-        <Lens
-          ref={lensRef}
-          isStatic={touchScrubbing}
-          position={lensPosition}
-          zoomFactor={lensZoom}
-          lensSize={lensSize}
-          lensColor="white"
-          duration={0}
-          ariaLabel={t("progress.heatmap.hint")}
-          className="inline-block w-max overflow-visible rounded-none shadow-none"
-        >
-          <HeatmapGrid {...gridProps} />
-        </Lens>
+        {touchScrubbing ? (
+          grid
+        ) : (
+          <Lens
+            ref={lensRef}
+            position={mouseLensPos}
+            zoomOrigin={mouseLensPos}
+            zoomFactor={lensZoom}
+            lensSize={lensSize}
+            lensColor="black"
+            hideBaseUnderLens
+            duration={0.1}
+            ariaLabel={t("progress.heatmap.hint")}
+            className="inline-block w-max overflow-visible rounded-none shadow-none"
+          >
+            {grid}
+          </Lens>
+        )}
       </div>
+
+      {touchScrubbing && touchPoint && touchGridRect && (
+        <TouchLoupe
+          point={touchPoint}
+          gridRect={touchGridRect}
+          lensSize={lensSize}
+          lensZoom={lensZoom}
+          lift={touchLoupeLift}
+          gridProps={{ ...gridProps, dockFocus: null }}
+        />
+      )}
 
       {!compact && (
         <div className="flex items-center gap-1.5 mt-3 text-[10px] text-app-text-muted">

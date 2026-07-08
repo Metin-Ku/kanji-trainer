@@ -11,13 +11,18 @@ interface LensProps {
   children: React.ReactNode
   zoomFactor?: number
   lensSize?: number
+  /** Visual center of the lens circle. */
   position?: Position
+  /** Point to magnify; defaults to `position`. Use when the glass sits above the touch point. */
+  zoomOrigin?: Position
   defaultPosition?: Position
   isStatic?: boolean
   duration?: number
   lensColor?: string
   ariaLabel?: string
   className?: string
+  /** Cut a hole in the base layer so unscaled content does not show through the glass. */
+  hideBaseUnderLens?: boolean
 }
 
 export const Lens = React.forwardRef<HTMLDivElement, LensProps>(function Lens(
@@ -27,11 +32,13 @@ export const Lens = React.forwardRef<HTMLDivElement, LensProps>(function Lens(
     lensSize = 170,
     isStatic = false,
     position = { x: 0, y: 0 },
+    zoomOrigin,
     defaultPosition,
     duration = 0.1,
     lensColor = "black",
     ariaLabel = "Zoom Area",
     className,
+    hideBaseUnderLens = false,
   },
   ref,
 ) {
@@ -61,6 +68,8 @@ export const Lens = React.forwardRef<HTMLDivElement, LensProps>(function Lens(
     return mousePosition
   }, [isStatic, position, defaultPosition, isHovering, mousePosition])
 
+  const currentZoomOrigin = zoomOrigin ?? currentPosition
+
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
     setMousePosition({
@@ -73,15 +82,22 @@ export const Lens = React.forwardRef<HTMLDivElement, LensProps>(function Lens(
     if (e.key === "Escape") setIsHovering(false)
   }, [])
 
-  const maskImage = useMotionTemplate`radial-gradient(circle ${
-    lensSize / 2
-  }px at ${currentPosition.x}px ${
-    currentPosition.y
-  }px, ${lensColor} 100%, transparent 100%)`
+  const radius = lensSize / 2
+
+  const maskImage = useMotionTemplate`radial-gradient(circle ${radius}px at ${currentPosition.x}px ${currentPosition.y}px, ${lensColor} 100%, transparent 100%)`
+
+  const baseMaskStyle = useMemo(() => {
+    const { x, y } = currentPosition
+    const gradient = `radial-gradient(circle ${radius}px at ${x}px ${y}px, transparent 100%, black 100%)`
+    return {
+      maskImage: gradient,
+      WebkitMaskImage: gradient,
+    } as React.CSSProperties
+  }, [currentPosition, radius])
+
+  const { x: ox, y: oy } = currentZoomOrigin
 
   const LensContent = useMemo(() => {
-    const { x, y } = currentPosition
-
     return (
       <motion.div
         initial={{ opacity: 0, scale: 0.58 }}
@@ -92,24 +108,32 @@ export const Lens = React.forwardRef<HTMLDivElement, LensProps>(function Lens(
         style={{
           maskImage,
           WebkitMaskImage: maskImage,
-          transformOrigin: `${x}px ${y}px`,
-          zIndex: 50,
+          zIndex: 500,
         }}
       >
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 bg-app-surface"
           style={{
             transform: `scale(${zoomFactor})`,
-            transformOrigin: `${x}px ${y}px`,
+            transformOrigin: `${ox}px ${oy}px`,
           }}
         >
           {children}
         </div>
       </motion.div>
     )
-  }, [currentPosition, maskImage, zoomFactor, children, duration])
+  }, [maskImage, zoomFactor, ox, oy, children, duration])
 
   const showLens = isStatic || defaultPosition != null
+  const lensVisible = showLens || isHovering
+
+  const baseLayer = hideBaseUnderLens && lensVisible ? (
+    <div className="relative" style={baseMaskStyle}>
+      {children}
+    </div>
+  ) : (
+    children
+  )
 
   return (
     <div
@@ -123,7 +147,7 @@ export const Lens = React.forwardRef<HTMLDivElement, LensProps>(function Lens(
       aria-label={ariaLabel}
       tabIndex={0}
     >
-      {children}
+      {baseLayer}
       {showLens ? (
         LensContent
       ) : (
