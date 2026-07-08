@@ -195,9 +195,25 @@ function HeatmapGrid({
   );
 }
 
+function cellCenterPx(
+  col: number,
+  row: number,
+  cellPx: number,
+  gapPx: number,
+): { x: number; y: number } {
+  const step = cellPx + gapPx;
+  return {
+    x: col * step + cellPx / 2,
+    y: row * step + cellPx / 2,
+  };
+}
+
 function TouchLoupe({
   point,
   gridRect,
+  ringCell,
+  cellPx,
+  gapPx,
   lensSize,
   lensZoom,
   lift,
@@ -205,6 +221,9 @@ function TouchLoupe({
 }: {
   point: ViewportPoint;
   gridRect: DOMRect;
+  ringCell: GridPos | null;
+  cellPx: number;
+  gapPx: number;
   lensSize: number;
   lensZoom: number;
   lift: number;
@@ -212,10 +231,20 @@ function TouchLoupe({
 }) {
   const loupeLeft = point.x - lensSize / 2;
   const loupeTop = point.y - lift - lensSize / 2;
-  const originX = point.x - gridRect.left;
-  const originY = point.y - gridRect.top;
   const offsetLeft = gridRect.left - loupeLeft;
   const offsetTop = gridRect.top - loupeTop;
+
+  const focal = ringCell
+    ? cellCenterPx(ringCell.col, ringCell.row, cellPx, gapPx)
+    : {
+        x: point.x - gridRect.left,
+        y: point.y - gridRect.top,
+      };
+
+  const focalInLoupeX = offsetLeft + focal.x;
+  const focalInLoupeY = offsetTop + focal.y;
+  const dx = lensSize / 2 - focalInLoupeX;
+  const dy = lensSize / 2 - focalInLoupeY;
 
   const loupeStyle: CSSProperties = {
     left: loupeLeft,
@@ -227,8 +256,8 @@ function TouchLoupe({
   const contentStyle: CSSProperties = {
     left: offsetLeft,
     top: offsetTop,
-    transformOrigin: `${originX}px ${originY}px`,
-    transform: `scale(${lensZoom})`,
+    transformOrigin: `${focal.x}px ${focal.y}px`,
+    transform: `translate(${dx}px, ${dy}px) scale(${lensZoom})`,
   };
 
   return createPortal(
@@ -498,6 +527,9 @@ export function StudyHeatmap({
         <TouchLoupe
           point={touchPoint}
           gridRect={touchGridRect}
+          ringCell={ringCell}
+          cellPx={cellPx}
+          gapPx={gapPx}
           lensSize={lensSize}
           lensZoom={lensZoom}
           lift={touchLoupeLift}
