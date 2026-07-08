@@ -299,7 +299,7 @@ export function StudyHeatmap({
                       zIndex: Math.round(scale * 100),
                       position: "relative",
                     }}
-                  />
+                  >a</div>
                 );
               })}
             </div>

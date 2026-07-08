@@ -66,11 +66,7 @@ const DeckRow = memo(function DeckRow({
             {label}
           </span>
           {deck.goalMet && (
-            <Check
-              size={12}
-              className="text-main-500 shrink-0"
-              strokeWidth={2.5}
-            />
+            <Check size={12} className="text-main-500 shrink-0" strokeWidth={2.5} />
           )}
         </div>
         <span
@@ -79,11 +75,7 @@ const DeckRow = memo(function DeckRow({
           {progressLabel}
         </span>
       </div>
-      <ProgressBar
-        ratio={deck.progressRatio}
-        goalMet={deck.goalMet}
-        size="sm"
-      />
+      <ProgressBar ratio={deck.progressRatio} goalMet={deck.goalMet} size="sm" />
     </div>
   );
 });
@@ -103,8 +95,8 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
   const enabledDecks = decks.filter((d) => d.enabled);
   const shellClass =
     variant === "banner"
-      ? `rounded-sm border px-4 py-5 border-main-200 bg-app-accent`
-      : `rounded-sm border px-4 py-5 mt-3 border-main-200 dark:border-app-vibrant bg-app-accent/40`;
+      ? `rounded-sm border px-4 py-5 border-main-200 bg-app-accent/40`
+      : `rounded-sm border px-4 py-5 mt-3 border-main-200 bg-app-accent/40`;
   // bg-[linear-gradient(135deg,color-mix(in_oklch,var(--main-400)_13%,transparent),color-mix(in_oklch,var(--main-600)_8%,transparent))]
   return (
     <div className={shellClass}>
@@ -127,11 +119,7 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
                 {t("dailyGoal.title")}
               </p>
               {goalMet && (
-                <Check
-                  size={14}
-                  className="text-main-500 shrink-0"
-                  strokeWidth={2.5}
-                />
+                <Check size={14} className="text-main-500 shrink-0" strokeWidth={2.5} />
               )}
             </div>
             <p
@@ -139,20 +127,13 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
             >
               {progressLabel}
             </p>
-            <p className="text-xs text-app-text-secondary mt-0.5">
-              {statusLabel}
-            </p>
+            <p className="text-xs text-app-text-secondary mt-0.5">{statusLabel}</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {streak > 0 ? (
               <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-surface/80 border border-main-100">
-                <Flame
-                  size={variant === "banner" ? 14 : 16}
-                  className="text-main-500"
-                />
-                <span className="text-sm font-bold text-main-600">
-                  {streak}
-                </span>
+                <Flame size={variant === "banner" ? 14 : 16} className="text-main-500" />
+                <span className="text-sm font-bold text-main-600">{streak}</span>
               </div>
             ) : (
               variant !== "banner" && (
@@ -189,16 +170,10 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
             </p>
             <div className="space-y-3">
               {enabledDecks.length === 0 ? (
-                <p className="text-xs text-app-text-muted">
-                  {t("dailyGoal.noDeckTargets")}
-                </p>
+                <p className="text-xs text-app-text-muted">{t("dailyGoal.noDeckTargets")}</p>
               ) : (
                 enabledDecks.map((deck) => (
-                  <DeckRow
-                    key={deck.deck}
-                    deck={deck}
-                    compact={variant === "banner"}
-                  />
+                  <DeckRow key={deck.deck} deck={deck} compact={variant === "banner"} />
                 ))
               )}
             </div>

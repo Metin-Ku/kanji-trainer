@@ -181,7 +181,7 @@ export function SettingsPage() {
             onClick={() => setSection("styling")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors ${
               section === "styling"
-                ? "bg-app-accent text-main-600"
+                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
@@ -192,7 +192,7 @@ export function SettingsPage() {
             onClick={() => setSection("srs")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "srs"
-                ? "bg-app-accent text-main-600"
+                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
@@ -203,7 +203,7 @@ export function SettingsPage() {
             onClick={() => setSection("database")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "database"
-                ? "bg-app-accent text-main-600"
+                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
@@ -214,7 +214,7 @@ export function SettingsPage() {
             onClick={() => setSection("language")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "language"
-                ? "bg-app-accent text-main-600"
+                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >

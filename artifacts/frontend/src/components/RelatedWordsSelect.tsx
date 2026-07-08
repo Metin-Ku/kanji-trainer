@@ -130,7 +130,7 @@ export function RelatedWordsSelect({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => addWord(w)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-app-accent active:bg-main-100 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-main-50 dark:hover:bg-main-950 active:bg-main-100 transition-colors text-left"
               >
                 <span className="text-base font-bold text-app-text shrink-0">
                   {w.kanji}

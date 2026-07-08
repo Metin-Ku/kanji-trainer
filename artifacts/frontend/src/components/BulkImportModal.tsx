@@ -182,7 +182,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
               </button>
             ) : (
               <div className="space-y-3">
-                <div className="bg-app-accent border border-main-100 rounded-xl px-4 py-3 text-sm text-app-text">
+                <div className="bg-main-50 dark:bg-main-950 border border-main-100 rounded-xl px-4 py-3 text-sm text-app-text">
                   <div className="flex items-center justify-between mb-2">
                     <p className="font-semibold text-app-text">
                       {t("bulkImport.wordsDetected", { count: preview.length })}

@@ -404,7 +404,7 @@ export function SrsExamplesEditor({
                 </div>
 
                 {ex.sentence && (
-                  <div className="rounded-lg bg-app-accent border border-main-100 px-3 py-2">
+                  <div className="rounded-lg bg-main-50 dark:bg-main-950 border border-main-100 px-3 py-2">
                     <p className="text-[10px] font-bold text-main-400 uppercase tracking-widest mb-0.5">
                       {t("srs.editor.srsPreview")}
                     </p>
@@ -482,7 +482,7 @@ export function SrsExamplesEditor({
                                 p.highlight ? (
                                   <span
                                     key={i}
-                                    className="font-semibold text-main-600 bg-app-accent px-0.5 rounded"
+                                    className="font-semibold text-main-600 bg-main-100 dark:bg-main-900 px-0.5 rounded"
                                   >
                                     {p.text}
                                   </span>

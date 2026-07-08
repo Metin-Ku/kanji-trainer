@@ -275,7 +275,7 @@ export function WordListPage() {
             <div className="relative shrink-0" ref={sortMenuRef}>
               <button
                 onClick={() => setShowSortMenu((v) => !v)}
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors ${activeSortCount > 0 ? "text-main-400 bg-app-accent hover:bg-main-100" : "text-app-text-muted hover:text-app-text-secondary hover:bg-app-muted"}`}
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors ${activeSortCount > 0 ? "text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900" : "text-app-text-muted hover:text-app-text-secondary hover:bg-app-muted"}`}
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
                 <span className="text-xs font-medium">
@@ -338,7 +338,7 @@ export function WordListPage() {
                     </div>
                   ))}
                   {activeSortCount > 1 && (
-                    <div className="mx-3 mb-2.5 mt-1.5 px-2.5 py-1.5 bg-app-accent rounded-lg">
+                    <div className="mx-3 mb-2.5 mt-1.5 px-2.5 py-1.5 bg-main-50 dark:bg-main-950 rounded-lg">
                       <p className="text-[11px] text-main-400 font-medium">
                         {t("words.sort.multiCriteria", { count: activeSortCount })}
                       </p>
@@ -352,7 +352,7 @@ export function WordListPage() {
               onClick={() =>
                 selectMode ? exitSelectMode() : setSelectMode(true)
               }
-              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-app-accent" : "text-app-text-muted hover:bg-app-muted"}`}
+              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50 dark:bg-main-950" : "text-app-text-muted hover:bg-app-muted"}`}
             >
               {selectMode ? t("common.cancel") : t("common.select")}
             </button>

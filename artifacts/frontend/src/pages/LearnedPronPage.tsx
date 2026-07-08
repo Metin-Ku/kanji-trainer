@@ -206,7 +206,7 @@ export function LearnedPronPage() {
             <div className="relative shrink-0" ref={sortMenuRef}>
               <button
                 onClick={() => setShowSortMenu((v) => !v)}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-main-400 bg-app-accent hover:bg-main-100 transition-colors"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900 transition-colors"
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
                 <span className="text-xs font-medium">{t("common.sort")}</span>
@@ -232,7 +232,7 @@ export function LearnedPronPage() {
 
             <button
               onClick={() => selectMode ? exitSelectMode() : setSelectMode(true)}
-              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-app-accent" : "text-app-text-muted hover:bg-app-muted"}`}
+              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50 dark:bg-main-950" : "text-app-text-muted hover:bg-app-muted"}`}
             >
               {selectMode ? t("common.cancel") : t("common.select")}
             </button>

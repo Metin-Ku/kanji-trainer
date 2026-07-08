@@ -332,7 +332,7 @@ export function ExampleSrsStudyPage() {
                     p.highlight ? (
                       <span
                         key={j}
-                        className="font-semibold text-main-600 bg-app-accent px-0.5 rounded"
+                        className="font-semibold text-main-600 bg-main-100 dark:bg-main-900 px-0.5 rounded"
                       >
                         {p.text}
                       </span>

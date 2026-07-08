@@ -44,6 +44,8 @@ html.theme-switching *::after {
   --color-app-text-muted: var(--app-text-muted);
   --color-app-accent: var(--app-accent);
   --color-app-vibrant: var(--app-vibrant);
+  --color-app-accent: var(--app-accent);
+  --color-app-vibrant: var(--app-vibrant);
   --font-sans: var(--app-font-sans);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -85,6 +87,7 @@ html.theme-switching *::after {
   --level-5: var(--main-700);
   --star-color: var(--main-300);
   --icon-bg: linear-gradient(135deg, color-mix(in oklch, var(--main-400) 13%, transparent), color-mix(in oklch, var(--main-600) 8%, transparent));
+  --icon-bg: linear-gradient(135deg, color-mix(in oklch, var(--main-400) 13%, transparent), color-mix(in oklch, var(--main-600) 8%, transparent));
 
   --app-bg: #f9fafb;
   --app-surface: #ffffff;
@@ -94,6 +97,7 @@ html.theme-switching *::after {
   --app-text: #111827;
   --app-text-secondary: #6b7280;
   --app-text-muted: #9ca3af;
+  --app-accent: color-mix(in oklch, var(--main-500) 10%, #ffffff);
   --app-accent: color-mix(in oklch, var(--main-500) 10%, #ffffff);
 }
 
@@ -118,7 +122,15 @@ html.theme-switching *::after {
   --app-text-secondary: #9ca3af;
   --app-text-muted: #6b7280;
   --app-accent: color-mix(in oklch, var(--main-500) 16%, #181b24);
-  --app-vibrant: color-mix(in oklch, var(--main-500) 32%, #181b24);
+  /* --app-vibrant: color-mix(in oklch, var(--main-500) 32%, #181b24); */
+  /* --app-xxx-yyy: oklch(0.29 0.08 38.36); */
+  --icon-bg: linear-gradient(
+    135deg,
+    color-mix(in oklch, var(--main-400) 22%, transparent),
+    color-mix(in oklch, var(--main-600) 14%, transparent)
+  );
+  --app-accent: color-mix(in oklch, var(--main-500) 16%, #181b24);
+  /* --app-vibrant: color-mix(in oklch, var(--main-500) 32%, #181b24); */
   /* --app-xxx-yyy: oklch(0.29 0.08 38.36); */
   --icon-bg: linear-gradient(
     135deg,
