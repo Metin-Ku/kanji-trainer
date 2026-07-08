@@ -10,12 +10,14 @@ import {
   Trash2,
   BarChart2,
   ChevronRight,
+  FolderOpen,
 } from "lucide-react";
 import { SearchBar } from "../components/SearchBar";
 import { DailyGoalCard } from "../components/DailyGoalCard";
 import { WordAddFab } from "../components/WordAddFab";
 import { BulkImportModal } from "../components/BulkImportModal";
 import { useWords } from "../hooks/useWords";
+import { useThemes } from "../hooks/useThemes";
 import { filterWords } from "../utils/filterWords";
 import {
   RelatedWordsList,
@@ -39,6 +41,7 @@ const STUDY_LINKS = [
   },
   { path: "/meaning", Icon: BookOpen, titleKey: "nav.meaning" as const },
   { path: "/learned", Icon: null, titleKey: "nav.learned" as const },
+  { path: "/themes", Icon: FolderOpen, titleKey: "nav.themes" as const },
 ] as const;
 
 export function HomePage() {
@@ -46,6 +49,7 @@ export function HomePage() {
   const [, navigate] = useLocation();
   const { words, isLoading, updateWord, deleteWord, addWord, bulkCreate } =
     useWords();
+  const { themes, isLoading: themesLoading } = useThemes();
   const activityByDate = useStudyHistory();
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
@@ -88,6 +92,7 @@ export function HomePage() {
       "nav.pronunciation": words.length,
       "nav.meaning": words.length,
       "nav.learned": starredCount,
+      "nav.themes": themes.length,
     };
 
   function toggleOpen(id: number) {
@@ -348,7 +353,7 @@ export function HomePage() {
                 <button
                   key={path}
                   onClick={() => navigate(path)}
-                  disabled={isLoading}
+                  disabled={isLoading || (titleKey === "nav.themes" && themesLoading)}
                   className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-3.5 active:scale-[0.99] transition-transform disabled:opacity-60"
                 >
                   <div className="w-10 h-10 rounded-xl bg-app-accent flex items-center justify-center shrink-0">

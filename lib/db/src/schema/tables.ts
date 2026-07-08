@@ -133,3 +133,56 @@ export const wordMistakesTable = pgTable(
   },
   (t) => [primaryKey({ columns: [t.wordId, t.deckType] })],
 );
+
+export type ThemeQuizChoice = {
+  key: string;
+  label: string;
+};
+
+export const themeQuizQuestionTypes = ["ab", "four"] as const;
+export type ThemeQuizQuestionType = (typeof themeQuizQuestionTypes)[number];
+
+export const themesTable = pgTable("themes", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const themeWordsTable = pgTable(
+  "theme_words",
+  {
+    themeId: integer("theme_id")
+      .notNull()
+      .references(() => themesTable.id, { onDelete: "cascade" }),
+    wordId: integer("word_id")
+      .notNull()
+      .references(() => wordsTable.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.themeId, t.wordId] })],
+);
+
+export const themeQuizQuestionsTable = pgTable("theme_quiz_questions", {
+  id: serial("id").primaryKey(),
+  themeId: integer("theme_id")
+    .notNull()
+    .references(() => themesTable.id, { onDelete: "cascade" }),
+  sortOrder: integer("sort_order").notNull().default(0),
+  type: text("type").notNull(),
+  prompt: text("prompt").notNull().default(""),
+  choices: jsonb("choices")
+    .$type<ThemeQuizChoice[]>()
+    .notNull()
+    .default([]),
+  correctKey: text("correct_key").notNull().default(""),
+  hints: jsonb("hints")
+    .$type<SrsExampleHint[]>()
+    .notNull()
+    .default([]),
+});

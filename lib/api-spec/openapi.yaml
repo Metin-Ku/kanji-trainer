@@ -9,6 +9,7 @@ servers:
 tags:
   - name: health
   - name: words
+  - name: themes
 paths:
   /healthz:
     get:
@@ -113,6 +114,225 @@ paths:
       responses:
         "204":
           description: Deleted
+        "404":
+          description: Not found
+
+  /themes:
+    get:
+      operationId: listThemes
+      tags: [themes]
+      summary: List all themes
+      responses:
+        "200":
+          description: List of themes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ThemeSummary"
+    post:
+      operationId: createTheme
+      tags: [themes]
+      summary: Create a theme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThemeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeDetail"
+        "400":
+          description: Bad request
+
+  /themes/{id}:
+    get:
+      operationId: getTheme
+      tags: [themes]
+      summary: Get theme detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Theme detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeDetail"
+        "404":
+          description: Not found
+    patch:
+      operationId: updateTheme
+      tags: [themes]
+      summary: Update theme name
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThemeUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeDetail"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTheme
+      tags: [themes]
+      summary: Delete theme
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /themes/{id}/words:
+    put:
+      operationId: replaceThemeWords
+      tags: [themes]
+      summary: Replace all words in theme
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThemeWordsInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeDetail"
+        "404":
+          description: Not found
+    post:
+      operationId: addThemeWords
+      tags: [themes]
+      summary: Add words to theme
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThemeWordsInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThemeDetail"
+        "404":
+          description: Not found
+
+  /themes/{id}/words/{wordId}:
+    delete:
+      operationId: removeThemeWord
+      tags: [themes]
+      summary: Remove word from theme
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: wordId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Removed
+        "404":
+          description: Not found
+
+  /themes/{id}/questions:
+    get:
+      operationId: listThemeQuestions
+      tags: [themes]
+      summary: List quiz questions for theme
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Questions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ThemeQuizQuestion"
+        "404":
+          description: Not found
+    put:
+      operationId: replaceThemeQuestions
+      tags: [themes]
+      summary: Replace all quiz questions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThemeQuestionsInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ThemeQuizQuestion"
         "404":
           description: Not found
 
@@ -360,6 +580,142 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/LinkedToken"
+        hints:
+          type: array
+          items:
+            $ref: "#/components/schemas/SrsExampleHint"
+
+    ThemeSummary:
+      type: object
+      required: [id, name, sortOrder, wordCount, questionCount, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sortOrder:
+          type: integer
+        wordCount:
+          type: integer
+        questionCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ThemeDetail:
+      type: object
+      required: [id, name, sortOrder, wordIds, questions, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sortOrder:
+          type: integer
+        wordIds:
+          type: array
+          items:
+            type: integer
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ThemeQuizQuestion"
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ThemeInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        wordIds:
+          type: array
+          items:
+            type: integer
+
+    ThemeUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        sortOrder:
+          type: integer
+
+    ThemeWordsInput:
+      type: object
+      required: [wordIds]
+      properties:
+        wordIds:
+          type: array
+          items:
+            type: integer
+
+    ThemeQuizChoice:
+      type: object
+      required: [key, label]
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+
+    ThemeQuizQuestion:
+      type: object
+      required: [id, sortOrder, type, prompt, choices, correctKey, hints]
+      properties:
+        id:
+          type: integer
+        sortOrder:
+          type: integer
+        type:
+          type: string
+          enum: [ab, four]
+        prompt:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: "#/components/schemas/ThemeQuizChoice"
+        correctKey:
+          type: string
+        hints:
+          type: array
+          items:
+            $ref: "#/components/schemas/SrsExampleHint"
+
+    ThemeQuestionsInput:
+      type: object
+      required: [questions]
+      properties:
+        questions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ThemeQuizQuestionInput"
+
+    ThemeQuizQuestionInput:
+      type: object
+      required: [sortOrder, type, prompt, choices, correctKey, hints]
+      properties:
+        sortOrder:
+          type: integer
+        type:
+          type: string
+          enum: [ab, four]
+        prompt:
+          type: string
+        choices:
+          type: array
+          items:
+            $ref: "#/components/schemas/ThemeQuizChoice"
+        correctKey:
+          type: string
         hints:
           type: array
           items:

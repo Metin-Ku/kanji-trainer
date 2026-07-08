@@ -13,6 +13,10 @@ import { SrsHubPage } from "@/pages/SrsHubPage";
 import { SrsStudyPage } from "@/pages/SrsStudyPage";
 import { TroubleWordsPage } from "@/pages/TroubleWordsPage";
 import { ProgressPage } from "@/pages/ProgressPage";
+import { ThemesHubPage } from "@/pages/ThemesHubPage";
+import { ThemeDetailPage } from "@/pages/ThemeDetailPage";
+import { ThemeQuizEditorPage } from "@/pages/ThemeQuizEditorPage";
+import { ThemeQuizStudyPage } from "@/pages/ThemeQuizStudyPage";
 
 function App() {
   return (
@@ -24,6 +28,10 @@ function App() {
         <Route path="/srs/study" component={SrsStudyPage} />
         <Route path="/srs/trouble" component={TroubleWordsPage} />
         <Route path="/srs" component={SrsHubPage} />
+        <Route path="/themes/:id/quiz/edit" component={ThemeQuizEditorPage} />
+        <Route path="/themes/:id/quiz" component={ThemeQuizStudyPage} />
+        <Route path="/themes/:id" component={ThemeDetailPage} />
+        <Route path="/themes" component={ThemesHubPage} />
         <Route path="/words" component={WordListPage} />
         <Route path="/pronunciation" component={PronunciationPage} />
         <Route path="/meaning" component={MeaningPage} />

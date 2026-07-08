@@ -270,3 +270,258 @@ export const DeleteWordParams = zod.object({
 })
 
 
+/**
+ * @summary List all themes
+ */
+export const ListThemesResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sortOrder": zod.number(),
+  "wordCount": zod.number(),
+  "questionCount": zod.number(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListThemesResponse = zod.array(ListThemesResponseItem)
+
+
+/**
+ * @summary Create a theme
+ */
+
+
+
+export const CreateThemeBody = zod.object({
+  "name": zod.string().min(1),
+  "wordIds": zod.array(zod.number()).optional()
+})
+
+
+/**
+ * @summary Get theme detail
+ */
+export const GetThemeParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetThemeResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sortOrder": zod.number(),
+  "wordIds": zod.array(zod.number()),
+  "questions": zod.array(zod.object({
+  "id": zod.number(),
+  "sortOrder": zod.number(),
+  "type": zod.enum(['ab', 'four']),
+  "prompt": zod.string(),
+  "choices": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string()
+})),
+  "correctKey": zod.string(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Update theme name
+ */
+export const UpdateThemeParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+export const UpdateThemeBody = zod.object({
+  "name": zod.string().min(1).optional(),
+  "sortOrder": zod.number().optional()
+})
+
+export const UpdateThemeResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sortOrder": zod.number(),
+  "wordIds": zod.array(zod.number()),
+  "questions": zod.array(zod.object({
+  "id": zod.number(),
+  "sortOrder": zod.number(),
+  "type": zod.enum(['ab', 'four']),
+  "prompt": zod.string(),
+  "choices": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string()
+})),
+  "correctKey": zod.string(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Delete theme
+ */
+export const DeleteThemeParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Replace all words in theme
+ */
+export const ReplaceThemeWordsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ReplaceThemeWordsBody = zod.object({
+  "wordIds": zod.array(zod.number())
+})
+
+export const ReplaceThemeWordsResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sortOrder": zod.number(),
+  "wordIds": zod.array(zod.number()),
+  "questions": zod.array(zod.object({
+  "id": zod.number(),
+  "sortOrder": zod.number(),
+  "type": zod.enum(['ab', 'four']),
+  "prompt": zod.string(),
+  "choices": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string()
+})),
+  "correctKey": zod.string(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Add words to theme
+ */
+export const AddThemeWordsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const AddThemeWordsBody = zod.object({
+  "wordIds": zod.array(zod.number())
+})
+
+export const AddThemeWordsResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "sortOrder": zod.number(),
+  "wordIds": zod.array(zod.number()),
+  "questions": zod.array(zod.object({
+  "id": zod.number(),
+  "sortOrder": zod.number(),
+  "type": zod.enum(['ab', 'four']),
+  "prompt": zod.string(),
+  "choices": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string()
+})),
+  "correctKey": zod.string(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Remove word from theme
+ */
+export const RemoveThemeWordParams = zod.object({
+  "id": zod.coerce.number(),
+  "wordId": zod.coerce.number()
+})
+
+
+/**
+ * @summary List quiz questions for theme
+ */
+export const ListThemeQuestionsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ListThemeQuestionsResponseItem = zod.object({
+  "id": zod.number(),
+  "sortOrder": zod.number(),
+  "type": zod.enum(['ab', 'four']),
+  "prompt": zod.string(),
+  "choices": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string()
+})),
+  "correctKey": zod.string(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})
+export const ListThemeQuestionsResponse = zod.array(ListThemeQuestionsResponseItem)
+
+
+/**
+ * @summary Replace all quiz questions
+ */
+export const ReplaceThemeQuestionsParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ReplaceThemeQuestionsBody = zod.object({
+  "questions": zod.array(zod.object({
+  "sortOrder": zod.number(),
+  "type": zod.enum(['ab', 'four']),
+  "prompt": zod.string(),
+  "choices": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string()
+})),
+  "correctKey": zod.string(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+}))
+})
+
+export const ReplaceThemeQuestionsResponseItem = zod.object({
+  "id": zod.number(),
+  "sortOrder": zod.number(),
+  "type": zod.enum(['ab', 'four']),
+  "prompt": zod.string(),
+  "choices": zod.array(zod.object({
+  "key": zod.string(),
+  "label": zod.string()
+})),
+  "correctKey": zod.string(),
+  "hints": zod.array(zod.object({
+  "text": zod.string(),
+  "highlights": zod.array(zod.string()).optional()
+}))
+})
+export const ReplaceThemeQuestionsResponse = zod.array(ReplaceThemeQuestionsResponseItem)
+
+

@@ -84,3 +84,54 @@ export interface WordUpdate {
   date?: string;
   relatedWordIds?: number[];
 }
+
+export type ThemeQuizChoice = {
+  key: string;
+  label: string;
+};
+
+export type ThemeQuizQuestionType = "ab" | "four";
+
+export interface ThemeQuizQuestion {
+  id?: number;
+  sortOrder: number;
+  type: ThemeQuizQuestionType;
+  prompt: string;
+  choices: ThemeQuizChoice[];
+  correctKey: string;
+  hints: SrsExampleHint[];
+}
+
+export interface ThemeSummary {
+  id: number;
+  name: string;
+  sortOrder: number;
+  wordCount: number;
+  questionCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ThemeDetail {
+  id: number;
+  name: string;
+  sortOrder: number;
+  wordIds: number[];
+  questions: ThemeQuizQuestion[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ThemeInput {
+  name: string;
+  wordIds?: number[];
+}
+
+export interface ThemeUpdate {
+  name?: string;
+  sortOrder?: number;
+}
+
+export interface ThemeQuestionsInput {
+  questions: Omit<ThemeQuizQuestion, "id">[];
+}

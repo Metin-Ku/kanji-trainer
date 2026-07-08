@@ -22,6 +22,13 @@ import type {
 import type {
   BulkImportResult,
   HealthStatus,
+  ThemeDetail,
+  ThemeInput,
+  ThemeQuestionsInput,
+  ThemeQuizQuestion,
+  ThemeSummary,
+  ThemeUpdate,
+  ThemeWordsInput,
   VocabWord,
   WordBulkInput,
   WordInput,
@@ -452,5 +459,737 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
         TContext
       > => {
       return useMutation(getDeleteWordMutationOptions(options));
+    }
+
+export const getListThemesUrl = () => {
+
+
+
+
+  return `/api/themes`
+}
+
+/**
+ * @summary List all themes
+ */
+export const listThemes = async ( options?: RequestInit): Promise<ThemeSummary[]> => {
+
+  return customFetch<ThemeSummary[]>(getListThemesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListThemesQueryKey = () => {
+    return [
+    `/api/themes`
+    ] as const;
+    }
+
+
+export const getListThemesQueryOptions = <TData = Awaited<ReturnType<typeof listThemes>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listThemes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListThemesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listThemes>>> = ({ signal }) => listThemes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listThemes>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListThemesQueryResult = NonNullable<Awaited<ReturnType<typeof listThemes>>>
+export type ListThemesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all themes
+ */
+
+export function useListThemes<TData = Awaited<ReturnType<typeof listThemes>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listThemes>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListThemesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateThemeUrl = () => {
+
+
+
+
+  return `/api/themes`
+}
+
+/**
+ * @summary Create a theme
+ */
+export const createTheme = async (themeInput: ThemeInput, options?: RequestInit): Promise<ThemeDetail> => {
+
+  return customFetch<ThemeDetail>(getCreateThemeUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      themeInput,)
+  }
+);}
+
+
+
+
+export const getCreateThemeMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTheme>>, TError,{data: BodyType<ThemeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createTheme>>, TError,{data: BodyType<ThemeInput>}, TContext> => {
+
+const mutationKey = ['createTheme'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTheme>>, {data: BodyType<ThemeInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTheme(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateThemeMutationResult = NonNullable<Awaited<ReturnType<typeof createTheme>>>
+    export type CreateThemeMutationBody = BodyType<ThemeInput>
+    export type CreateThemeMutationError = ErrorType<void>
+
+    /**
+ * @summary Create a theme
+ */
+export const useCreateTheme = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTheme>>, TError,{data: BodyType<ThemeInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createTheme>>,
+        TError,
+        {data: BodyType<ThemeInput>},
+        TContext
+      > => {
+      return useMutation(getCreateThemeMutationOptions(options));
+    }
+
+export const getGetThemeUrl = (id: number,) => {
+
+
+
+
+  return `/api/themes/${id}`
+}
+
+/**
+ * @summary Get theme detail
+ */
+export const getTheme = async (id: number, options?: RequestInit): Promise<ThemeDetail> => {
+
+  return customFetch<ThemeDetail>(getGetThemeUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetThemeQueryKey = (id: number,) => {
+    return [
+    `/api/themes/${id}`
+    ] as const;
+    }
+
+
+export const getGetThemeQueryOptions = <TData = Awaited<ReturnType<typeof getTheme>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTheme>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetThemeQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTheme>>> = ({ signal }) => getTheme(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTheme>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetThemeQueryResult = NonNullable<Awaited<ReturnType<typeof getTheme>>>
+export type GetThemeQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get theme detail
+ */
+
+export function useGetTheme<TData = Awaited<ReturnType<typeof getTheme>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTheme>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetThemeQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateThemeUrl = (id: number,) => {
+
+
+
+
+  return `/api/themes/${id}`
+}
+
+/**
+ * @summary Update theme name
+ */
+export const updateTheme = async (id: number,
+    themeUpdate: ThemeUpdate, options?: RequestInit): Promise<ThemeDetail> => {
+
+  return customFetch<ThemeDetail>(getUpdateThemeUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      themeUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateThemeMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTheme>>, TError,{id: number;data: BodyType<ThemeUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTheme>>, TError,{id: number;data: BodyType<ThemeUpdate>}, TContext> => {
+
+const mutationKey = ['updateTheme'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTheme>>, {id: number;data: BodyType<ThemeUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateTheme(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateThemeMutationResult = NonNullable<Awaited<ReturnType<typeof updateTheme>>>
+    export type UpdateThemeMutationBody = BodyType<ThemeUpdate>
+    export type UpdateThemeMutationError = ErrorType<void>
+
+    /**
+ * @summary Update theme name
+ */
+export const useUpdateTheme = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTheme>>, TError,{id: number;data: BodyType<ThemeUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateTheme>>,
+        TError,
+        {id: number;data: BodyType<ThemeUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateThemeMutationOptions(options));
+    }
+
+export const getDeleteThemeUrl = (id: number,) => {
+
+
+
+
+  return `/api/themes/${id}`
+}
+
+/**
+ * @summary Delete theme
+ */
+export const deleteTheme = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteThemeUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteThemeMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTheme>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTheme>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteTheme'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTheme>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteTheme(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteThemeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTheme>>>
+
+    export type DeleteThemeMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete theme
+ */
+export const useDeleteTheme = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTheme>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTheme>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteThemeMutationOptions(options));
+    }
+
+export const getReplaceThemeWordsUrl = (id: number,) => {
+
+
+
+
+  return `/api/themes/${id}/words`
+}
+
+/**
+ * @summary Replace all words in theme
+ */
+export const replaceThemeWords = async (id: number,
+    themeWordsInput: ThemeWordsInput, options?: RequestInit): Promise<ThemeDetail> => {
+
+  return customFetch<ThemeDetail>(getReplaceThemeWordsUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      themeWordsInput,)
+  }
+);}
+
+
+
+
+export const getReplaceThemeWordsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replaceThemeWords>>, TError,{id: number;data: BodyType<ThemeWordsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof replaceThemeWords>>, TError,{id: number;data: BodyType<ThemeWordsInput>}, TContext> => {
+
+const mutationKey = ['replaceThemeWords'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof replaceThemeWords>>, {id: number;data: BodyType<ThemeWordsInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  replaceThemeWords(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReplaceThemeWordsMutationResult = NonNullable<Awaited<ReturnType<typeof replaceThemeWords>>>
+    export type ReplaceThemeWordsMutationBody = BodyType<ThemeWordsInput>
+    export type ReplaceThemeWordsMutationError = ErrorType<void>
+
+    /**
+ * @summary Replace all words in theme
+ */
+export const useReplaceThemeWords = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replaceThemeWords>>, TError,{id: number;data: BodyType<ThemeWordsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof replaceThemeWords>>,
+        TError,
+        {id: number;data: BodyType<ThemeWordsInput>},
+        TContext
+      > => {
+      return useMutation(getReplaceThemeWordsMutationOptions(options));
+    }
+
+export const getAddThemeWordsUrl = (id: number,) => {
+
+
+
+
+  return `/api/themes/${id}/words`
+}
+
+/**
+ * @summary Add words to theme
+ */
+export const addThemeWords = async (id: number,
+    themeWordsInput: ThemeWordsInput, options?: RequestInit): Promise<ThemeDetail> => {
+
+  return customFetch<ThemeDetail>(getAddThemeWordsUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      themeWordsInput,)
+  }
+);}
+
+
+
+
+export const getAddThemeWordsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addThemeWords>>, TError,{id: number;data: BodyType<ThemeWordsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addThemeWords>>, TError,{id: number;data: BodyType<ThemeWordsInput>}, TContext> => {
+
+const mutationKey = ['addThemeWords'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addThemeWords>>, {id: number;data: BodyType<ThemeWordsInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  addThemeWords(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddThemeWordsMutationResult = NonNullable<Awaited<ReturnType<typeof addThemeWords>>>
+    export type AddThemeWordsMutationBody = BodyType<ThemeWordsInput>
+    export type AddThemeWordsMutationError = ErrorType<void>
+
+    /**
+ * @summary Add words to theme
+ */
+export const useAddThemeWords = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addThemeWords>>, TError,{id: number;data: BodyType<ThemeWordsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof addThemeWords>>,
+        TError,
+        {id: number;data: BodyType<ThemeWordsInput>},
+        TContext
+      > => {
+      return useMutation(getAddThemeWordsMutationOptions(options));
+    }
+
+export const getRemoveThemeWordUrl = (id: number,
+    wordId: number,) => {
+
+
+
+
+  return `/api/themes/${id}/words/${wordId}`
+}
+
+/**
+ * @summary Remove word from theme
+ */
+export const removeThemeWord = async (id: number,
+    wordId: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getRemoveThemeWordUrl(id,wordId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getRemoveThemeWordMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeThemeWord>>, TError,{id: number;wordId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeThemeWord>>, TError,{id: number;wordId: number}, TContext> => {
+
+const mutationKey = ['removeThemeWord'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeThemeWord>>, {id: number;wordId: number}> = (props) => {
+          const {id,wordId} = props ?? {};
+
+          return  removeThemeWord(id,wordId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveThemeWordMutationResult = NonNullable<Awaited<ReturnType<typeof removeThemeWord>>>
+
+    export type RemoveThemeWordMutationError = ErrorType<void>
+
+    /**
+ * @summary Remove word from theme
+ */
+export const useRemoveThemeWord = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeThemeWord>>, TError,{id: number;wordId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof removeThemeWord>>,
+        TError,
+        {id: number;wordId: number},
+        TContext
+      > => {
+      return useMutation(getRemoveThemeWordMutationOptions(options));
+    }
+
+export const getListThemeQuestionsUrl = (id: number,) => {
+
+
+
+
+  return `/api/themes/${id}/questions`
+}
+
+/**
+ * @summary List quiz questions for theme
+ */
+export const listThemeQuestions = async (id: number, options?: RequestInit): Promise<ThemeQuizQuestion[]> => {
+
+  return customFetch<ThemeQuizQuestion[]>(getListThemeQuestionsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListThemeQuestionsQueryKey = (id: number,) => {
+    return [
+    `/api/themes/${id}/questions`
+    ] as const;
+    }
+
+
+export const getListThemeQuestionsQueryOptions = <TData = Awaited<ReturnType<typeof listThemeQuestions>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listThemeQuestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListThemeQuestionsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listThemeQuestions>>> = ({ signal }) => listThemeQuestions(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listThemeQuestions>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListThemeQuestionsQueryResult = NonNullable<Awaited<ReturnType<typeof listThemeQuestions>>>
+export type ListThemeQuestionsQueryError = ErrorType<void>
+
+
+/**
+ * @summary List quiz questions for theme
+ */
+
+export function useListThemeQuestions<TData = Awaited<ReturnType<typeof listThemeQuestions>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listThemeQuestions>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListThemeQuestionsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getReplaceThemeQuestionsUrl = (id: number,) => {
+
+
+
+
+  return `/api/themes/${id}/questions`
+}
+
+/**
+ * @summary Replace all quiz questions
+ */
+export const replaceThemeQuestions = async (id: number,
+    themeQuestionsInput: ThemeQuestionsInput, options?: RequestInit): Promise<ThemeQuizQuestion[]> => {
+
+  return customFetch<ThemeQuizQuestion[]>(getReplaceThemeQuestionsUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      themeQuestionsInput,)
+  }
+);}
+
+
+
+
+export const getReplaceThemeQuestionsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replaceThemeQuestions>>, TError,{id: number;data: BodyType<ThemeQuestionsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof replaceThemeQuestions>>, TError,{id: number;data: BodyType<ThemeQuestionsInput>}, TContext> => {
+
+const mutationKey = ['replaceThemeQuestions'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof replaceThemeQuestions>>, {id: number;data: BodyType<ThemeQuestionsInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  replaceThemeQuestions(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReplaceThemeQuestionsMutationResult = NonNullable<Awaited<ReturnType<typeof replaceThemeQuestions>>>
+    export type ReplaceThemeQuestionsMutationBody = BodyType<ThemeQuestionsInput>
+    export type ReplaceThemeQuestionsMutationError = ErrorType<void>
+
+    /**
+ * @summary Replace all quiz questions
+ */
+export const useReplaceThemeQuestions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof replaceThemeQuestions>>, TError,{id: number;data: BodyType<ThemeQuestionsInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof replaceThemeQuestions>>,
+        TError,
+        {id: number;data: BodyType<ThemeQuestionsInput>},
+        TContext
+      > => {
+      return useMutation(getReplaceThemeQuestionsMutationOptions(options));
     }
 

@@ -161,3 +161,83 @@ export interface BulkImportResult {
   updatedWords: string[];
 }
 
+export interface ThemeSummary {
+  id: number;
+  name: string;
+  sortOrder: number;
+  wordCount: number;
+  questionCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ThemeQuizQuestionType = typeof ThemeQuizQuestionType[keyof typeof ThemeQuizQuestionType];
+
+
+export const ThemeQuizQuestionType = {
+  ab: 'ab',
+  four: 'four',
+} as const;
+
+export interface ThemeQuizChoice {
+  key: string;
+  label: string;
+}
+
+export interface ThemeQuizQuestion {
+  id: number;
+  sortOrder: number;
+  type: ThemeQuizQuestionType;
+  prompt: string;
+  choices: ThemeQuizChoice[];
+  correctKey: string;
+  hints: SrsExampleHint[];
+}
+
+export interface ThemeDetail {
+  id: number;
+  name: string;
+  sortOrder: number;
+  wordIds: number[];
+  questions: ThemeQuizQuestion[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ThemeInput {
+  /** @minLength 1 */
+  name: string;
+  wordIds?: number[];
+}
+
+export interface ThemeUpdate {
+  /** @minLength 1 */
+  name?: string;
+  sortOrder?: number;
+}
+
+export interface ThemeWordsInput {
+  wordIds: number[];
+}
+
+export type ThemeQuizQuestionInputType = typeof ThemeQuizQuestionInputType[keyof typeof ThemeQuizQuestionInputType];
+
+
+export const ThemeQuizQuestionInputType = {
+  ab: 'ab',
+  four: 'four',
+} as const;
+
+export interface ThemeQuizQuestionInput {
+  sortOrder: number;
+  type: ThemeQuizQuestionInputType;
+  prompt: string;
+  choices: ThemeQuizChoice[];
+  correctKey: string;
+  hints: SrsExampleHint[];
+}
+
+export interface ThemeQuestionsInput {
+  questions: ThemeQuizQuestionInput[];
+}
+

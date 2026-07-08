@@ -4,7 +4,6 @@ import {
   ChevronUp,
   Plus,
   Trash2,
-  Highlighter,
   Import,
   Link2,
 } from "lucide-react";
@@ -13,12 +12,12 @@ import type { SrsExample, Word } from "../types";
 import {
   parsePlainDescriptionToSrsExamples,
   renderClozeSentence,
-  renderHintParts,
   sanitizeSrsExamples,
   syncExampleFromSentence,
 } from "../lib/srsExamples";
 import { linkSrsExamples } from "../lib/wordLinking";
 import { ExampleSentenceDisplay } from "./ExampleSentenceDisplay";
+import { HintLinesEditor } from "./HintLinesEditor";
 import { useTranslation } from "../i18n/I18nProvider";
 
 interface Props {
@@ -51,27 +50,10 @@ export function SrsExamplesEditor({
   const [linkingIndex, setLinkingIndex] = useState<number | null>(null);
   const [linkingAll, setLinkingAll] = useState(false);
   const sentenceRefs = useRef<Record<number, HTMLInputElement | null>>({});
-  const hintRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   function patchExample(index: number, patch: Partial<SrsExample>) {
     onChange(
       examples.map((ex, i) => (i === index ? { ...ex, ...patch } : ex)),
-    );
-  }
-
-  function patchHint(
-    exIndex: number,
-    hintIndex: number,
-    patch: Partial<SrsExample["hints"][0]>,
-  ) {
-    onChange(
-      examples.map((ex, i) => {
-        if (i !== exIndex) return ex;
-        const hints = ex.hints.map((h, hi) =>
-          hi === hintIndex ? { ...h, ...patch } : h,
-        );
-        return { ...ex, hints };
-      }),
     );
   }
 
@@ -91,26 +73,6 @@ export function SrsExamplesEditor({
     onChange(reindexExamples(copy));
   }
 
-  function addHint(exIndex: number) {
-    onChange(
-      examples.map((ex, i) =>
-        i === exIndex ? { ...ex, hints: [...ex.hints, { text: "" }] } : ex,
-      ),
-    );
-  }
-
-  function removeHint(exIndex: number, hintIndex: number) {
-    onChange(
-      examples.map((ex, i) => {
-        if (i !== exIndex) return ex;
-        return {
-          ...ex,
-          hints: ex.hints.filter((_, hi) => hi !== hintIndex),
-        };
-      }),
-    );
-  }
-
   function setHiddenFromSelection(exIndex: number) {
     const el = sentenceRefs.current[exIndex];
     if (!el) return;
@@ -124,32 +86,6 @@ export function SrsExamplesEditor({
         linkedTokens: undefined,
       });
     }
-  }
-
-  function addHighlight(exIndex: number, hintIndex: number) {
-    const key = `${exIndex}-${hintIndex}`;
-    const el = hintRefs.current[key];
-    if (!el) return;
-    const start = el.selectionStart ?? 0;
-    const end = el.selectionEnd ?? 0;
-    if (start === end) return;
-    const selected = el.value.slice(start, end).trim();
-    if (!selected) return;
-    const hint = examples[exIndex].hints[hintIndex];
-    const highlights = [...(hint.highlights ?? [])];
-    if (!highlights.includes(selected)) highlights.push(selected);
-    patchHint(exIndex, hintIndex, { highlights });
-  }
-
-  function removeHighlight(
-    exIndex: number,
-    hintIndex: number,
-    word: string,
-  ) {
-    const hint = examples[exIndex].hints[hintIndex];
-    patchHint(exIndex, hintIndex, {
-      highlights: hint.highlights?.filter((h) => h !== word),
-    });
   }
 
   async function importFromDescription() {
@@ -418,91 +354,10 @@ export function SrsExamplesEditor({
                   </div>
                 )}
 
-                <div className="space-y-2">
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
-                    {t("srs.editor.hintLines")}
-                  </p>
-                  {ex.hints.map((hint, hintIndex) => {
-                    const refKey = `${exIndex}-${hintIndex}`;
-                    return (
-                      <div key={hintIndex} className="space-y-1">
-                        <div className="flex gap-1.5">
-                          <input
-                            ref={(el) => {
-                              hintRefs.current[refKey] = el;
-                            }}
-                            type="text"
-                            value={hint.text}
-                            onChange={(e) =>
-                              patchHint(exIndex, hintIndex, {
-                                text: e.target.value,
-                              })
-                            }
-                            placeholder={t("srs.editor.placeholders.hint")}
-                            className="flex-1 rounded-lg border border-app-border-strong bg-app-surface px-3 py-1.5 text-sm text-app-text focus:outline-none focus:ring-2 focus:ring-main-300"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => addHighlight(exIndex, hintIndex)}
-                            className="shrink-0 p-2 rounded-lg border border-app-border-strong bg-app-surface text-app-text-secondary hover:text-main-500 hover:border-main-300"
-                            title={t("srs.editor.highlightSelection")}
-                          >
-                            <Highlighter size={14} />
-                          </button>
-                          {ex.hints.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeHint(exIndex, hintIndex)}
-                              className="shrink-0 p-2 rounded-lg border border-app-border-strong bg-app-surface text-app-text-muted hover:text-red-500"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
-                        </div>
-                        {hint.highlights && hint.highlights.length > 0 && (
-                          <div className="flex flex-wrap gap-1">
-                            {hint.highlights.map((h) => (
-                              <button
-                                key={h}
-                                type="button"
-                                onClick={() =>
-                                  removeHighlight(exIndex, hintIndex, h)
-                                }
-                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-main-100 text-main-600"
-                              >
-                                {h} ×
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                        {hint.text && (
-                          <p className="text-xs text-app-text-secondary pl-0.5">
-                            {renderHintParts(hint.text, hint.highlights).map(
-                              (p, i) =>
-                                p.highlight ? (
-                                  <span
-                                    key={i}
-                                    className="font-semibold text-main-600 bg-main-100 dark:bg-main-900 px-0.5 rounded"
-                                  >
-                                    {p.text}
-                                  </span>
-                                ) : (
-                                  <span key={i}>{p.text}</span>
-                                ),
-                            )}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                  <button
-                    type="button"
-                    onClick={() => addHint(exIndex)}
-                    className="text-xs font-semibold text-app-text-muted hover:text-main-500"
-                  >
-                    {t("srs.editor.addLine")}
-                  </button>
-                </div>
+                <HintLinesEditor
+                  hints={ex.hints}
+                  onChange={(hints) => patchExample(exIndex, { hints })}
+                />
               </div>
             )}
           </div>
