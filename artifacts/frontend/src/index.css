@@ -216,6 +216,26 @@ textarea {
 }
 
 /* Scrollbar minimal */
-::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--app-border-strong); border-radius: 2px; }
+
+/* Horizontal scroll regions (heatmap, charts) */
+.app-scroll-x {
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-border-strong) var(--app-muted);
+}
+
+.app-scroll-x::-webkit-scrollbar {
+  height: 6px;
+}
+
+.app-scroll-x::-webkit-scrollbar-track {
+  background: var(--app-muted);
+  border-radius: 3px;
+}
+
+.app-scroll-x::-webkit-scrollbar-thumb {
+  background: var(--app-border-strong);
+  border-radius: 3px;
+}

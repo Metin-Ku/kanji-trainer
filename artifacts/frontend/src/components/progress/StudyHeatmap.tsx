@@ -1,6 +1,5 @@
 import {
   useCallback,
-  useEffect,
   useMemo,
   useRef,
   useState,
@@ -8,6 +7,7 @@ import {
   type CSSProperties,
 } from "react";
 import { createPortal } from "react-dom";
+import { HorizontalScroll } from "@/components/ui/horizontal-scroll";
 import { Lens } from "@/components/ui/lens";
 import { useTranslation } from "../../i18n/I18nProvider";
 import {
@@ -463,28 +463,6 @@ export function StudyHeatmap({
     dateLocale,
   };
 
-  useEffect(() => {
-    const el = gridRef.current;
-    if (!el) return;
-
-    const scrollToEnd = () => {
-      el.scrollLeft = Math.max(0, el.scrollWidth - el.clientWidth);
-    };
-
-    scrollToEnd();
-    const raf = requestAnimationFrame(scrollToEnd);
-
-    const ro = new ResizeObserver(scrollToEnd);
-    ro.observe(el);
-    const inner = gridWrapRef.current;
-    if (inner) ro.observe(inner);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-    };
-  }, [cells.length, compact, columns.length]);
-
   const grid = (
     <div ref={gridWrapRef} className="inline-block w-max">
       <HeatmapGrid
@@ -509,9 +487,10 @@ export function StudyHeatmap({
           : t("progress.heatmap.hint")}
       </div>
 
-      <div
+      <HorizontalScroll
         ref={gridRef}
-        className="w-full min-w-0 max-w-full overflow-x-auto overscroll-x-contain touch-none select-none"
+        scrollDeps={[cells.length, compact, columns.length]}
+        className="touch-none select-none"
         style={{ padding: hitPad }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -537,7 +516,7 @@ export function StudyHeatmap({
             {grid}
           </Lens>
         )}
-      </div>
+      </HorizontalScroll>
 
       {touchScrubbing && touchPoint && touchGridRect && (
         <TouchLoupe
