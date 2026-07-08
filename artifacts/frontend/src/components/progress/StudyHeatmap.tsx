@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "../../i18n/I18nProvider";
 import {
   getHeatmapCells,
@@ -109,6 +110,98 @@ function pointerToFocus(
   return { date, focus };
 }
 
+const LOUPE_SPAN = 2;
+const LOUPE_DOT_PX = 14;
+const LOUPE_GAP_PX = 3;
+const LOUPE_LIFT_PX = 88;
+
+type LoupeCell = {
+  col: number;
+  row: number;
+  cell: HeatmapCell | null;
+  isCenter: boolean;
+};
+
+function buildLoupeGrid(
+  columns: HeatmapCell[][],
+  focus: FocusPos,
+): LoupeCell[][] {
+  const centerCol = Math.round(focus.col);
+  const centerRow = Math.round(focus.row);
+  const rows: LoupeCell[][] = [];
+
+  for (let r = centerRow - LOUPE_SPAN; r <= centerRow + LOUPE_SPAN; r++) {
+    const rowCells: LoupeCell[] = [];
+    for (let c = centerCol - LOUPE_SPAN; c <= centerCol + LOUPE_SPAN; c++) {
+      rowCells.push({
+        col: c,
+        row: r,
+        cell: columns[c]?.[r] ?? null,
+        isCenter: c === centerCol && r === centerRow,
+      });
+    }
+    rows.push(rowCells);
+  }
+  return rows;
+}
+
+function HeatmapLoupe({
+  x,
+  y,
+  focus,
+  columns,
+  label,
+}: {
+  x: number;
+  y: number;
+  focus: FocusPos;
+  columns: HeatmapCell[][];
+  label: string;
+}) {
+  const grid = useMemo(
+    () => buildLoupeGrid(columns, focus),
+    [columns, focus],
+  );
+
+  return createPortal(
+    <div
+      className="heatmap-loupe fixed"
+      style={{
+        left: x,
+        top: y - LOUPE_LIFT_PX,
+        transform: "translate(-50%, -100%)",
+      }}
+    >
+      <div className="heatmap-loupe-glass">
+        <div
+          className="grid"
+          style={{
+            gap: LOUPE_GAP_PX,
+            gridTemplateColumns: `repeat(${LOUPE_SPAN * 2 + 1}, ${LOUPE_DOT_PX}px)`,
+          }}
+        >
+          {grid.flat().map(({ col, row, cell, isCenter }) => (
+            <div
+              key={`${col}-${row}`}
+              className={`rounded-sm shrink-0 ${
+                cell ? HEATMAP_LEVEL_CLASSES[cell.level] : "bg-app-muted"
+              } ${isCenter ? "ring-2 ring-main-500 ring-offset-2 ring-offset-app-surface" : ""}`}
+              style={{
+                width: LOUPE_DOT_PX,
+                height: LOUPE_DOT_PX,
+                transform: isCenter ? "scale(1.2)" : undefined,
+              }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="heatmap-loupe-stem" />
+      <p className="heatmap-loupe-label">{label}</p>
+    </div>,
+    document.body,
+  );
+}
+
 export function StudyHeatmap({
   activityByDate,
   weeks = 26,
@@ -129,6 +222,10 @@ export function StudyHeatmap({
 
   const [activeDate, setActiveDate] = useState<string | null>(null);
   const [focusPos, setFocusPos] = useState<FocusPos | null>(null);
+  const [loupePos, setLoupePos] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [touchScrubbing, setTouchScrubbing] = useState(false);
 
   const resolvedRange: HeatmapRange = range ?? { kind: "weeks", weeks };
 
@@ -175,7 +272,18 @@ export function StudyHeatmap({
     activeDateRef.current = null;
     setActiveDate(null);
     setFocusPos(null);
+    setLoupePos(null);
+    setTouchScrubbing(false);
   }, []);
+
+  const trackLoupe = useCallback(
+    (clientX: number, clientY: number, pointerType: string) => {
+      if (pointerType === "touch" && isDraggingRef.current) {
+        setLoupePos({ x: clientX, y: clientY });
+      }
+    },
+    [],
+  );
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
@@ -184,6 +292,10 @@ export function StudyHeatmap({
       dragMovedRef.current = false;
       pointerStartRef.current = { x: e.clientX, y: e.clientY };
       gridRef.current?.setPointerCapture(e.pointerId);
+      if (e.pointerType === "touch") {
+        setTouchScrubbing(true);
+        setLoupePos({ x: e.clientX, y: e.clientY });
+      }
       applyPointer(e.clientX, e.clientY);
     },
     [applyPointer],
@@ -199,12 +311,13 @@ export function StudyHeatmap({
       }
 
       if (isDraggingRef.current || e.buttons > 0) {
+        trackLoupe(e.clientX, e.clientY, e.pointerType);
         applyPointer(e.clientX, e.clientY);
       } else if (e.pointerType === "mouse") {
         applyPointer(e.clientX, e.clientY);
       }
     },
-    [applyPointer],
+    [applyPointer, trackLoupe],
   );
 
   const endInteraction = useCallback(
@@ -240,6 +353,15 @@ export function StudyHeatmap({
   );
 
   const activeCell = activeDate ? cellByDate.get(activeDate) : null;
+  const loupeLabel = activeCell
+    ? t("progress.heatmap.tooltip", {
+        date: formatTooltipDate(activeCell.date, dateLocale),
+        count: activeCell.count,
+      })
+    : "";
+
+  const showLoupe =
+    touchScrubbing && loupePos !== null && focusPos !== null && activeCell;
 
   useEffect(() => {
     const el = gridRef.current;
@@ -254,12 +376,14 @@ export function StudyHeatmap({
           compact ? "text-[10px]" : "text-xs"
         }`}
       >
-        {activeCell
-          ? t("progress.heatmap.tooltip", {
-              date: formatTooltipDate(activeCell.date, dateLocale),
-              count: activeCell.count,
-            })
-          : t("progress.heatmap.hint")}
+        {showLoupe
+          ? "\u00a0"
+          : activeCell
+            ? t("progress.heatmap.tooltip", {
+                date: formatTooltipDate(activeCell.date, dateLocale),
+                count: activeCell.count,
+              })
+            : t("progress.heatmap.hint")}
       </div>
 
       <div
@@ -299,13 +423,23 @@ export function StudyHeatmap({
                       zIndex: Math.round(scale * 100),
                       position: "relative",
                     }}
-                  >a</div>
+                  />
                 );
               })}
             </div>
           ))}
         </div>
       </div>
+
+      {showLoupe && loupePos && focusPos && (
+        <HeatmapLoupe
+          x={loupePos.x}
+          y={loupePos.y}
+          focus={focusPos}
+          columns={columns}
+          label={loupeLabel}
+        />
+      )}
 
       {!compact && (
         <div className="flex items-center gap-1.5 mt-3 text-[10px] text-app-text-muted">
