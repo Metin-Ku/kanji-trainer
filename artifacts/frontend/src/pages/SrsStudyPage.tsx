@@ -18,8 +18,10 @@ import { ExampleSrsStudyPage } from "./ExampleSrsStudyPage";
 import { useTranslation } from "../i18n/I18nProvider";
 import {
   intervalCountsAsDailyLearn,
-  recordStudyUnit,
+  localDateKey,
 } from "../lib/dailyGoal";
+import { useStudyActivity } from "../hooks/useStudyActivity";
+import { useStudySwipeKeys } from "../lib/studyKeyboard";
 
 function getPrimary(item: SrsQueueItem, deck: SrsDeckType, emDash: string): string {
   const { word } = item;
@@ -87,6 +89,7 @@ function SrsStudyPageInner({
   const queryClient = useQueryClient();
   const { deck, title, backPath } = sessionRef.current;
   const { words, updateWord } = useWords();
+  const { increment: recordStudy } = useStudyActivity();
 
   const [items, setItems] = useState(sessionRef.current.items);
   const [index, setIndex] = useState(0);
@@ -164,7 +167,7 @@ function SrsStudyPageInner({
           ? current.card.intervals[ratingMeta.key]
           : "";
         if (intervalCountsAsDailyLearn(intervalLabel)) {
-          recordStudyUnit(deck);
+          recordStudy.mutate({ deck, date: localDateKey() });
         }
         queryClient.invalidateQueries({ queryKey: ["trouble-words"] });
         advanceAfterReview();
@@ -178,7 +181,7 @@ function SrsStudyPageInner({
         setReviewing(false);
       }
     },
-    [advanceAfterReview, deck, queryClient, t],
+    [advanceAfterReview, deck, queryClient, recordStudy, t],
   );
 
   function handleReviewClick(rating: ReviewRating) {
@@ -187,6 +190,28 @@ function SrsStudyPageInner({
 
   const submitReviewRef = useRef(submitReview);
   submitReviewRef.current = submitReview;
+
+  const triggerKnow = useCallback(() => {
+    if (flyingRef.current || reviewingRef.current || done) return;
+    flyDirectionRef.current = "right";
+    flyingRef.current = true;
+    setIsFlying(true);
+    setTimeout(() => submitReviewRef.current(3), 195);
+  }, [done]);
+
+  const triggerDontKnow = useCallback(() => {
+    if (flyingRef.current || reviewingRef.current || done) return;
+    flyDirectionRef.current = "left";
+    flyingRef.current = true;
+    setIsFlying(true);
+    setTimeout(() => advanceRequeue(), 195);
+  }, [advanceRequeue, done]);
+
+  useStudySwipeKeys({
+    enabled: !done && !!items[index] && !showEdit && !showStroke,
+    onKnow: triggerKnow,
+    onDontKnow: triggerDontKnow,
+  });
 
   useEffect(() => {
     const el = ratingBarRef.current;
@@ -384,7 +409,10 @@ function SrsStudyPageInner({
     setDone(false);
   }
 
-  function handleSave(data: WordUpdate & { relatedWordIds: number[] }) {
+  function handleSave(data: WordUpdate & {
+    relatedWordIds: number[];
+    categoryIds: number[];
+  }) {
     const current = items[index];
     if (current) {
       updateWord(current.word.id, data);
@@ -397,6 +425,7 @@ function SrsStudyPageInner({
                   ...item.word,
                   ...data,
                   relatedWordIds: data.relatedWordIds,
+                  categoryIds: data.categoryIds,
                 },
               }
             : item,

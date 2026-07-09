@@ -14,6 +14,8 @@ import { SrsStudyPage } from "@/pages/SrsStudyPage";
 import { TroubleWordsPage } from "@/pages/TroubleWordsPage";
 import { ProgressPage } from "@/pages/ProgressPage";
 import { ThemesHubPage } from "@/pages/ThemesHubPage";
+import { CategoriesHubPage } from "@/pages/CategoriesHubPage";
+import { CategoryDetailPage } from "@/pages/CategoryDetailPage";
 import { ThemeDetailPage } from "@/pages/ThemeDetailPage";
 import { ThemeQuizEditorPage } from "@/pages/ThemeQuizEditorPage";
 import { ThemeQuizStudyPage } from "@/pages/ThemeQuizStudyPage";
@@ -32,6 +34,8 @@ function App() {
         <Route path="/themes/:id/quiz" component={ThemeQuizStudyPage} />
         <Route path="/themes/:id" component={ThemeDetailPage} />
         <Route path="/themes" component={ThemesHubPage} />
+        <Route path="/categories/:id" component={CategoryDetailPage} />
+        <Route path="/categories" component={CategoriesHubPage} />
         <Route path="/words" component={WordListPage} />
         <Route path="/pronunciation" component={PronunciationPage} />
         <Route path="/meaning" component={MeaningPage} />

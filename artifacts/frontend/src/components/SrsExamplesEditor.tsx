@@ -19,6 +19,7 @@ import { linkSrsExamples } from "../lib/wordLinking";
 import { ExampleSentenceDisplay } from "./ExampleSentenceDisplay";
 import { HintLinesEditor } from "./HintLinesEditor";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useConfirm } from "./ConfirmProvider";
 
 interface Props {
   examples: SrsExample[];
@@ -46,6 +47,7 @@ export function SrsExamplesEditor({
   currentWordId,
 }: Props) {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [collapsed, setCollapsed] = useState<Record<number, boolean>>({});
   const [linkingIndex, setLinkingIndex] = useState<number | null>(null);
   const [linkingAll, setLinkingAll] = useState(false);
@@ -255,10 +257,10 @@ export function SrsExamplesEditor({
               </button>
               <button
                 type="button"
-                onClick={() => {
+                onClick={async () => {
                   if (
                     ex.sentence &&
-                    !confirm(t("common.confirmDeleteExample"))
+                    !(await confirm(t("common.confirmDeleteExample")))
                   )
                     return;
                   removeExample(exIndex);

@@ -15,7 +15,9 @@ import { romajiToKanaInput } from "../lib/japaneseInput";
 import { gradeClozeAnswer, renderHintParts } from "../lib/srsExamples";
 import { linkedTokensForDisplay } from "../lib/wordLinking";
 import { useTranslation } from "../i18n/I18nProvider";
-import { recordStudyUnit } from "../lib/dailyGoal";
+import { localDateKey } from "../lib/dailyGoal";
+import { useStudyActivity } from "../hooks/useStudyActivity";
+import { useStudySwipeKeys } from "../lib/studyKeyboard";
 
 type AnswerPhase = "typing" | "correct" | "partial" | "revealed";
 
@@ -35,6 +37,7 @@ export function ExampleSrsStudyPage() {
   const { title, backPath } = sessionRef.current;
   const { words, updateWord } = useWords();
   const settings = getAppSettings();
+  const { increment: recordStudy } = useStudyActivity();
 
   const [items, setItems] = useState(sessionRef.current.items);
   const [index, setIndex] = useState(0);
@@ -78,7 +81,7 @@ export function ExampleSrsStudyPage() {
     setReviewing(true);
     try {
       await reviewSrsExample(current.card.id, correct);
-      if (correct) recordStudyUnit("example");
+      if (correct) recordStudy.mutate({ deck: "example", date: localDateKey() });
       queryClient.invalidateQueries({ queryKey: ["trouble-words"] });
     } catch {
       alert(t("srs.study.saveFailed"));
@@ -142,6 +145,32 @@ export function ExampleSrsStudyPage() {
     setAnswerPhase(correct ? "correct" : "partial");
   }
 
+  const handlePrimaryActionRef = useRef(handlePrimaryAction);
+  handlePrimaryActionRef.current = handlePrimaryAction;
+
+  const handleDontKnow = useCallback(async () => {
+    if (reviewingRef.current || done) return;
+    if (answerPhase === "typing") {
+      setEmptyChecked(false);
+      setAnswerPhase("revealed");
+      return;
+    }
+    if (answerPhase === "partial" || answerPhase === "revealed") {
+      try {
+        await submitReview(false);
+        advanceAfterReview();
+      } catch {
+        /* keep feedback visible */
+      }
+    }
+  }, [advanceAfterReview, answerPhase, done]);
+
+  useStudySwipeKeys({
+    enabled: !done && !!items[index] && !sheetWord && !showCardDetails,
+    onKnow: () => handlePrimaryActionRef.current(),
+    onDontKnow: handleDontKnow,
+  });
+
   function handleAnswerChange(raw: string) {
     const current = itemsRef.current[indexRef.current];
     const liveWord = current
@@ -171,7 +200,7 @@ export function ExampleSrsStudyPage() {
 
   function handleSaveWord(
     wordId: number,
-    data: WordUpdate & { relatedWordIds: number[] },
+    data: WordUpdate & { relatedWordIds: number[]; categoryIds: number[] },
   ) {
     updateWord(wordId, data);
     setItems((prev) =>
@@ -184,6 +213,7 @@ export function ExampleSrsStudyPage() {
                 ...data,
                 srsExamples: data.srsExamples ?? item.word.srsExamples,
                 relatedWordIds: data.relatedWordIds,
+                categoryIds: data.categoryIds,
               },
             }
           : item,
@@ -191,13 +221,19 @@ export function ExampleSrsStudyPage() {
     );
   }
 
-  function handleSaveCard(data: WordUpdate & { relatedWordIds: number[] }) {
+  function handleSaveCard(data: WordUpdate & {
+    relatedWordIds: number[];
+    categoryIds: number[];
+  }) {
     const current = items[index];
     if (current) handleSaveWord(current.word.id, data);
     setShowCardDetails(false);
   }
 
-  function handleSaveSheet(data: WordUpdate & { relatedWordIds: number[] }) {
+  function handleSaveSheet(data: WordUpdate & {
+    relatedWordIds: number[];
+    categoryIds: number[];
+  }) {
     if (sheetWord) handleSaveWord(sheetWord.id, data);
     setSheetWord(null);
   }

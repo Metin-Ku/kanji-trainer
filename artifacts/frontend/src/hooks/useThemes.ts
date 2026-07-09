@@ -2,8 +2,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   useListThemes,
   useGetTheme,
-  useCreateTheme,
-  useUpdateTheme,
   useDeleteTheme,
   useReplaceThemeWords,
   useAddThemeWords,
@@ -12,7 +10,14 @@ import {
   getListThemesQueryKey,
   getGetThemeQueryKey,
 } from "@workspace/api-client-react";
-import type { ThemeInput, ThemeUpdate, ThemeQuestionsInput } from "../types";
+import type { ThemeInput, ThemeUpdate, ThemeQuestionsInput, ThemeSummary, ThemeDetail } from "../types";
+import { apiUrl } from "../lib/apiOrigin";
+
+function normalizeIconSvg(iconSvg?: string | null): string | null {
+  if (iconSvg == null) return null;
+  const trimmed = iconSvg.trim();
+  return trimmed || null;
+}
 
 export function useThemes() {
   const queryClient = useQueryClient();
@@ -29,12 +34,6 @@ export function useThemes() {
   };
 
   const listQuery = useListThemes();
-  const createMutation = useCreateTheme({
-    mutation: { onSuccess: () => invalidateList() },
-  });
-  const updateMutation = useUpdateTheme({
-    mutation: { onSuccess: (_d, vars) => invalidateAll(vars.id) },
-  });
   const deleteMutation = useDeleteTheme({
     mutation: { onSuccess: () => invalidateList() },
   });
@@ -52,12 +51,41 @@ export function useThemes() {
   });
 
   return {
-    themes: listQuery.data ?? [],
+    themes: (listQuery.data ?? []) as ThemeSummary[],
     isLoading: listQuery.isLoading,
     isError: listQuery.isError,
-    createTheme: (data: ThemeInput) => createMutation.mutateAsync({ data }),
-    updateTheme: (id: number, data: ThemeUpdate) =>
-      updateMutation.mutateAsync({ id, data }),
+    createTheme: async (data: ThemeInput) => {
+      const res = await fetch(apiUrl("/api/themes"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.name.trim(),
+          wordIds: data.wordIds,
+          iconSvg: normalizeIconSvg(data.iconSvg),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to create theme");
+      const theme = await res.json();
+      invalidateList();
+      return theme;
+    },
+    updateTheme: async (id: number, data: ThemeUpdate) => {
+      const res = await fetch(apiUrl(`/api/themes/${id}`), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+          ...(data.iconSvg !== undefined
+            ? { iconSvg: normalizeIconSvg(data.iconSvg) }
+            : {}),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to update theme");
+      const theme = await res.json();
+      invalidateAll(id);
+      return theme;
+    },
     deleteTheme: (id: number) => deleteMutation.mutateAsync({ id }),
     replaceThemeWords: (id: number, wordIds: number[]) =>
       replaceWordsMutation.mutateAsync({ id, data: { wordIds } }),
@@ -68,8 +96,7 @@ export function useThemes() {
     saveThemeQuestions: (id: number, data: ThemeQuestionsInput) =>
       replaceQuestionsMutation.mutateAsync({ id, data }),
     isSaving:
-      createMutation.isPending ||
-      updateMutation.isPending ||
+      deleteMutation.isPending ||
       replaceWordsMutation.isPending ||
       addWordsMutation.isPending ||
       replaceQuestionsMutation.isPending,
@@ -90,9 +117,6 @@ export function useTheme(id: number) {
     queryClient.invalidateQueries({ queryKey: getListThemesQueryKey() });
   };
 
-  const updateMutation = useUpdateTheme({
-    mutation: { onSuccess: invalidate },
-  });
   const replaceWordsMutation = useReplaceThemeWords({
     mutation: { onSuccess: invalidate },
   });
@@ -114,12 +138,27 @@ export function useTheme(id: number) {
   });
 
   return {
-    theme: query.data,
+    theme: query.data as ThemeDetail | undefined,
     isLoading: query.isLoading,
     isError: query.isError,
     refetch: query.refetch,
-    updateTheme: (data: ThemeUpdate) =>
-      updateMutation.mutateAsync({ id, data }),
+    updateTheme: async (data: ThemeUpdate) => {
+      const res = await fetch(apiUrl(`/api/themes/${id}`), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...data,
+          ...(data.name !== undefined ? { name: data.name.trim() } : {}),
+          ...(data.iconSvg !== undefined
+            ? { iconSvg: normalizeIconSvg(data.iconSvg) }
+            : {}),
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to update theme");
+      const theme = await res.json();
+      invalidate();
+      return theme;
+    },
     deleteTheme: () => deleteMutation.mutateAsync({ id }),
     replaceThemeWords: (wordIds: number[]) =>
       replaceWordsMutation.mutateAsync({ id, data: { wordIds } }),
@@ -130,7 +169,6 @@ export function useTheme(id: number) {
     saveThemeQuestions: (data: ThemeQuestionsInput) =>
       replaceQuestionsMutation.mutateAsync({ id, data }),
     isSaving:
-      updateMutation.isPending ||
       replaceWordsMutation.isPending ||
       addWordsMutation.isPending ||
       replaceQuestionsMutation.isPending,

@@ -10,7 +10,9 @@ import {
   Trash2,
   BarChart2,
   ChevronRight,
-  FolderOpen,
+  Blocks,
+  Tags,
+  SquareStack
 } from "lucide-react";
 import { SearchBar } from "../components/SearchBar";
 import { DailyGoalCard } from "../components/DailyGoalCard";
@@ -18,6 +20,7 @@ import { WordAddFab } from "../components/WordAddFab";
 import { BulkImportModal } from "../components/BulkImportModal";
 import { useWords } from "../hooks/useWords";
 import { useThemes } from "../hooks/useThemes";
+import { useCategories } from "../hooks/useCategories";
 import { filterWords } from "../utils/filterWords";
 import {
   RelatedWordsList,
@@ -30,7 +33,9 @@ import { useStudyHistory } from "../hooks/useStudyHistory";
 import type { Word } from "../types";
 import { themeVars } from "../theme";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useConfirm } from "../components/ConfirmProvider";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { DAILY_GOAL_DECK_IDS } from "../lib/dailyGoal";
 
 const STUDY_LINKS = [
   { path: "/words", Icon: Languages, titleKey: "nav.words" as const },
@@ -41,15 +46,19 @@ const STUDY_LINKS = [
   },
   { path: "/meaning", Icon: BookOpen, titleKey: "nav.meaning" as const },
   { path: "/learned", Icon: null, titleKey: "nav.learned" as const },
-  { path: "/themes", Icon: FolderOpen, titleKey: "nav.themes" as const },
+  { path: "/categories", Icon: SquareStack, titleKey: "nav.categories" as const },
+  { path: "/themes", Icon: Blocks, titleKey: "nav.themes" as const },
+  { path: "/srs", Icon: Layers, titleKey: "nav.decks" as const },
 ] as const;
 
 export function HomePage() {
   const { t, formatToday } = useTranslation();
+  const confirm = useConfirm();
   const [, navigate] = useLocation();
   const { words, isLoading, updateWord, deleteWord, addWord, bulkCreate } =
     useWords();
   const { themes, isLoading: themesLoading } = useThemes();
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories();
   const activityByDate = useStudyHistory();
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
@@ -68,6 +77,7 @@ export function HomePage() {
     jlptLevel: string | null;
     date: string;
     relatedWordIds: number[];
+    categoryIds: number[];
   }) {
     if (editingWord) updateWord(editingWord.id, data);
     else addWord(data);
@@ -93,7 +103,17 @@ export function HomePage() {
       "nav.meaning": words.length,
       "nav.learned": starredCount,
       "nav.themes": themes.length,
+      "nav.decks": DAILY_GOAL_DECK_IDS.length,
+      "nav.categories": categories.length,
     };
+
+  function studyCountLabel(titleKey: (typeof STUDY_LINKS)[number]["titleKey"]) {
+    const count = studyCounts[titleKey];
+    if (titleKey === "nav.themes") return t("common.themeCount", { count });
+    if (titleKey === "nav.decks") return t("common.deckCount", { count });
+    if (titleKey === "nav.categories") return t("common.categoryCount", { count });
+    return t("common.wordCount", { count });
+  }
 
   function toggleOpen(id: number) {
     setOpenIds((prev) => {
@@ -279,10 +299,10 @@ export function HomePage() {
                           />
                         </button>
                         <button
-                          onClick={(e) => {
+                          onClick={async (e) => {
                             e.stopPropagation();
                             if (
-                              confirm(
+                              await confirm(
                                 t("home.confirmDelete", { kanji: word.kanji }),
                               )
                             )
@@ -349,16 +369,29 @@ export function HomePage() {
           <div className="space-y-2">
             {STUDY_LINKS.map(({ path, Icon, titleKey }) => {
               const star = titleKey === "nav.learned";
+              const countLoading =
+                titleKey === "nav.themes"
+                  ? themesLoading
+                  : titleKey === "nav.categories"
+                    ? categoriesLoading
+                    : titleKey === "nav.decks"
+                      ? false
+                      : isLoading;
               return (
                 <button
                   key={path}
                   onClick={() => navigate(path)}
-                  disabled={isLoading || (titleKey === "nav.themes" && themesLoading)}
+                  disabled={
+                    isLoading ||
+                    (titleKey === "nav.themes" && themesLoading) ||
+                    (titleKey === "nav.categories" && categoriesLoading)
+                  }
                   className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-3.5 active:scale-[0.99] transition-transform disabled:opacity-60"
                 >
                   <div className="w-10 h-10 rounded-xl bg-app-accent flex items-center justify-center shrink-0">
                     {star ? (
-                      <span style={{ color: themeVars.star, fontSize: 18 }}>
+                      // <span style={{ color: themeVars.star, fontSize: 18 }}>
+                      <span className="text-main-500">
                         ★
                       </span>
                     ) : (
@@ -376,21 +409,19 @@ export function HomePage() {
                       {t(titleKey)}
                     </p>
                     <div className="flex items-center gap-1">
-                      {isLoading ? (
+                      {countLoading ? (
                         <>
                           <LoadingSpinner
                             size={14}
                             className="text-app-text-muted"
                           />
                           <p className="text-xs text-app-text-muted mt-0.5 invisible">
-                            {t("common.words")}
+                            {studyCountLabel(titleKey)}
                           </p>
                         </>
                       ) : (
                         <p className="text-xs text-app-text-muted mt-0.5">
-                          {t("common.wordCount", {
-                            count: studyCounts[titleKey],
-                          })}
+                          {studyCountLabel(titleKey)}
                         </p>
                       )}
                     </div>

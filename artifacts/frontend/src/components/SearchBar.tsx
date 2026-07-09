@@ -30,21 +30,7 @@ export function SearchBar({ value, onChange, placeholder = "" }: Props) {
         placeholder={placeholder}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className={`
-          rounded-sm
-          w-full
-          pl-8
-          pr-7
-          py-1.5
-          border
-          border-app-border-strong
-          bg-app-muted
-          text-sm
-          text-app-text
-          placeholder-app-text-muted
-          outline-none
-          transition-all
-          duration-150
+        className={`rounded-sm w-full pl-8 pr-7 py-1.5 border border-app-border-strong bg-gray-50 text-sm text-app-text placeholder-app-text-muted outline-none transition-all duration-150
           ${focused ? "border-transparent ring-2 ring-main-400 ring-inset" : ""}
         `}
         // style={{

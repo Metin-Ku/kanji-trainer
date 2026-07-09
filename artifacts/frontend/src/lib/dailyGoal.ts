@@ -20,8 +20,6 @@ export const DAILY_TARGET_PRESETS = [5, 10, 15, 20, 30] as const;
 
 export interface DailyGoalData {
   targets: Record<DailyGoalDeckId, number>;
-  /** Local date → deck → learned count */
-  activityByDate: Record<string, Partial<Record<DailyGoalDeckId, number>>>;
 }
 
 export interface DeckDailyProgress {
@@ -91,28 +89,6 @@ export function intervalCountsAsDailyLearn(label: string): boolean {
   }
 }
 
-function normalizeActivity(
-  raw: Record<string, unknown> | undefined,
-): Record<string, Partial<Record<DailyGoalDeckId, number>>> {
-  const out: Record<string, Partial<Record<DailyGoalDeckId, number>>> = {};
-  if (!raw || typeof raw !== "object") return out;
-
-  for (const [dateKey, value] of Object.entries(raw)) {
-    if (typeof value === "number" && value > 0) {
-      out[dateKey] = { word: value };
-      continue;
-    }
-    if (!value || typeof value !== "object") continue;
-    const deckCounts: Partial<Record<DailyGoalDeckId, number>> = {};
-    for (const deck of DAILY_GOAL_DECK_IDS) {
-      const n = (value as Record<string, unknown>)[deck];
-      if (typeof n === "number" && n > 0) deckCounts[deck] = n;
-    }
-    if (Object.keys(deckCounts).length > 0) out[dateKey] = deckCounts;
-  }
-  return out;
-}
-
 function normalizeTargets(
   raw: Partial<Record<DailyGoalDeckId, number>> | undefined,
   legacyTarget?: number,
@@ -131,23 +107,28 @@ function normalizeTargets(
   return targets;
 }
 
-function normalizeData(raw: Partial<DailyGoalData> & { target?: number } | null | undefined): DailyGoalData {
+function normalizeTargetsData(
+  raw: Partial<DailyGoalData> & { target?: number } | null | undefined,
+): DailyGoalData {
   if (!raw || typeof raw !== "object") {
-    return { targets: emptyTargets(), activityByDate: {} };
+    return { targets: emptyTargets() };
   }
   return {
     targets: normalizeTargets(raw.targets, raw.target),
-    activityByDate: normalizeActivity(raw.activityByDate as Record<string, unknown>),
   };
+}
+
+export function getDailyGoalTargets(): Record<DailyGoalDeckId, number> {
+  return getDailyGoalData().targets;
 }
 
 export function getDailyGoalData(): DailyGoalData {
   try {
     const raw = localStorage.getItem(DAILY_GOAL_STORAGE_KEY);
-    if (!raw) return { targets: emptyTargets(), activityByDate: {} };
-    return normalizeData(JSON.parse(raw) as Partial<DailyGoalData> & { target?: number });
+    if (!raw) return { targets: emptyTargets() };
+    return normalizeTargetsData(JSON.parse(raw) as Partial<DailyGoalData> & { target?: number });
   } catch {
-    return { targets: emptyTargets(), activityByDate: {} };
+    return { targets: emptyTargets() };
   }
 }
 
@@ -223,10 +204,13 @@ export function computeStreak(
   return streak;
 }
 
-export function getDailyGoalProgress(today = new Date()): DailyGoalProgress {
+export function getDailyGoalProgress(
+  activityByDate: Record<string, Partial<Record<DailyGoalDeckId, number>>>,
+  today = new Date(),
+): DailyGoalProgress {
   const data = getDailyGoalData();
   const dateKey = localDateKey(today);
-  const dayActivity = data.activityByDate[dateKey] ?? {};
+  const dayActivity = activityByDate[dateKey] ?? {};
 
   const decks = DAILY_GOAL_DECK_IDS.map((deck) =>
     deckProgress(deck, dayActivity[deck] ?? 0, data.targets[deck]),
@@ -238,7 +222,7 @@ export function getDailyGoalProgress(today = new Date()): DailyGoalProgress {
   const goalMet = target > 0 && count >= target;
   const remaining = Math.max(0, target - count);
   const progressRatio = target > 0 ? Math.min(1, count / target) : 0;
-  const streak = computeStreak(data.activityByDate, data.targets, today);
+  const streak = computeStreak(activityByDate, data.targets, today);
 
   return {
     dateKey,
@@ -250,20 +234,4 @@ export function getDailyGoalProgress(today = new Date()): DailyGoalProgress {
     progressRatio,
     decks,
   };
-}
-
-export function recordStudyUnit(deck: DailyGoalDeckId, units = 1): DailyGoalProgress {
-  if (units <= 0) return getDailyGoalProgress();
-
-  const data = getDailyGoalData();
-  const dateKey = localDateKey();
-  const dayActivity = { ...(data.activityByDate[dateKey] ?? {}) };
-  dayActivity[deck] = (dayActivity[deck] ?? 0) + units;
-
-  persistDailyGoal({
-    ...data,
-    activityByDate: { ...data.activityByDate, [dateKey]: dayActivity },
-  });
-  notifyDailyGoalChanged();
-  return getDailyGoalProgress();
 }

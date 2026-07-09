@@ -11,7 +11,7 @@ interface Props {
   word: Word;
   allWords: Word[];
   onClose: () => void;
-  onSave?: (data: WordUpdate & { relatedWordIds: number[] }) => void;
+  onSave?: (data: WordUpdate & { relatedWordIds: number[]; categoryIds: number[] }) => void;
   bottom?: number;
 }
 

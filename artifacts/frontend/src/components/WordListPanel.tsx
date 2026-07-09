@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
+  ArrowLeft,
   ArrowUpDown,
   CheckSquare,
   Square,
@@ -17,6 +18,7 @@ import { clusterByKanji } from "../utils/kanjiCluster";
 import type { Word, WordUpdate } from "../types";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useConfirm } from "../components/ConfirmProvider";
 
 export type SortMode =
   | "level-asc"
@@ -98,6 +100,7 @@ function toggleSort(
 }
 
 export type WordListPanelProps = {
+  hasKanji?: boolean;
   words: Word[];
   allWords: Word[];
   isLoading?: boolean;
@@ -113,9 +116,15 @@ export type WordListPanelProps = {
   bulkRemoveLabel?: string;
   showDice?: boolean;
   toolbarExtra?: React.ReactNode;
+  /** Full-page layout: sticky header with back + dice row (matches Pronunciation/Meaning). */
+  layout?: "embedded" | "page";
+  pageTitle?: string;
+  pageTitleIcon?: React.ReactNode;
+  onBack?: () => void;
 };
 
 export function WordListPanel({
+  hasKanji,
   words,
   allWords,
   isLoading = false,
@@ -131,8 +140,13 @@ export function WordListPanel({
   bulkRemoveLabel,
   showDice = true,
   toolbarExtra,
+  layout = "embedded",
+  pageTitle,
+  pageTitleIcon,
+  onBack,
 }: WordListPanelProps) {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [, navigate] = useLocation();
 
   const sortOptions: { value: SortMode; label: string; group: SortGroup }[] = [
@@ -142,7 +156,11 @@ export function WordListPanel({
     { value: "date-desc", label: t("words.sort.dateDesc"), group: "date" },
     { value: "jlpt-asc", label: t("words.sort.jlptAsc"), group: "jlpt" },
     { value: "jlpt-desc", label: t("words.sort.jlptDesc"), group: "jlpt" },
-    { value: "kanji-cluster", label: t("words.sort.kanjiCluster"), group: "kanji" },
+    {
+      value: "kanji-cluster",
+      label: t("words.sort.kanjiCluster"),
+      group: "kanji",
+    },
   ];
 
   const groups: { key: SortGroup; label: string }[] = [
@@ -216,11 +234,18 @@ export function WordListPanel({
     if (selectedIds.size === 0) return;
     const ids = Array.from(selectedIds);
     if (bulkMode === "remove" && onBulkRemove) {
-      if (!window.confirm(t("themes.confirmRemoveWords", { count: ids.length })))
+      if (
+        !(await confirm({
+          message: t("themes.confirmRemoveWords", { count: ids.length }),
+          confirmLabel: t("themes.removeFromTheme"),
+        }))
+      )
         return;
       await onBulkRemove(ids);
     } else {
-      if (!window.confirm(t("common.confirmBulkDelete", { count: ids.length })))
+      if (
+        !(await confirm(t("common.confirmBulkDelete", { count: ids.length })))
+      )
         return;
       if (onBulkDelete) await onBulkDelete(ids);
     }
@@ -228,134 +253,165 @@ export function WordListPanel({
     setSelectMode(false);
   }
 
-  function handleDelete(id: number) {
-    if (window.confirm(t("common.confirmDeleteWord"))) {
-      onDelete(id);
-      setOpenIds((prev) => {
-        const n = new Set(prev);
-        n.delete(id);
-        return n;
-      });
-    }
+  async function handleDelete(id: number) {
+    if (!(await confirm(t("common.confirmDeleteWord")))) return;
+    onDelete(id);
+    setOpenIds((prev) => {
+      const n = new Set(prev);
+      n.delete(id);
+      return n;
+    });
   }
 
   const sorted = sortWords(words, activeSorts);
   const displayed = filterWords(sorted, query);
   const activeSortCount = activeSorts.size;
+  const diceInHeader = layout === "page" && showDice;
+
+  const diceButton = showDice ? (
+    <button
+      onClick={() => {
+        if (displayed.length === 0) return;
+        startStudy(displayed, "kelime", studyTitle, studyReturnPath);
+        navigate("/study");
+      }}
+      disabled={displayed.length === 0}
+      className="p-1.5 rounded-lg text-app-text-muted hover:bg-app-muted transition-colors disabled:opacity-30 shrink-0"
+    >
+      <Dices size={17} strokeWidth={2} />
+    </button>
+  ) : null;
+
+  const toolbarRow = (
+    <div className="flex items-center gap-2">
+      <p className="text-sm text-app-text-muted shrink-0 min-w-[1.25rem] flex items-center justify-center">
+        {isLoading ? (
+          <LoadingSpinner size={18} />
+        ) : (
+          t("common.wordCount", { count: displayed.length })
+        )}
+      </p>
+      <div className="flex-1 min-w-0">
+        <SearchBar value={query} onChange={setQuery} />
+      </div>
+
+      {!diceInHeader && diceButton}
+      <div className="relative shrink-0" ref={sortMenuRef}>
+        <button
+          onClick={() => setShowSortMenu((v) => !v)}
+          className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors ${activeSortCount > 0 ? "text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900" : "text-app-text-muted hover:text-app-text-secondary hover:bg-app-muted"}`}
+        >
+          <ArrowUpDown size={14} strokeWidth={2} />
+          <span className="text-xs font-medium">
+            {activeSortCount > 1
+              ? t("common.sortWithCount", { count: activeSortCount })
+              : t("common.sort")}
+          </span>
+        </button>
+        {showSortMenu && (
+          <div className="absolute right-0 top-full mt-1.5 z-50 bg-app-surface rounded-xl shadow-xl border border-app-border overflow-hidden w-56">
+            {groups.map((group, gi) => (
+              <div key={group.key}>
+                {gi > 0 && (
+                  <div className="mx-3 my-1.5 border-t border-app-border" />
+                )}
+                <div className="px-3 pt-2.5 pb-1">
+                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
+                    {group.label}
+                  </p>
+                </div>
+                {sortOptions
+                  .filter((o) => o.group === group.key)
+                  .map((opt) => {
+                    const active = activeSorts.has(opt.value);
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() =>
+                          setActiveSorts((p) =>
+                            toggleSort(p, opt.value, sortOptions),
+                          )
+                        }
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-app-muted transition-colors"
+                      >
+                        {active ? (
+                          <CheckSquare
+                            size={15}
+                            className="text-main-400 shrink-0"
+                            strokeWidth={2}
+                          />
+                        ) : (
+                          <Square
+                            size={15}
+                            className="text-app-text-muted shrink-0"
+                            strokeWidth={2}
+                          />
+                        )}
+                        <span
+                          className={
+                            active
+                              ? "text-app-text font-medium"
+                              : "text-app-text-secondary"
+                          }
+                        >
+                          {opt.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+              </div>
+            ))}
+            {activeSortCount > 1 && (
+              <div className="mx-3 mb-2.5 mt-1.5 px-2.5 py-1.5 bg-main-50 dark:bg-main-950 rounded-lg">
+                <p className="text-[11px] text-main-400 font-medium">
+                  {t("words.sort.multiCriteria", { count: activeSortCount })}
+                </p>
+              </div>
+            )}
+            <div className="h-1" />
+          </div>
+        )}
+      </div>
+      <button
+        onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
+        className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50 dark:bg-main-950" : "text-app-text-muted hover:bg-app-muted"}`}
+      >
+        {selectMode ? t("common.cancel") : t("common.select")}
+      </button>
+    </div>
+  );
 
   return (
     <>
-      <div ref={headerRef} className="space-y-2">
-        <div className="flex items-center gap-2">
-          <p className="text-sm text-app-text-muted shrink-0 min-w-[1.25rem] flex items-center justify-center">
-            {isLoading ? (
-              <LoadingSpinner size={18} />
-            ) : (
-              t("common.wordCount", { count: displayed.length })
-            )}
-          </p>
-          <div className="flex-1 min-w-0">
-            <SearchBar value={query} onChange={setQuery} />
-          </div>
-          {showDice && (
+      <div
+        ref={headerRef}
+        className={
+          layout === "page"
+            ? "sticky top-0 z-10 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 space-y-2"
+            : "space-y-2"
+        }
+      >
+        {layout === "page" && (
+          <div className="flex items-center justify-between">
             <button
-              onClick={() => {
-                if (displayed.length === 0) return;
-                startStudy(displayed, "kelime", studyTitle, studyReturnPath);
-                navigate("/study");
-              }}
-              disabled={displayed.length === 0}
-              className="p-1.5 rounded-lg text-app-text-muted hover:bg-app-muted transition-colors disabled:opacity-30 shrink-0"
+              onClick={onBack}
+              className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors min-w-0"
             >
-              <Dices size={17} strokeWidth={2} />
+              <ArrowLeft size={18} className="shrink-0" />
+              {pageTitle && (
+                <span
+                  className={`${hasKanji ? "text-[14px]" : "text-[11px]"} font-semibold text-main-400 uppercase tracking-widest inline-flex items-center gap-1.5 min-w-0`}
+                >
+                  {pageTitleIcon}
+                  <span className="truncate">{pageTitle}</span>
+                </span>
+              )}
             </button>
-          )}
-          {toolbarExtra}
-          <div className="relative shrink-0" ref={sortMenuRef}>
-            <button
-              onClick={() => setShowSortMenu((v) => !v)}
-              className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors ${activeSortCount > 0 ? "text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900" : "text-app-text-muted hover:text-app-text-secondary hover:bg-app-muted"}`}
-            >
-              <ArrowUpDown size={14} strokeWidth={2} />
-              <span className="text-xs font-medium">
-                {activeSortCount > 1
-                  ? t("common.sortWithCount", { count: activeSortCount })
-                  : t("common.sort")}
-              </span>
-            </button>
-            {showSortMenu && (
-              <div className="absolute right-0 top-full mt-1.5 z-50 bg-app-surface rounded-xl shadow-xl border border-app-border overflow-hidden w-56">
-                {groups.map((group, gi) => (
-                  <div key={group.key}>
-                    {gi > 0 && (
-                      <div className="mx-3 my-1.5 border-t border-app-border" />
-                    )}
-                    <div className="px-3 pt-2.5 pb-1">
-                      <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
-                        {group.label}
-                      </p>
-                    </div>
-                    {sortOptions
-                      .filter((o) => o.group === group.key)
-                      .map((opt) => {
-                        const active = activeSorts.has(opt.value);
-                        return (
-                          <button
-                            key={opt.value}
-                            onClick={() =>
-                              setActiveSorts((p) =>
-                                toggleSort(p, opt.value, sortOptions),
-                              )
-                            }
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-app-muted transition-colors"
-                          >
-                            {active ? (
-                              <CheckSquare
-                                size={15}
-                                className="text-main-400 shrink-0"
-                                strokeWidth={2}
-                              />
-                            ) : (
-                              <Square
-                                size={15}
-                                className="text-app-text-muted shrink-0"
-                                strokeWidth={2}
-                              />
-                            )}
-                            <span
-                              className={
-                                active
-                                  ? "text-app-text font-medium"
-                                  : "text-app-text-secondary"
-                              }
-                            >
-                              {opt.label}
-                            </span>
-                          </button>
-                        );
-                      })}
-                  </div>
-                ))}
-                {activeSortCount > 1 && (
-                  <div className="mx-3 mb-2.5 mt-1.5 px-2.5 py-1.5 bg-main-50 dark:bg-main-950 rounded-lg">
-                    <p className="text-[11px] text-main-400 font-medium">
-                      {t("words.sort.multiCriteria", { count: activeSortCount })}
-                    </p>
-                  </div>
-                )}
-                <div className="h-1" />
-              </div>
-            )}
+            <div className="flex items-center gap-2">{toolbarExtra}</div>
+            {diceButton}
           </div>
-          <button
-            onClick={() =>
-              selectMode ? exitSelectMode() : setSelectMode(true)
-            }
-            className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50 dark:bg-main-950" : "text-app-text-muted hover:bg-app-muted"}`}
-          >
-            {selectMode ? t("common.cancel") : t("common.select")}
-          </button>
-        </div>
+        )}
+        {toolbarRow}
       </div>
 
       {isError && (

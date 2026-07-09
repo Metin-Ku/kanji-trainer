@@ -1,11 +1,13 @@
-import { useState } from "react";
-import { ArrowLeft, ChevronRight, Plus } from "lucide-react";
+import { useRef, useState } from "react";
+import { ArrowLeft, ChevronRight, Plus, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useThemes } from "../hooks/useThemes";
 import { useWords } from "../hooks/useWords";
 import { WordPickerModal } from "../components/WordPickerModal";
 import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
 import { useTranslation } from "../i18n/I18nProvider";
+import { CategoryTitle } from "../components/CategoryIcon";
+import { SvgIconField } from "../components/SvgIconField";
 
 export function ThemesHubPage() {
   const { t } = useTranslation();
@@ -16,8 +18,21 @@ export function ThemesHubPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
   const [name, setName] = useState("");
+  const [iconSvg, setIconSvg] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const [saving, setSaving] = useState(false);
+  const backdropRef = useRef<HTMLDivElement>(null);
+
+  function closeCreateModal() {
+    setShowCreate(false);
+    setName("");
+    setIconSvg("");
+    setSelectedIds(new Set());
+  }
+
+  function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (e.target === backdropRef.current) closeCreateModal();
+  }
 
   async function handleCreate() {
     if (!name.trim()) return;
@@ -26,10 +41,9 @@ export function ThemesHubPage() {
       const theme = await createTheme({
         name: name.trim(),
         wordIds: Array.from(selectedIds),
+        iconSvg: iconSvg.trim() || null,
       });
-      setShowCreate(false);
-      setName("");
-      setSelectedIds(new Set());
+      closeCreateModal();
       navigate(`/themes/${theme.id}`);
     } finally {
       setSaving(false);
@@ -67,7 +81,12 @@ export function ThemesHubPage() {
                 className="w-full flex items-center gap-3 p-4 rounded-2xl border border-app-border bg-app-surface hover:border-main-300 transition-colors text-left"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-lg text-app-text truncate">{theme.name}</p>
+                  <CategoryTitle
+                    name={theme.name}
+                    iconSvg={theme.iconSvg}
+                    iconSize={22}
+                    nameClassName="font-bold text-lg text-app-text truncate"
+                  />
                   <p className="text-xs text-app-text-muted mt-0.5">
                     {t("themes.meta", { words: theme.wordCount, questions: theme.questionCount })}
                   </p>
@@ -89,9 +108,22 @@ export function ThemesHubPage() {
       </div>
 
       {showCreate && (
-        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4">
+        <div
+          ref={backdropRef}
+          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+          onClick={handleBackdropClick}
+        >
           <div className="bg-app-surface w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-app-border p-5 shadow-xl">
-            <h2 className="text-lg font-bold text-app-text mb-4">{t("themes.newTheme")}</h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-app-text">{t("themes.newTheme")}</h2>
+              <button
+                type="button"
+                onClick={closeCreateModal}
+                className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted"
+              >
+                <X size={18} />
+              </button>
+            </div>
             <label className="block text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-1.5">
               {t("themes.nameLabel")}
             </label>
@@ -100,6 +132,11 @@ export function ThemesHubPage() {
               onChange={(e) => setName(e.target.value)}
               placeholder={t("themes.namePlaceholder")}
               className="w-full rounded-xl border border-app-border-strong bg-app-surface px-3 py-2.5 text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 mb-3"
+            />
+            <SvgIconField
+              value={iconSvg}
+              onChange={setIconSvg}
+              namespace="themes"
             />
             <button
               type="button"
@@ -111,11 +148,7 @@ export function ThemesHubPage() {
             <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  setShowCreate(false);
-                  setName("");
-                  setSelectedIds(new Set());
-                }}
+                onClick={closeCreateModal}
                 className="flex-1 py-2.5 rounded-xl border border-app-border-strong text-sm font-semibold"
               >
                 {t("common.cancel")}

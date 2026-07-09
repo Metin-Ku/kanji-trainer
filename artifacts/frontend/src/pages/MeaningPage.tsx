@@ -12,6 +12,7 @@ import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useConfirm } from "../components/ConfirmProvider";
 
 type SortMode = "level-asc" | "level-desc" | "date-asc" | "date-desc" | "jlpt-asc" | "jlpt-desc" | "kanji-cluster";
 type SortGroup = "jlpt" | "level" | "date" | "kanji";
@@ -105,6 +106,7 @@ function MeaningCard({
 
 export function MeaningPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [, navigate] = useLocation();
   const { words, isLoading, updateWord, deleteWords } = useWords();
 
@@ -167,7 +169,7 @@ export function MeaningPage() {
   function exitSelectMode() { setSelectMode(false); setSelectedIds(new Set()); }
 
   async function handleBulkDelete() {
-    if (!window.confirm(t("common.confirmBulkDelete", { count: selectedIds.size }))) return;
+    if (!(await confirm(t("common.confirmBulkDelete", { count: selectedIds.size })))) return;
     await deleteWords(Array.from(selectedIds));
     setSelectedIds(new Set());
     setSelectMode(false);

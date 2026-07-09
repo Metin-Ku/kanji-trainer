@@ -1,62 +1,57 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, Pencil, Play, Plus, Trash2, X } from "lucide-react";
+import { Pencil, Trash2, X } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
-import { useTheme } from "../hooks/useThemes";
+import { useCategory } from "../hooks/useCategories";
 import { useWords } from "../hooks/useWords";
 import { WordListPanel } from "../components/WordListPanel";
-import { WordPickerModal } from "../components/WordPickerModal";
 import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
 import { useTranslation } from "../i18n/I18nProvider";
 import { useConfirm } from "../components/ConfirmProvider";
 import { CategoryIcon } from "../components/CategoryIcon";
-import { SvgIconField } from "../components/SvgIconField";
+import { CategoryIconField } from "../components/CategoryIconField";
 
-export function ThemeDetailPage() {
+export function CategoryDetailPage() {
   const { t } = useTranslation();
   const confirm = useConfirm();
   const [, navigate] = useLocation();
-  const [, params] = useRoute("/themes/:id");
-  const themeId = Number(params?.id);
+  const [, params] = useRoute("/categories/:id");
+  const categoryId = Number(params?.id);
 
   const { words, updateWord, deleteWord } = useWords();
   const {
-    theme,
+    data: category,
     isLoading,
     isError,
-    updateTheme,
-    deleteTheme,
-    addThemeWords,
-    removeThemeWord,
+    updateCategory,
+    deleteCategory,
     isSaving,
-  } = useTheme(themeId);
+  } = useCategory(categoryId);
 
   const [showEdit, setShowEdit] = useState(false);
   const [nameDraft, setNameDraft] = useState("");
   const [iconDraft, setIconDraft] = useState("");
-  const [showPicker, setShowPicker] = useState(false);
-  const [pickerIds, setPickerIds] = useState<Set<number>>(new Set());
   const backdropRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (theme) {
-      setNameDraft(theme.name);
-      setIconDraft(theme.iconSvg ?? "");
+    if (category) {
+      setNameDraft(category.name);
+      setIconDraft(category.iconSvg ?? "");
     }
-  }, [theme]);
+  }, [category]);
 
-  const themeWords = useMemo(() => {
-    if (!theme) return [];
+  const categoryWords = useMemo(() => {
+    if (!category) return [];
     const map = new Map(words.map((w) => [w.id, w]));
-    return theme.wordIds
+    return category.wordIds
       .map((id) => map.get(id))
       .filter((w): w is NonNullable<typeof w> => !!w);
-  }, [theme, words]);
+  }, [category, words]);
 
   function closeEditModal() {
     setShowEdit(false);
-    if (theme) {
-      setNameDraft(theme.name);
-      setIconDraft(theme.iconSvg ?? "");
+    if (category) {
+      setNameDraft(category.name);
+      setIconDraft(category.iconSvg ?? "");
     }
   }
 
@@ -64,15 +59,9 @@ export function ThemeDetailPage() {
     if (e.target === backdropRef.current) closeEditModal();
   }
 
-  const hasKanji = /\p{Script=Han}/u.test(theme?.name ?? ""  );
-  // const hasKana = /\p{Script=Hiragana}|\p{Script=Katakana}/u.test(
-  //   theme?.name ?? "",
-  // );
-  // const hasLatin = /\p{Script=Latin}/u.test(theme?.name ?? "");
-
   async function handleSave() {
     if (!nameDraft.trim()) return;
-    await updateTheme({
+    await updateCategory({
       name: nameDraft.trim(),
       iconSvg: iconDraft.trim() || null,
     });
@@ -80,25 +69,12 @@ export function ThemeDetailPage() {
   }
 
   async function handleDelete() {
-    if (!(await confirm(t("themes.confirmDelete")))) return;
-    await deleteTheme();
-    navigate("/themes");
+    if (!(await confirm(t("categories.confirmDelete")))) return;
+    await deleteCategory();
+    navigate("/categories");
   }
 
-  async function handleAddWords() {
-    const newIds = Array.from(pickerIds).filter(
-      (id) => !theme?.wordIds.includes(id),
-    );
-    if (newIds.length > 0) await addThemeWords(newIds);
-    setShowPicker(false);
-    setPickerIds(new Set());
-  }
-
-  async function handleBulkRemove(ids: number[]) {
-    await Promise.all(ids.map((wordId) => removeThemeWord(wordId)));
-  }
-
-  if (isLoading || !theme) {
+  if (isLoading || !category) {
     return (
       <div className="min-h-dvh bg-app-surface">
         <LoadingPlaceholder padding="lg" />
@@ -109,67 +85,28 @@ export function ThemeDetailPage() {
   if (isError) {
     return (
       <div className="min-h-dvh bg-app-surface p-8 text-center text-red-400">
-        {t("themes.loadError")}
+        {t("categories.loadError")}
       </div>
     );
   }
-
-  const toolbarExtra = (
-    <>
-      <button
-        type="button"
-        onClick={() => {
-          setPickerIds(new Set(theme.wordIds));
-          setShowPicker(true);
-        }}
-        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border border-app-border-strong text-[11px] font-semibold text-app-text-secondary shrink-0"
-        title={t("themes.addWords")}
-      >
-        <Plus size={13} />
-        <span className="hidden sm:inline">{t("themes.addWords")}</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => navigate(`/themes/${themeId}/quiz/edit`)}
-        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg border border-app-border-strong text-[11px] font-semibold text-app-text-secondary shrink-0"
-        title={t("themeQuiz.edit")}
-      >
-        <BookOpen size={13} />
-        <span className="hidden sm:inline">{t("themeQuiz.edit")}</span>
-      </button>
-      <button
-        type="button"
-        onClick={() => navigate(`/themes/${themeId}/quiz`)}
-        disabled={theme.questions.length === 0}
-        className="inline-flex items-center gap-1 px-2 py-1.5 rounded-lg bg-main-500 text-white text-[11px] font-semibold disabled:opacity-40 shrink-0"
-        title={t("themeQuiz.start")}
-      >
-        <Play size={13} />
-        <span className="hidden sm:inline">{t("themeQuiz.start")}</span>
-      </button>
-    </>
-  );
 
   return (
     <div className="min-h-dvh bg-app-surface">
       <div className="max-w-2xl mx-auto pb-8 sm:border-l sm:border-r sm:border-app-border">
         <WordListPanel
           layout="page"
-          hasKanji={hasKanji}
-          pageTitle={theme.name}
-          pageTitleIcon={<CategoryIcon svg={theme.iconSvg} size={14} />}
-          onBack={() => navigate("/themes")}
-          words={themeWords}
+          pageTitle={category.name}
+          pageTitleIcon={
+            <CategoryIcon svg={category.iconSvg} size={14} />
+          }
+          onBack={() => navigate("/categories")}
+          words={categoryWords}
           allWords={words}
-          emptyMessage={t("themes.noWords")}
-          studyTitle={t("themes.studyTitle", { name: theme.name })}
-          studyReturnPath={`/themes/${themeId}`}
+          emptyMessage={t("categories.noWordsInCategory")}
+          studyTitle={category.name}
+          studyReturnPath={`/categories/${categoryId}`}
           onUpdate={updateWord}
           onDelete={deleteWord}
-          bulkMode="remove"
-          onBulkRemove={handleBulkRemove}
-          bulkRemoveLabel={t("themes.removeFromTheme")}
-          toolbarExtra={toolbarExtra}
         />
 
         <button
@@ -178,7 +115,7 @@ export function ThemeDetailPage() {
           className="fixed bottom-6 right-6 sm:right-[max(1.5rem,calc(50%-20rem))] z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-main-500 text-white shadow-lg font-semibold text-sm"
         >
           <Pencil size={18} />
-          {t("themes.editTheme")}
+          {t("categories.editCategory")}
         </button>
       </div>
 
@@ -191,7 +128,7 @@ export function ThemeDetailPage() {
           <div className="bg-app-surface w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-app-border p-5 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-app-text">
-                {t("themes.editTheme")}
+                {t("categories.editCategory")}
               </h2>
               <button
                 type="button"
@@ -202,19 +139,15 @@ export function ThemeDetailPage() {
               </button>
             </div>
             <label className="block text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-1.5">
-              {t("themes.nameLabel")}
+              {t("categories.nameLabel")}
             </label>
             <input
               value={nameDraft}
               onChange={(e) => setNameDraft(e.target.value)}
-              placeholder={t("themes.namePlaceholder")}
+              placeholder={t("categories.namePlaceholder")}
               className="w-full rounded-xl border border-app-border-strong bg-app-surface px-3 py-2.5 text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 mb-4"
             />
-            <SvgIconField
-              value={iconDraft}
-              onChange={setIconDraft}
-              namespace="themes"
-            />
+            <CategoryIconField value={iconDraft} onChange={setIconDraft} />
             <div className="flex gap-2 mb-3">
               <button
                 type="button"
@@ -239,23 +172,10 @@ export function ThemeDetailPage() {
               className="w-full py-2.5 rounded-xl border border-red-200 text-red-500 text-sm font-semibold hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-40 flex items-center justify-center gap-2"
             >
               <Trash2 size={16} />
-              {t("themes.deleteTheme")}
+              {t("categories.deleteCategory")}
             </button>
           </div>
         </div>
-      )}
-
-      {showPicker && (
-        <WordPickerModal
-          allWords={words}
-          selectedIds={pickerIds}
-          onChange={setPickerIds}
-          onClose={() => setShowPicker(false)}
-          onConfirm={async () => {
-            await handleAddWords();
-            setShowPicker(false);
-          }}
-        />
       )}
     </div>
   );

@@ -2,12 +2,14 @@ import { useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Word, SrsExample } from "../types";
 import { RelatedWordsSelect } from "./RelatedWordsSelect";
+import { CategoriesSelect } from "./CategoriesSelect";
 import { SrsExamplesEditor } from "./SrsExamplesEditor";
 import {
   sanitizeSrsExamples,
   srsExamplesToPlainDescription,
 } from "../lib/srsExamples";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useCategories } from "../hooks/useCategories";
 
 interface SaveData {
   kanji: string;
@@ -19,6 +21,7 @@ interface SaveData {
   jlptLevel: string | null;
   date: string;
   relatedWordIds: number[];
+  categoryIds: number[];
 }
 
 interface Props {
@@ -47,6 +50,7 @@ export function WordFormModal({
   onClose,
 }: Props) {
   const { t } = useTranslation();
+  const { data: categories = [] } = useCategories();
   const [tab, setTab] = useState<TabId>("general");
   const [kanji, setKanji] = useState(initial?.kanji ?? "");
   const [pronunciation, setPronunciation] = useState(
@@ -64,6 +68,9 @@ export function WordFormModal({
   const [date, setDate] = useState(initial?.date ?? todayStr());
   const [relatedWordIds, setRelatedWordIds] = useState<number[]>(
     initial?.relatedWordIds ?? [],
+  );
+  const [categoryIds, setCategoryIds] = useState<number[]>(
+    initial?.categoryIds ?? [],
   );
   const backdropRef = useRef<HTMLDivElement>(null);
 
@@ -96,6 +103,7 @@ export function WordFormModal({
       jlptLevel,
       date,
       relatedWordIds,
+      categoryIds,
     });
     onClose();
   }
@@ -219,6 +227,19 @@ export function WordFormModal({
                     className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 text-sm text-app-text leading-relaxed focus:outline-none focus:ring-2 focus:ring-main-300 transition-all font-mono"
                   />
                 </div>
+
+                {categories.length > 0 && (
+                  <div>
+                    <label className="block text-xs font-semibold text-app-text-muted mb-1.5 uppercase tracking-wide">
+                      {t("wordForm.labels.categories")}
+                    </label>
+                    <CategoriesSelect
+                      categories={categories}
+                      selectedIds={categoryIds}
+                      onChange={setCategoryIds}
+                    />
+                  </div>
+                )}
 
                 {allWords.length > 0 && (
                   <div>

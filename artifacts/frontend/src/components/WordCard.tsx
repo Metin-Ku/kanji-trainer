@@ -3,6 +3,8 @@ import { Word, WordUpdate } from "../types";
 import { LevelChart } from "./LevelChart";
 import { KanjiStrokeModal } from "./KanjiStrokeModal";
 import { RelatedWordsList, RelatedWordsButton } from "./RelatedWordsList";
+import { CategoryChip, CategoryWordsList } from "./CategoryWordsList";
+import { useCategories } from "../hooks/useCategories";
 import { Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "../i18n/I18nProvider";
 
@@ -47,11 +49,34 @@ export function WordCard({
   allWords,
 }: Props) {
   const { t, formatCardDate } = useTranslation();
+  const { data: categories = [] } = useCategories();
   const [showStroke, setShowStroke] = useState(false);
   const [showRelated, setShowRelated] = useState(false);
+  const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
   useEffect(() => {
-    if (!isOpen) setShowRelated(false);
+    if (!isOpen) {
+      setShowRelated(false);
+      setActiveCategoryId(null);
+    }
   }, [isOpen]);
+
+  const wordCategories = (word.categoryIds ?? [])
+    .map((id) => categories.find((c) => c.id === id))
+    .filter((c): c is NonNullable<typeof c> => !!c);
+
+  const activeCategory =
+    activeCategoryId != null
+      ? categories.find((c) => c.id === activeCategoryId)
+      : undefined;
+
+  const categoryWords =
+    activeCategory && allWords
+      ? allWords.filter(
+          (w) =>
+            w.id !== word.id &&
+            (w.categoryIds ?? []).includes(activeCategory.id),
+        )
+      : [];
   const kanjiClickable = hasKanji(word.kanji) && !selectMode;
 
   function handleRowClick() {
@@ -86,7 +111,7 @@ export function WordCard({
               )}
             </div>
           ) : (
-            <span className="text-app-text-muted font-medium text-sm w-5 text-right shrink-0 tabular-nums">
+            <span className="self-end mb-[1px] text-app-text-muted font-medium text-sm w-5 text-right shrink-0 tabular-nums">
               {index}
             </span>
           )}
@@ -167,6 +192,7 @@ export function WordCard({
                     active={showRelated}
                     onClick={(e) => {
                       e.stopPropagation();
+                      setActiveCategoryId(null);
                       setShowRelated((v) => !v);
                     }}
                   />
@@ -192,16 +218,43 @@ export function WordCard({
                       {word.meaning}
                     </p>
                   )}
-                  {word.description && (
-                    <div className="pt-1 border-t border-app-border">
-                      <div className="whitespace-pre-wrap text-[15px] text-app-text leading-relaxed font-[inherit]">
-                        {word.description}
-                      </div>
+                  {wordCategories.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {wordCategories.map((cat) => (
+                        <CategoryChip
+                          key={cat.id}
+                          label={cat.name}
+                          iconSvg={cat.iconSvg}
+                          active={activeCategoryId === cat.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowRelated(false);
+                            setActiveCategoryId((prev) =>
+                              prev === cat.id ? null : cat.id,
+                            );
+                          }}
+                        />
+                      ))}
                     </div>
+                  )}
+                  {activeCategory ? (
+                    <CategoryWordsList
+                      category={activeCategory}
+                      words={categoryWords}
+                    />
+                  ) : (
+                    word.description && (
+                      <div className="pt-1 border-t border-app-border">
+                        <div className="whitespace-pre-wrap text-[15px] text-app-text leading-relaxed font-[inherit]">
+                          {word.description}
+                        </div>
+                      </div>
+                    )
                   )}
                   {!word.pronunciation &&
                     !word.meaning &&
-                    !word.description && (
+                    !word.description &&
+                    wordCategories.length === 0 && (
                       <span className="text-app-text-muted italic text-sm">
                         {t("common.noDescription")}
                       </span>

@@ -19,6 +19,12 @@ import { logger } from "../lib/logger";
 
 const router = Router();
 
+function parseIconSvg(raw: unknown): string | null {
+  if (raw == null) return null;
+  const value = String(raw).trim();
+  return value || null;
+}
+
 function sanitizeHints(hints: SrsExampleHint[]): SrsExampleHint[] {
   return hints.map((h) => {
     const text = h.text.trim();
@@ -87,6 +93,7 @@ async function buildThemeDetail(themeId: number) {
   return {
     id: theme.id,
     name: theme.name,
+    iconSvg: theme.iconSvg,
     sortOrder: theme.sortOrder,
     wordIds,
     questions: questions.map((q) => ({
@@ -169,6 +176,7 @@ router.get("/themes", async (_req, res, next) => {
       themes.map((t) => ({
         id: t.id,
         name: t.name,
+        iconSvg: t.iconSvg,
         sortOrder: t.sortOrder,
         wordCount: wordMap.get(t.id) ?? 0,
         questionCount: qMap.get(t.id) ?? 0,
@@ -190,9 +198,11 @@ router.post("/themes", async (req, res, next) => {
       return;
     }
 
+    const iconSvg = parseIconSvg(req.body?.iconSvg);
+
     const [theme] = await db
       .insert(themesTable)
-      .values({ name: parsed.data.name.trim() })
+      .values({ name: parsed.data.name.trim(), iconSvg })
       .returning();
 
     if (parsed.data.wordIds?.length) {
@@ -231,11 +241,19 @@ router.patch("/themes/:id", async (req, res, next) => {
       return;
     }
 
-    const patch: Partial<{ name: string; sortOrder: number; updatedAt: Date }> = {
+    const patch: Partial<{
+      name: string;
+      iconSvg: string | null;
+      sortOrder: number;
+      updatedAt: Date;
+    }> = {
       updatedAt: new Date(),
     };
     if (parsed.data.name !== undefined) patch.name = parsed.data.name.trim();
     if (parsed.data.sortOrder !== undefined) patch.sortOrder = parsed.data.sortOrder;
+    if (req.body?.iconSvg !== undefined) {
+      patch.iconSvg = parseIconSvg(req.body.iconSvg);
+    }
 
     const [updated] = await db
       .update(themesTable)

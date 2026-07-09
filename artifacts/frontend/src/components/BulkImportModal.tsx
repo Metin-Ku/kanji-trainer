@@ -2,9 +2,15 @@ import { useRef, useState } from "react";
 import { X, Upload } from "lucide-react";
 import { LoadingSpinner } from "./LoadingSpinner";
 import type { SrsExample, Word } from "../types";
-import { parseBulkDescriptionHtml, elementSurfaceText } from "../lib/srsExamples";
+import {
+  parseBulkDescriptionHtml,
+  elementSurfaceText,
+} from "../lib/srsExamples";
 import { linkSrsExamples } from "../lib/wordLinking";
+import { parseBracketList } from "../lib/categoryMatch";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useCategories } from "../hooks/useCategories";
+import { matchCategoryNames } from "../lib/categoryMatch";
 
 interface BulkWord {
   kanji: string;
@@ -13,6 +19,8 @@ interface BulkWord {
   description: string;
   srsExamples?: SrsExample[];
   jlptLevel?: string;
+  categoryNames?: string[];
+  synonymKanji?: string[];
 }
 
 interface ImportResult {
@@ -35,11 +43,14 @@ function extractText(el: Element): string {
 
 const JLPT_SET = new Set(["N1", "N2", "N3", "N4", "N5"]);
 
-function parseTableHtml(html: string): BulkWord[] {
+function parseTableHtml(html: string, allWords: Word[]): BulkWord[] {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
   const rows = doc.querySelectorAll("tr");
   const words: BulkWord[] = [];
+  const knownKanji = new Set(
+    allWords.map((w) => w.kanji.normalize("NFC")),
+  );
 
   rows.forEach((row) => {
     const wordEl = row.querySelector(".word");
@@ -47,6 +58,8 @@ function parseTableHtml(html: string): BulkWord[] {
     const meanEl = row.querySelector(".meaning");
     const descEl = row.querySelector(".description");
     const jlptEl = row.querySelector(".jlpt");
+    const catEl = row.querySelector(".categories");
+    const synEl = row.querySelector(".synonyms");
     if (!wordEl) return;
     const kanji = wordEl.textContent?.trim() ?? "";
     if (!kanji || kanji === "Word" || kanji === "Kelime") return;
@@ -68,6 +81,13 @@ function parseTableHtml(html: string): BulkWord[] {
       }
     }
 
+    const categoryNames = catEl
+      ? parseBracketList(extractText(catEl))
+      : undefined;
+    const synonymKanji = synEl
+      ? parseBracketList(extractText(synEl)).filter((k) => k !== kanji)
+      : undefined;
+
     words.push({
       kanji,
       pronunciation: pronEl ? extractText(pronEl) : "",
@@ -75,7 +95,10 @@ function parseTableHtml(html: string): BulkWord[] {
       description,
       ...(srsExamples && srsExamples.length > 0 ? { srsExamples } : {}),
       ...(jlptLevel ? { jlptLevel } : {}),
+      ...(categoryNames && categoryNames.length > 0 ? { categoryNames } : {}),
+      ...(synonymKanji && synonymKanji.length > 0 ? { synonymKanji } : {}),
     });
+    knownKanji.add(kanji.normalize("NFC"));
   });
 
   return words;
@@ -83,6 +106,7 @@ function parseTableHtml(html: string): BulkWord[] {
 
 export function BulkImportModal({ onImport, onClose, allWords }: Props) {
   const { t } = useTranslation();
+  const { data: categories = [] } = useCategories();
   const [html, setHtml] = useState("");
   const [loading, setLoading] = useState(false);
   const [linking, setLinking] = useState(false);
@@ -90,12 +114,24 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
   const [preview, setPreview] = useState<BulkWord[]>([]);
   const backdropRef = useRef<HTMLDivElement>(null);
 
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleHtmlChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = e.target;
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${textarea.scrollHeight}px`;
+
+    setHtml(textarea.value);
+    setPreview([]);
+  };
+
   function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
     if (e.target === backdropRef.current) onClose();
   }
 
   function handleParse() {
-    const words = parseTableHtml(html);
+    const words = parseTableHtml(html, allWords);
     setPreview(words);
     setResult(null);
   }
@@ -162,14 +198,12 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
             </p>
 
             <textarea
-              value={html}
-              onChange={(e) => {
-                setHtml(e.target.value);
-                setPreview([]);
-              }}
-              placeholder={t("bulkImport.placeholder")}
-              rows={6}
-              className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 text-xs text-app-text-secondary font-mono focus:outline-none focus:ring-2 focus:ring-main-300 transition-all mb-3"
+               ref={textareaRef}
+               value={html}
+               onChange={handleHtmlChange}
+               placeholder={t("bulkImport.placeholder")}
+               rows={6}
+              className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 max-h-[90vh]Z text-xs text-app-text-secondary font-mono focus:outline-none focus:ring-2 focus:ring-main-300 transition-all mb-3"
             />
 
             {preview.length === 0 ? (
@@ -189,12 +223,28 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                     </p>
                   </div>
                   <div className="max-h-36 overflow-y-auto space-y-1.5">
-                    {preview.map((w, i) => (
-                      <div key={i} className="flex gap-2 text-xs items-center">
+                    {preview.map((w, i) => {
+                      const knownKanji = new Set([
+                        ...allWords.map((word) => word.kanji.normalize("NFC")),
+                        ...preview.map((word) => word.kanji.normalize("NFC")),
+                      ]);
+                      const matchedCategories =
+                        w.categoryNames && w.categoryNames.length > 0
+                          ? matchCategoryNames(w.categoryNames, categories)
+                          : [];
+                      const matchedCategoryNames = matchedCategories
+                        .map(
+                          (id) =>
+                            categories.find((c) => c.id === id)?.name ?? "",
+                        )
+                        .filter(Boolean);
+
+                      return (
+                      <div key={i} className="flex gap-2 text-xs items-center flex-wrap">
                         <span className="font-bold text-app-text w-16 shrink-0">
                           {w.kanji}
                         </span>
-                        <span className="text-app-text-secondary truncate flex-1">
+                        <span className="text-app-text-secondary truncate flex-1 min-w-0">
                           {w.pronunciation}
                         </span>
                         {w.jlptLevel && (
@@ -220,8 +270,32 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                             })}
                           </span>
                         )}
+                        {matchedCategoryNames.length > 0 && (
+                          <span
+                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-amber-100 text-amber-700"
+                            title={matchedCategoryNames.join(", ")}
+                          >
+                            {t("bulkImport.categoriesBadge", {
+                              count: matchedCategoryNames.length,
+                            })}
+                          </span>
+                        )}
+                        {w.synonymKanji && w.synonymKanji.length > 0 && (
+                          <span
+                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-violet-100 text-violet-700"
+                            title={w.synonymKanji.join(", ")}
+                          >
+                            {t("bulkImport.synonymsBadge", {
+                              count: w.synonymKanji.filter((k) =>
+                                knownKanji.has(k.normalize("NFC")),
+                              ).length,
+                              total: w.synonymKanji.length,
+                            })}
+                          </span>
+                        )}
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 </div>
                 <div className="flex gap-2">

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { SearchBar } from "./SearchBar";
 import { filterWords } from "../utils/filterWords";
@@ -14,6 +14,28 @@ type WordPickerModalProps = {
   title?: string;
 };
 
+function SelectionCircle({ checked }: { checked: boolean }) {
+  return (
+    <div
+      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors border-app-border-strong ${
+        checked ? "border-main-500 bg-main-500" : "transparent"
+      }`}
+    >
+      {checked && (
+        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <path
+            d="M1 4L4 7L9 1"
+            stroke="white"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
+    </div>
+  );
+}
+
 export function WordPickerModal({
   allWords,
   selectedIds,
@@ -24,6 +46,7 @@ export function WordPickerModal({
 }: WordPickerModalProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
+  const backdropRef = useRef<HTMLDivElement>(null);
 
   const displayed = useMemo(
     () => filterWords(allWords, query),
@@ -37,8 +60,16 @@ export function WordPickerModal({
     onChange(next);
   }
 
+  function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
+    if (e.target === backdropRef.current) onClose();
+  }
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4">
+    <div
+      ref={backdropRef}
+      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-app-surface w-full sm:max-w-lg max-h-[85dvh] rounded-t-2xl sm:rounded-2xl border border-app-border flex flex-col shadow-xl">
         <div className="flex items-center justify-between px-4 py-3 border-b border-app-border shrink-0">
           <h2 className="text-sm font-bold text-app-text">
@@ -47,7 +78,7 @@ export function WordPickerModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-app-text-muted hover:bg-app-muted"
+            className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted"
           >
             <X size={18} />
           </button>
@@ -64,23 +95,20 @@ export function WordPickerModal({
           {displayed.map((word) => {
             const checked = selectedIds.has(word.id);
             return (
-              <label
+              <button
                 key={word.id}
-                className="flex items-center gap-3 px-4 py-3 border-b border-app-border cursor-pointer hover:bg-app-muted/50"
+                type="button"
+                onClick={() => toggle(word.id)}
+                className="w-full flex items-center gap-3 px-4 py-3 border-b border-app-border text-left hover:bg-app-muted/50 transition-colors"
               >
-                <input
-                  type="checkbox"
-                  checked={checked}
-                  onChange={() => toggle(word.id)}
-                  className="rounded border-app-border-strong text-main-500 focus:ring-main-300"
-                />
+                <SelectionCircle checked={checked} />
                 <div className="min-w-0 flex-1">
                   <p className="font-bold text-app-text truncate">{word.kanji}</p>
                   <p className="text-xs text-app-text-muted truncate">
                     {word.pronunciation || word.meaning || t("common.emDash")}
                   </p>
                 </div>
-              </label>
+              </button>
             );
           })}
         </div>

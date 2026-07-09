@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, wordsTable, wordRelationsTable } from "@workspace/db";
+import { db, wordsTable, wordRelationsTable, categoryWordsTable } from "@workspace/db";
 import { eq, or, inArray } from "drizzle-orm";
 import {
   CreateWordBody,
@@ -8,8 +8,32 @@ import {
 } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
 import { ensureSrsCardsForWord, ensureSrsCardsForWords, clampExampleCursorForWord } from "../lib/srsCards";
+import {
+  getCategoryIdsForWord,
+  setCategoryWords,
+} from "../lib/categoryWords";
+import { matchCategoryNames } from "../lib/categoryMatch";
+import { categoriesTable } from "@workspace/db";
 
 const router = Router();
+
+function parseIdArray(raw: unknown): number[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  return [
+    ...new Set(
+      raw
+        .map((v) => Number(v))
+        .filter((id) => Number.isFinite(id) && id > 0),
+    ),
+  ];
+}
+
+function parseStringArray(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((v) => (typeof v === "string" ? v.trim() : ""))
+    .filter(Boolean);
+}
 
 async function getRelatedWordIds(wordId: number): Promise<number[]> {
   const rows = await db
@@ -49,6 +73,7 @@ router.get("/words", async (req, res, next) => {
   try {
   const words = await db.select().from(wordsTable).orderBy(wordsTable.createdAt);
   const relations = await db.select().from(wordRelationsTable);
+  const categoryLinks = await db.select().from(categoryWordsTable);
 
   // Build a map: wordId → Set of relatedWordIds (bidirectional)
   const relMap = new Map<number, number[]>();
@@ -59,9 +84,16 @@ router.get("/words", async (req, res, next) => {
     relMap.get(r.relatedWordId)!.push(r.wordId);
   }
 
+  const catMap = new Map<number, number[]>();
+  for (const link of categoryLinks) {
+    if (!catMap.has(link.wordId)) catMap.set(link.wordId, []);
+    catMap.get(link.wordId)!.push(link.categoryId);
+  }
+
   const result = words.map((w) => ({
     ...w,
     relatedWordIds: relMap.get(w.id) ?? [],
+    categoryIds: catMap.get(w.id) ?? [],
   }));
   res.json(result);
   } catch (err) {
@@ -77,9 +109,23 @@ router.post("/words/bulk", async (req, res) => {
     return;
   }
 
-  const incoming = parsed.data.words;
-  const existing = await db.select({ kanji: wordsTable.kanji }).from(wordsTable);
-  const existingSet = new Set(existing.map((w) => w.kanji.normalize("NFC")));
+  const rawWords = Array.isArray(req.body?.words)
+    ? (req.body.words as Record<string, unknown>[])
+    : [];
+
+  const incoming = parsed.data.words.map((w, i) => ({
+    ...w,
+    categoryNames: parseStringArray(rawWords[i]?.categoryNames),
+    synonymKanji: parseStringArray(rawWords[i]?.synonymKanji),
+  }));
+
+  const existingRows = await db
+    .select({ id: wordsTable.id, kanji: wordsTable.kanji })
+    .from(wordsTable);
+  const existingSet = new Set(existingRows.map((w) => w.kanji.normalize("NFC")));
+  const kanjiToId = new Map(
+    existingRows.map((w) => [w.kanji.normalize("NFC"), w.id]),
+  );
 
   const toAdd = incoming.filter((w) => !existingSet.has(w.kanji.normalize("NFC")));
   const toUpdate = incoming.filter((w) => existingSet.has(w.kanji.normalize("NFC")));
@@ -98,8 +144,11 @@ router.post("/words/bulk", async (req, res) => {
         jlptLevel: w.jlptLevel ?? null,
         date: today,
       }))
-    ).returning({ id: wordsTable.id });
+    ).returning({ id: wordsTable.id, kanji: wordsTable.kanji });
     await ensureSrsCardsForWords(inserted.map((w) => w.id));
+    for (const row of inserted) {
+      kanjiToId.set(row.kanji.normalize("NFC"), row.id);
+    }
   }
 
   for (const w of toUpdate) {
@@ -121,7 +170,36 @@ router.post("/words/bulk", async (req, res) => {
       .where(eq(wordsTable.kanji, w.kanji))
       .limit(1);
     if (updated) {
+      kanjiToId.set(w.kanji.normalize("NFC"), updated.id);
       await clampExampleCursorForWord(updated.id, srsExamples.length);
+    }
+  }
+
+  const allCategories = await db
+    .select({ id: categoriesTable.id, name: categoriesTable.name })
+    .from(categoriesTable);
+
+  for (const w of incoming) {
+    const wordId = kanjiToId.get(w.kanji.normalize("NFC"));
+    if (!wordId) continue;
+
+    if (w.categoryNames.length > 0) {
+      const categoryIds = matchCategoryNames(w.categoryNames, allCategories);
+      if (categoryIds.length > 0) {
+        await setCategoryWords(wordId, categoryIds);
+      }
+    }
+
+    if (w.synonymKanji.length > 0) {
+      const synonymIds = w.synonymKanji
+        .map((k) => kanjiToId.get(k.normalize("NFC")))
+        .filter((id): id is number => id != null && id !== wordId);
+      if (synonymIds.length > 0) {
+        const existingRelated = await getRelatedWordIds(wordId);
+        await setRelatedWords(wordId, [
+          ...new Set([...existingRelated, ...synonymIds]),
+        ]);
+      }
     }
   }
 
@@ -140,6 +218,7 @@ router.post("/words", async (req, res) => {
     return;
   }
   const { kanji, pronunciation = "", meaning = "", description = "", srsExamples = [], level = 1, jlptLevel, date, relatedWordIds } = parsed.data;
+  const categoryIds = parseIdArray(req.body?.categoryIds);
   const [word] = await db
     .insert(wordsTable)
     .values({ kanji, pronunciation, meaning, description, srsExamples, level, jlptLevel: jlptLevel ?? null, date })
@@ -147,8 +226,15 @@ router.post("/words", async (req, res) => {
   if (relatedWordIds && relatedWordIds.length > 0) {
     await setRelatedWords(word.id, relatedWordIds);
   }
+  if (categoryIds && categoryIds.length > 0) {
+    await setCategoryWords(word.id, categoryIds);
+  }
   await ensureSrsCardsForWord(word.id);
-  res.status(201).json({ ...word, relatedWordIds: relatedWordIds ?? [] });
+  res.status(201).json({
+    ...word,
+    relatedWordIds: relatedWordIds ?? [],
+    categoryIds: categoryIds ?? [],
+  });
 });
 
 router.patch("/words/:id", async (req, res) => {
@@ -164,6 +250,7 @@ router.patch("/words/:id", async (req, res) => {
     return;
   }
   const { relatedWordIds, srsExamples, ...wordFields } = parsed.data;
+  const categoryIds = parseIdArray(req.body?.categoryIds);
   const patch: Record<string, unknown> = { ...wordFields };
   if (srsExamples !== undefined) patch.srsExamples = srsExamples;
 
@@ -181,11 +268,22 @@ router.patch("/words/:id", async (req, res) => {
     await setRelatedWords(id, relatedWordIds);
   }
 
+  if (categoryIds !== undefined) {
+    await setCategoryWords(id, categoryIds);
+  }
+
   const finalRelatedIds = relatedWordIds !== undefined
     ? relatedWordIds
     : await getRelatedWordIds(id);
+  const finalCategoryIds = categoryIds !== undefined
+    ? categoryIds
+    : await getCategoryIdsForWord(id);
 
-  res.json({ ...updated, relatedWordIds: finalRelatedIds });
+  res.json({
+    ...updated,
+    relatedWordIds: finalRelatedIds,
+    categoryIds: finalCategoryIds,
+  });
 });
 
 router.delete("/words/:id", async (req, res) => {

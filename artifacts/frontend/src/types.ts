@@ -54,6 +54,7 @@ export interface Word {
   date: string;
   createdAt: string;
   relatedWordIds: number[];
+  categoryIds?: number[];
 }
 
 export interface WordInput {
@@ -66,6 +67,7 @@ export interface WordInput {
   jlptLevel?: string | null;
   date: string;
   relatedWordIds?: number[];
+  categoryIds?: number[];
 }
 
 export interface WordUpdate {
@@ -83,6 +85,7 @@ export interface WordUpdate {
   jlptLevel?: string | null;
   date?: string;
   relatedWordIds?: number[];
+  categoryIds?: number[];
 }
 
 export type ThemeQuizChoice = {
@@ -105,6 +108,7 @@ export interface ThemeQuizQuestion {
 export interface ThemeSummary {
   id: number;
   name: string;
+  iconSvg: string | null;
   sortOrder: number;
   wordCount: number;
   questionCount: number;
@@ -115,6 +119,7 @@ export interface ThemeSummary {
 export interface ThemeDetail {
   id: number;
   name: string;
+  iconSvg: string | null;
   sortOrder: number;
   wordIds: number[];
   questions: ThemeQuizQuestion[];
@@ -125,11 +130,13 @@ export interface ThemeDetail {
 export interface ThemeInput {
   name: string;
   wordIds?: number[];
+  iconSvg?: string | null;
 }
 
 export interface ThemeUpdate {
   name?: string;
   sortOrder?: number;
+  iconSvg?: string | null;
 }
 
 export interface ThemeQuestionsInput {

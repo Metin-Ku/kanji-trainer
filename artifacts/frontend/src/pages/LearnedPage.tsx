@@ -19,6 +19,7 @@ import { clusterByKanji } from "../utils/kanjiCluster";
 import { Word } from "../types";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useConfirm } from "../components/ConfirmProvider";
 
 type SortMode =
   | "date-asc"
@@ -54,6 +55,7 @@ function sortLearned(words: Word[], sort: SortMode): Word[] {
 
 export function LearnedPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [, navigate] = useLocation();
   const { words, isLoading, updateWord, deleteWord, deleteWords } = useWords();
 
@@ -131,9 +133,9 @@ export function LearnedPage() {
 
   async function handleBulkDelete() {
     if (
-      !window.confirm(
+      !(await confirm(
         t("common.confirmBulkDelete", { count: selectedIds.size }),
-      )
+      ))
     )
       return;
     await deleteWords(Array.from(selectedIds));
@@ -141,15 +143,14 @@ export function LearnedPage() {
     setSelectMode(false);
   }
 
-  function handleDelete(id: number) {
-    if (window.confirm(t("common.confirmDeleteWord"))) {
-      deleteWord(id);
-      setOpenIds((prev) => {
-        const n = new Set(prev);
-        n.delete(id);
-        return n;
-      });
-    }
+  async function handleDelete(id: number) {
+    if (!(await confirm(t("common.confirmDeleteWord")))) return;
+    deleteWord(id);
+    setOpenIds((prev) => {
+      const n = new Set(prev);
+      n.delete(id);
+      return n;
+    });
   }
 
   function handleSave(data: {
@@ -161,6 +162,8 @@ export function LearnedPage() {
     level: number;
     jlptLevel: string | null;
     date: string;
+    relatedWordIds: number[];
+    categoryIds: number[];
   }) {
     if (editingWord) updateWord(editingWord.id, data);
     setEditingWord(undefined);

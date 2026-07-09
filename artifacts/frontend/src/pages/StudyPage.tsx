@@ -7,7 +7,6 @@ import { Word } from "../types";
 import { themeVars } from "../theme";
 import { apiUrl } from "../lib/apiOrigin";
 import { useTranslation } from "../i18n/I18nProvider";
-import { recordStudyUnit } from "../lib/dailyGoal";
 const LONG_PRESS_MS = 320;
 const LEVEL_STEP_PX = 30;
 

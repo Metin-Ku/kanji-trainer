@@ -8,6 +8,9 @@ export const en = {
     loading: "…",
     words: "words",
     wordCount: "{count} words",
+    themeCount: "{count} themes",
+    deckCount: "{count} decks",
+    categoryCount: "{count} categories",
     resultCount: "{count} results",
     noResultsForQuery: 'No results for "{query}"',
     selectAll: "Select all",
@@ -44,6 +47,7 @@ export const en = {
     confirmDeleteWord: "Are you sure you want to delete this word?",
     confirmBulkDelete: "Are you sure you want to delete {count} words?",
     confirmDeleteExample: "Do you want to delete this example?",
+    confirmTitle: "Are you sure?",
     language: "Language",
     english: "English",
     turkish: "Turkish",
@@ -60,6 +64,8 @@ export const en = {
     learnedPronunciation: "Learned · Pronunciation",
     learnedMeaning: "Learned · Meaning",
     themes: "Themes",
+    decks: "Decks",
+    categories: "Categories",
   },
 
   home: {
@@ -148,7 +154,8 @@ export const en = {
 
   srs: {
     hub: {
-      title: "Spaced Repetition",
+      //title: "Spaced Repetition",
+      title: "Decks",
       subtitle: "FSRS algorithm — same logic as Anki",
       filters: "Filters",
       jlptMin: "JLPT min",
@@ -231,6 +238,7 @@ export const en = {
       examplesAndNotes: "Example sentences & notes",
       relatedWords: "Related words",
       relatedWordsHint: "(A ≡ B)",
+      categories: "Categories",
       jlptLevel: "JLPT level",
       jlptOptional: "(optional)",
       date: "Date",
@@ -255,7 +263,7 @@ export const en = {
   bulkImport: {
     title: "Bulk add words",
     instructions:
-      "Paste an HTML table. Parsed by .word, .pronunciation, .meaning, .description, and .jlpt classes.",
+      "Paste an HTML table. Parsed by .word, .pronunciation, .meaning, .description, .jlpt, .categories, and .synonyms classes.",
     placeholder: "<table>...</table>",
     pasteTable: "Paste a table",
     wordsDetected: "{count} words detected",
@@ -271,6 +279,8 @@ export const en = {
       updated: "{count} words already existed; fields updated:",
     },
     descriptionTitle: "Description",
+    categoriesBadge: "{count} categories",
+    synonymsBadge: "{count}/{total} synonyms",
   },
 
   settings: {
@@ -414,6 +424,8 @@ export const en = {
     empty: "No themes yet. Create one to get started.",
     meta: "{words} words · {questions} questions",
     newTheme: "New theme",
+    editTheme: "Edit theme",
+    deleteTheme: "Delete theme",
     nameLabel: "Theme name",
     namePlaceholder: "e.g. 洗濯",
     pickWords: "Select words",
@@ -427,6 +439,36 @@ export const en = {
     studyTitle: "{name} · Words",
     backToTheme: "Back to theme",
     loadError: "Could not load theme.",
+    iconLabel: "Icon",
+    iconOptional: "(optional)",
+    iconPlaceholder: "<svg>...</svg>",
+    iconPreview: "Preview",
+  },
+
+  categories: {
+    title: "Categories",
+    subtitle: "Browse words by topic groups",
+    empty: "No categories yet.",
+    wordCount: "{count} words",
+    noWordsInCategory: "No words in this category.",
+    loadError: "Could not load category.",
+    view: {
+      row: "List view",
+      grid2: "2-column grid",
+      grid3: "3-column grid",
+    },
+    newCategory: "New category",
+    editCategory: "Edit category",
+    deleteCategory: "Delete category",
+    confirmDelete: "Delete this category? Words will not be removed.",
+    iconLabel: "Icon",
+    iconOptional: "(optional)",
+    iconPlaceholder: "<svg>...</svg>",
+    iconPreview: "Preview",
+    nameLabel: "Name",
+    namePlaceholder: "e.g. Home & Cleaning",
+    selectPlaceholder: "Search categories…",
+    selectNotFound: 'No category matching "{query}"',
   },
 
   themeQuiz: {

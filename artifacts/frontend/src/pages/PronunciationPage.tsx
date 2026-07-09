@@ -22,6 +22,7 @@ import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useConfirm } from "../components/ConfirmProvider";
 
 type SortMode =
   | "level-asc"
@@ -198,6 +199,7 @@ function PronCard({
 
 export function PronunciationPage() {
   const { t } = useTranslation();
+  const confirm = useConfirm();
   const [, navigate] = useLocation();
   const { words, isLoading, updateWord, deleteWords } = useWords();
 
@@ -274,7 +276,9 @@ export function PronunciationPage() {
 
   async function handleBulkDelete() {
     if (
-      !window.confirm(t("common.confirmBulkDelete", { count: selectedIds.size }))
+      !(await confirm(
+        t("common.confirmBulkDelete", { count: selectedIds.size }),
+      ))
     )
       return;
     await deleteWords(Array.from(selectedIds));

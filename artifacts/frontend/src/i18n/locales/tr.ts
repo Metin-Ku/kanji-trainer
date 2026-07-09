@@ -10,6 +10,9 @@ export const tr: Messages = {
     loading: "…",
     words: "kelime",
     wordCount: "{count} kelime",
+    themeCount: "{count} tema",
+    deckCount: "{count} deste",
+    categoryCount: "{count} kategori",
     resultCount: "{count} sonuç",
     noResultsForQuery: '"{query}" için sonuç bulunamadı',
     selectAll: "Tümünü seç",
@@ -46,6 +49,7 @@ export const tr: Messages = {
     confirmDeleteWord: "Bu kelimeyi silmek istediğinize emin misiniz?",
     confirmBulkDelete: "{count} kelimeyi silmek istediğinize emin misiniz?",
     confirmDeleteExample: "Bu örneği silmek istiyor musunuz?",
+    confirmTitle: "Emin misiniz?",
     language: "Dil",
     english: "İngilizce",
     turkish: "Türkçe",
@@ -62,6 +66,8 @@ export const tr: Messages = {
     learnedPronunciation: "Öğrenilenler · Okunuş",
     learnedMeaning: "Öğrenilenler · Anlam",
     themes: "Temalar",
+    decks: "Desteler",
+    categories: "Kategoriler",
   },
 
   home: {
@@ -150,7 +156,8 @@ export const tr: Messages = {
 
   srs: {
     hub: {
-      title: "Aralıklı Tekrar",
+      // title: "Aralıklı Tekrar",
+      title: "Desteler",
       subtitle: "FSRS algoritması — Anki ile aynı mantık",
       filters: "Filtreler",
       jlptMin: "JLPT min",
@@ -233,6 +240,7 @@ export const tr: Messages = {
       examplesAndNotes: "Örnek cümleler ve notlar",
       relatedWords: "İlişkili kelimeler",
       relatedWordsHint: "(A ≡ B)",
+      categories: "Kategoriler",
       jlptLevel: "JLPT seviyesi",
       jlptOptional: "(isteğe bağlı)",
       date: "Tarih",
@@ -257,7 +265,7 @@ export const tr: Messages = {
   bulkImport: {
     title: "Toplu kelime ekle",
     instructions:
-      "HTML tablo yapıştırın. .word, .pronunciation, .meaning, .description ve .jlpt sınıflarından okunur.",
+      "HTML tablo yapıştırın. .word, .pronunciation, .meaning, .description, .jlpt, .categories ve .synonyms sınıflarından okunur.",
     placeholder: "<table>...</table>",
     pasteTable: "Tablo yapıştır",
     wordsDetected: "{count} kelime algılandı",
@@ -273,6 +281,8 @@ export const tr: Messages = {
       updated: "{count} kelime zaten vardı; alanlar güncellendi:",
     },
     descriptionTitle: "Açıklama",
+    categoriesBadge: "{count} kategori",
+    synonymsBadge: "{count}/{total} eş anlamlı",
   },
 
   settings: {
@@ -416,6 +426,8 @@ export const tr: Messages = {
     empty: "Henüz tema yok. Başlamak için bir tane oluşturun.",
     meta: "{words} kelime · {questions} soru",
     newTheme: "Yeni tema",
+    editTheme: "Temayı düzenle",
+    deleteTheme: "Temayı sil",
     nameLabel: "Tema adı",
     namePlaceholder: "ör. 洗濯",
     pickWords: "Kelime seç",
@@ -429,6 +441,36 @@ export const tr: Messages = {
     studyTitle: "{name} · Kelimeler",
     backToTheme: "Temaya dön",
     loadError: "Tema yüklenemedi.",
+    iconLabel: "İkon",
+    iconOptional: "(isteğe bağlı)",
+    iconPlaceholder: "<svg>...</svg>",
+    iconPreview: "Önizleme",
+  },
+
+  categories: {
+    title: "Kategoriler",
+    subtitle: "Kelimeleri konu gruplarına göre gezin",
+    empty: "Henüz kategori yok.",
+    wordCount: "{count} kelime",
+    noWordsInCategory: "Bu kategoride kelime yok.",
+    loadError: "Kategori yüklenemedi.",
+    view: {
+      row: "Liste görünümü",
+      grid2: "2 sütunlu grid",
+      grid3: "3 sütunlu grid",
+    },
+    newCategory: "Yeni kategori",
+    editCategory: "Kategoriyi düzenle",
+    deleteCategory: "Kategoriyi sil",
+    confirmDelete: "Bu kategori silinsin mi? Kelimeler silinmez.",
+    iconLabel: "İkon",
+    iconOptional: "(isteğe bağlı)",
+    iconPlaceholder: "<svg>...</svg>",
+    iconPreview: "Önizleme",
+    nameLabel: "Ad",
+    namePlaceholder: "ör. Ev・Çamaşır・Temizlik",
+    selectPlaceholder: "Kategori ara…",
+    selectNotFound: '"{query}" ile eşleşen kategori yok',
   },
 
   themeQuiz: {

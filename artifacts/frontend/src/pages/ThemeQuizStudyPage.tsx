@@ -5,6 +5,7 @@ import { useTheme } from "../hooks/useThemes";
 import { HintLinesDisplay } from "../components/HintLinesEditor";
 import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
 import { useTranslation } from "../i18n/I18nProvider";
+import { isDesktopStudyKeyboard, isEditableTarget } from "../lib/studyKeyboard";
 
 export function ThemeQuizStudyPage() {
   const { t } = useTranslation();
@@ -41,11 +42,25 @@ export function ThemeQuizStudyPage() {
     setHintsOpen(false);
   }, [questions.length]);
 
+  const handleKnow = useCallback(() => {
+    if (!q || revealed) return;
+    setSelectedKey(q.correctKey);
+    setCorrectCount((c) => c + 1);
+    setRevealed(true);
+    setHintsOpen(true);
+  }, [q, revealed]);
+
+  const handleDontKnow = useCallback(() => {
+    if (!q || revealed) return;
+    setSelectedKey(null);
+    setRevealed(true);
+    setHintsOpen(true);
+  }, [q, revealed]);
+
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (finished) return;
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (isEditableTarget(e.target)) return;
 
       if (e.code === "Space") {
         e.preventDefault();
@@ -61,6 +76,19 @@ export function ThemeQuizStudyPage() {
         return;
       }
 
+      if (isDesktopStudyKeyboard()) {
+        if (e.key === "ArrowRight") {
+          e.preventDefault();
+          handleKnow();
+          return;
+        }
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          handleDontKnow();
+          return;
+        }
+      }
+
       if (!q) return;
       if (q.type === "ab") {
         if (e.key === "a" || e.key === "A") setSelectedKey("a");
@@ -71,7 +99,7 @@ export function ThemeQuizStudyPage() {
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [finished, revealed, q, toggleHints, goNext]);
+  }, [finished, revealed, q, toggleHints, goNext, handleKnow, handleDontKnow]);
 
   function handleSubmit() {
     if (!q || !selectedKey) return;

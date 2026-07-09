@@ -145,6 +145,7 @@ export type ThemeQuizQuestionType = (typeof themeQuizQuestionTypes)[number];
 export const themesTable = pgTable("themes", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  iconSvg: text("icon_svg"),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
@@ -186,3 +187,41 @@ export const themeQuizQuestionsTable = pgTable("theme_quiz_questions", {
     .notNull()
     .default([]),
 });
+
+/** Per-day SRS study counts by deck (local calendar date YYYY-MM-DD). */
+export const studyActivityTable = pgTable(
+  "study_activity",
+  {
+    date: text("date").notNull(),
+    deckType: text("deck_type").notNull(),
+    count: integer("count").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.date, t.deckType] })],
+);
+
+export const categoriesTable = pgTable("categories", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  iconSvg: text("icon_svg"),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const categoryWordsTable = pgTable(
+  "category_words",
+  {
+    categoryId: integer("category_id")
+      .notNull()
+      .references(() => categoriesTable.id, { onDelete: "cascade" }),
+    wordId: integer("word_id")
+      .notNull()
+      .references(() => wordsTable.id, { onDelete: "cascade" }),
+    sortOrder: integer("sort_order").notNull().default(0),
+  },
+  (t) => [primaryKey({ columns: [t.categoryId, t.wordId] })],
+);
