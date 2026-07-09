@@ -18,6 +18,7 @@ import { clusterByKanji } from "../utils/kanjiCluster";
 import type { Word, WordUpdate } from "../types";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
+import { pageTitleLabelClass } from "../lib/japaneseScript";
 import { useConfirm } from "../components/ConfirmProvider";
 
 export type SortMode =
@@ -100,7 +101,6 @@ function toggleSort(
 }
 
 export type WordListPanelProps = {
-  hasKanji?: boolean;
   words: Word[];
   allWords: Word[];
   isLoading?: boolean;
@@ -124,7 +124,6 @@ export type WordListPanelProps = {
 };
 
 export function WordListPanel({
-  hasKanji,
   words,
   allWords,
   isLoading = false,
@@ -399,9 +398,7 @@ export function WordListPanel({
             >
               <ArrowLeft size={18} className="shrink-0" />
               {pageTitle && (
-                <span
-                  className={`${hasKanji ? "text-[14px]" : "text-[11px]"} font-semibold text-main-400 uppercase tracking-widest inline-flex items-center gap-1.5 min-w-0`}
-                >
+                <span className={pageTitleLabelClass(pageTitle)}>
                   {pageTitleIcon}
                   <span className="truncate">{pageTitle}</span>
                 </span>

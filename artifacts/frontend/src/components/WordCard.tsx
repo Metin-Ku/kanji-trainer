@@ -7,6 +7,7 @@ import { CategoryChip, CategoryWordsList } from "./CategoryWordsList";
 import { useCategories } from "../hooks/useCategories";
 import { Pencil, Trash2 } from "lucide-react";
 import { useTranslation } from "../i18n/I18nProvider";
+import { hasKanji } from "../lib/japaneseScript";
 
 interface Props {
   word: Word;
@@ -21,17 +22,6 @@ interface Props {
   isSelected?: boolean;
   onSelect?: () => void;
   allWords?: Word[];
-}
-
-function hasKanji(str: string): boolean {
-  return [...str].some((c) => {
-    const cp = c.codePointAt(0) ?? 0;
-    return (
-      (cp >= 0x4e00 && cp <= 0x9fff) ||
-      (cp >= 0x3400 && cp <= 0x4dbf) ||
-      (cp >= 0xf900 && cp <= 0xfaff)
-    );
-  });
 }
 
 export function WordCard({

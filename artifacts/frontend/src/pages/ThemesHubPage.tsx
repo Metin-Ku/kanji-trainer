@@ -54,24 +54,37 @@ export function ThemesHubPage() {
     <div className="min-h-dvh bg-app-bg">
       <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-app-border">
         <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
-          >
-            <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
-              {t("nav.themes")}
-            </span>
-          </button>
-          <h1 className="text-xl font-bold text-app-text mt-2">{t("themes.title")}</h1>
-          <p className="text-sm text-app-text-secondary mt-1">{t("themes.subtitle")}</p>
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
+            >
+              <ArrowLeft size={18} />
+              <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
+                {t("nav.themes")}
+              </span>
+            </button>
+            {/* For pixel perfection */}
+            <button className="invisible p-1.5 rounded-lg text-app-text-muted hover:bg-app-muted transition-colors disabled:opacity-30 shrink-0">
+              <Plus size={17} />
+            </button>
+          </div>
+
+          <h1 className="text-xl font-bold text-app-text mt-2">
+            {t("themes.title")}
+          </h1>
+          <p className="text-sm text-app-text-secondary mt-1">
+            {t("themes.subtitle")}
+          </p>
         </div>
 
         <div className="px-5 py-4 space-y-3 pb-24">
           {isLoading ? (
             <LoadingPlaceholder padding="lg" />
           ) : themes.length === 0 ? (
-            <p className="text-sm text-app-text-muted text-center py-16">{t("themes.empty")}</p>
+            <p className="text-sm text-app-text-muted text-center py-16">
+              {t("themes.empty")}
+            </p>
           ) : (
             themes.map((theme) => (
               <button
@@ -88,10 +101,16 @@ export function ThemesHubPage() {
                     nameClassName="font-bold text-lg text-app-text truncate"
                   />
                   <p className="text-xs text-app-text-muted mt-0.5">
-                    {t("themes.meta", { words: theme.wordCount, questions: theme.questionCount })}
+                    {t("themes.meta", {
+                      words: theme.wordCount,
+                      questions: theme.questionCount,
+                    })}
                   </p>
                 </div>
-                <ChevronRight size={18} className="text-app-text-muted shrink-0" />
+                <ChevronRight
+                  size={18}
+                  className="text-app-text-muted shrink-0"
+                />
               </button>
             ))
           )}
@@ -115,7 +134,9 @@ export function ThemesHubPage() {
         >
           <div className="bg-app-surface w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-app-border p-5 shadow-xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-app-text">{t("themes.newTheme")}</h2>
+              <h2 className="text-lg font-bold text-app-text">
+                {t("themes.newTheme")}
+              </h2>
               <button
                 type="button"
                 onClick={closeCreateModal}

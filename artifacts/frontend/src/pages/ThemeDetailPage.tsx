@@ -64,12 +64,6 @@ export function ThemeDetailPage() {
     if (e.target === backdropRef.current) closeEditModal();
   }
 
-  const hasKanji = /\p{Script=Han}/u.test(theme?.name ?? ""  );
-  // const hasKana = /\p{Script=Hiragana}|\p{Script=Katakana}/u.test(
-  //   theme?.name ?? "",
-  // );
-  // const hasLatin = /\p{Script=Latin}/u.test(theme?.name ?? "");
-
   async function handleSave() {
     if (!nameDraft.trim()) return;
     await updateTheme({
@@ -155,7 +149,6 @@ export function ThemeDetailPage() {
       <div className="max-w-2xl mx-auto pb-8 sm:border-l sm:border-r sm:border-app-border">
         <WordListPanel
           layout="page"
-          hasKanji={hasKanji}
           pageTitle={theme.name}
           pageTitleIcon={<CategoryIcon svg={theme.iconSvg} size={14} />}
           onBack={() => navigate("/themes")}

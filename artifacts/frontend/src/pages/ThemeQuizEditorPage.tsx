@@ -11,6 +11,7 @@ import {
   sanitizeThemeQuestions,
 } from "../lib/themeQuiz";
 import { useTranslation } from "../i18n/I18nProvider";
+import { pageTitleLabelClass } from "../lib/japaneseScript";
 
 export function ThemeQuizEditorPage() {
   const { t } = useTranslation();
@@ -66,34 +67,52 @@ export function ThemeQuizEditorPage() {
             className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
           >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
+            <span className={pageTitleLabelClass(theme.name)}>
               {theme.name}
             </span>
           </button>
-          <h1 className="text-xl font-bold text-app-text mt-2">{t("themeQuiz.editTitle")}</h1>
+          <h1 className="text-xl font-bold text-app-text mt-2">
+            {t("themeQuiz.editTitle")}
+          </h1>
         </div>
 
         <div className="px-5 py-4 space-y-4">
           {questions.map((q, qi) => (
-            <div key={qi} className="rounded-2xl border border-app-border bg-app-surface overflow-hidden">
+            <div
+              key={qi}
+              className="rounded-2xl border border-app-border bg-app-surface overflow-hidden"
+            >
               <div className="flex items-center gap-2 px-4 py-3 border-b border-app-border bg-app-muted/30">
-                <span className="text-sm font-bold text-app-text">#{qi + 1}</span>
+                <span className="text-sm font-bold text-app-text">
+                  #{qi + 1}
+                </span>
                 <select
                   value={q.type}
-                  onChange={(e) => setQuestionType(qi, e.target.value as "ab" | "four")}
+                  onChange={(e) =>
+                    setQuestionType(qi, e.target.value as "ab" | "four")
+                  }
                   className="text-xs rounded-lg border border-app-border-strong px-2 py-1 bg-app-surface"
                 >
                   <option value="ab">{t("themeQuiz.typeAb")}</option>
                   <option value="four">{t("themeQuiz.typeFour")}</option>
                 </select>
                 <div className="flex-1" />
-                <button type="button" onClick={() => setCollapsed((c) => ({ ...c, [qi]: !c[qi] }))}>
-                  {collapsed[qi] ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+                <button
+                  type="button"
+                  onClick={() => setCollapsed((c) => ({ ...c, [qi]: !c[qi] }))}
+                >
+                  {collapsed[qi] ? (
+                    <ChevronDown size={16} />
+                  ) : (
+                    <ChevronUp size={16} />
+                  )}
                 </button>
                 {questions.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => setQuestions((prev) => prev.filter((_, i) => i !== qi))}
+                    onClick={() =>
+                      setQuestions((prev) => prev.filter((_, i) => i !== qi))
+                    }
                     className="text-app-text-muted hover:text-red-500"
                   >
                     <Trash2 size={16} />
@@ -109,7 +128,9 @@ export function ThemeQuizEditorPage() {
                     </label>
                     <textarea
                       value={q.prompt}
-                      onChange={(e) => patchQuestion(qi, { prompt: e.target.value })}
+                      onChange={(e) =>
+                        patchQuestion(qi, { prompt: e.target.value })
+                      }
                       rows={4}
                       className="mt-1 w-full rounded-xl border border-app-border-strong px-3 py-2 text-sm font-medium text-app-text"
                       placeholder={t("themeQuiz.promptPlaceholder")}
@@ -126,9 +147,13 @@ export function ThemeQuizEditorPage() {
                           type="radio"
                           name={`correct-${qi}`}
                           checked={q.correctKey === choice.key}
-                          onChange={() => patchQuestion(qi, { correctKey: choice.key })}
+                          onChange={() =>
+                            patchQuestion(qi, { correctKey: choice.key })
+                          }
                         />
-                        <span className="text-sm font-bold w-6">{choice.key}.</span>
+                        <span className="text-sm font-bold w-6">
+                          {choice.key}.
+                        </span>
                         <input
                           value={choice.label}
                           onChange={(e) => {
@@ -155,7 +180,9 @@ export function ThemeQuizEditorPage() {
 
           <button
             type="button"
-            onClick={() => setQuestions((prev) => [...prev, emptyQuestion(prev.length)])}
+            onClick={() =>
+              setQuestions((prev) => [...prev, emptyQuestion(prev.length)])
+            }
             className="w-full py-2 rounded-xl border border-dashed border-app-border-strong text-sm font-semibold text-app-text-muted"
           >
             <Plus size={14} className="inline mr-1" />

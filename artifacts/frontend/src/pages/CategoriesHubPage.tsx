@@ -106,7 +106,7 @@ export function CategoriesHubPage() {
     <div className="min-h-dvh bg-app-bg">
       <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-app-border">
         <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 h-[29px]">
             <button
               onClick={() => navigate("/")}
               className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
