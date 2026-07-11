@@ -96,7 +96,7 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
   const shellClass =
     variant === "banner"
       ? `rounded-sm border px-4 py-5 border-main-200 bg-app-accent/40`
-      : `rounded-sm border px-4 py-5 mt-4 border-main-200 dark:border-main-900 bg-app-accent/40`;
+      : `rounded-sm border px-4 py-5 mt-3 border-main-200 dark:border-main-900 bg-app-accent/40`;
   // bg-[linear-gradient(135deg,color-mix(in_oklch,var(--main-400)_13%,transparent),color-mix(in_oklch,var(--main-600)_8%,transparent))]
   return (
     <div className={shellClass}>
