@@ -31,10 +31,16 @@ interface RefStroke {
 const CANVAS_HEIGHT = 216;
 const CANVAS_MAX_WIDTH = 360;
 
+let colorProbe: HTMLSpanElement | null = null;
+
 function getMainStrokeColor(): string {
-  const styles = getComputedStyle(document.documentElement);
-  const main600 = styles.getPropertyValue("--main-600").trim();
-  return main600 || "#e85d04";
+  if (!colorProbe) {
+    colorProbe = document.createElement("span");
+    colorProbe.style.display = "none";
+    document.body.appendChild(colorProbe);
+  }
+  colorProbe.style.color = "var(--main-600)";
+  return getComputedStyle(colorProbe).color || "rgb(232, 93, 4)";
 }
 
 function dist(a: Point, b: Point) {
@@ -70,7 +76,7 @@ export function KanjiPracticeModal({
 
   const drawingRef = useRef(false);
   const currentStrokeRef = useRef<Point[]>([]);
-  const completedStrokesRef = useRef<Point[][]>([]);
+  const visibleStrokesRef = useRef<Point[][]>([]);
   const refStrokesRef = useRef<RefStroke[]>([]);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -133,7 +139,7 @@ export function KanjiPracticeModal({
       ctx.restore();
     };
 
-    completedStrokesRef.current.forEach((pts) => {
+    visibleStrokesRef.current.forEach((pts) => {
       drawPolyline(pts, strokeColor, 4);
     });
 
@@ -160,7 +166,7 @@ export function KanjiPracticeModal({
   const resetPractice = useCallback(() => {
     setStrokeIndex(0);
     currentStrokeRef.current = [];
-    completedStrokesRef.current = [];
+    visibleStrokesRef.current = [];
     setFeedback("none");
     drawCanvas();
   }, [drawCanvas]);
@@ -184,20 +190,22 @@ export function KanjiPracticeModal({
       return;
     }
 
+    // Always keep drawn strokes on canvas; only remove the latest if validation fails.
+    visibleStrokesRef.current.push([...pts]);
+    currentStrokeRef.current = [];
+    drawCanvas();
+
     const ref = refStrokesRef.current[strokeIndex];
     if (!ref) return;
 
     if (validateStroke(pts, ref.path, undefined, ref.offsetX)) {
-      completedStrokesRef.current.push([...pts]);
-      currentStrokeRef.current = [];
       setFeedback("correct");
-      drawCanvas();
       clearFeedbackTimer();
       feedbackTimerRef.current = setTimeout(advanceAfterCorrect, 280);
     } else {
-      currentStrokeRef.current = [];
-      setFeedback("wrong");
+      visibleStrokesRef.current.pop();
       drawCanvas();
+      setFeedback("wrong");
       clearFeedbackTimer();
       feedbackTimerRef.current = setTimeout(() => setFeedback("none"), 450);
     }
@@ -216,7 +224,7 @@ export function KanjiPracticeModal({
   );
 
   const onPointerDown = (e: React.PointerEvent) => {
-    if (loading || error || feedback === "correct") return;
+    if (loading || error) return;
     e.stopPropagation();
     (e.currentTarget as HTMLCanvasElement).setPointerCapture(e.pointerId);
     drawingRef.current = true;
@@ -245,7 +253,7 @@ export function KanjiPracticeModal({
     setError(false);
     setStrokeIndex(0);
     currentStrokeRef.current = [];
-    completedStrokesRef.current = [];
+    visibleStrokesRef.current = [];
     setFeedback("none");
     refStrokesRef.current = [];
     setCombinedSvg(null);
