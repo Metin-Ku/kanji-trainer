@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { X, RotateCcw } from "lucide-react";
 import { useTranslation } from "../i18n/I18nProvider";
 import { LoadingSpinner } from "./LoadingSpinner";
@@ -34,7 +34,7 @@ const CANVAS_MAX_WIDTH = 360;
 function getMainStrokeColor(): string {
   const styles = getComputedStyle(document.documentElement);
   const main600 = styles.getPropertyValue("--main-600").trim();
-  return main600 || "#2563eb";
+  return main600 || "#e85d04";
 }
 
 function dist(a: Point, b: Point) {
@@ -61,14 +61,12 @@ export function KanjiPracticeModal({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [feedback, setFeedback] = useState<Feedback>("none");
-  const [ready, setReady] = useState(false);
   const [totalStrokes, setTotalStrokes] = useState(0);
   const [combinedSvg, setCombinedSvg] = useState<string | null>(null);
 
   const svgRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
-  const areaRef = useRef<HTMLDivElement>(null);
 
   const drawingRef = useRef(false);
   const currentStrokeRef = useRef<Point[]>([]);
@@ -91,6 +89,16 @@ export function KanjiPracticeModal({
     }
   };
 
+  const toCanvasPoint = useCallback(
+    (clientX: number, clientY: number): Point | null => {
+      const canvas = canvasRef.current;
+      if (!canvas) return null;
+      const rect = canvas.getBoundingClientRect();
+      return clientToViewBox(clientX, clientY, rect, viewWidth, viewHeight);
+    },
+    [viewWidth, viewHeight],
+  );
+
   const drawCanvas = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -101,19 +109,27 @@ export function KanjiPracticeModal({
     const strokeColor = getMainStrokeColor();
 
     const drawPolyline = (pts: Point[], color: string, width: number, alpha = 1) => {
-      if (pts.length < 2) return;
+      if (pts.length === 0) return;
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.strokeStyle = color;
+      ctx.fillStyle = color;
       ctx.lineWidth = width;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      ctx.beginPath();
-      ctx.moveTo(pts[0].x * drawScale.x, pts[0].y * drawScale.y);
-      for (let i = 1; i < pts.length; i++) {
-        ctx.lineTo(pts[i].x * drawScale.x, pts[i].y * drawScale.y);
+
+      if (pts.length === 1) {
+        ctx.beginPath();
+        ctx.arc(pts[0].x * drawScale.x, pts[0].y * drawScale.y, width / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x * drawScale.x, pts[0].y * drawScale.y);
+        for (let i = 1; i < pts.length; i++) {
+          ctx.lineTo(pts[i].x * drawScale.x, pts[i].y * drawScale.y);
+        }
+        ctx.stroke();
       }
-      ctx.stroke();
       ctx.restore();
     };
 
@@ -122,8 +138,8 @@ export function KanjiPracticeModal({
     });
 
     const cur = currentStrokeRef.current;
-    if (cur.length >= 2) {
-      drawPolyline(cur, strokeColor, 4, 0.85);
+    if (cur.length > 0) {
+      drawPolyline(cur, strokeColor, 4, 0.9);
     }
   }, [canvasWidth, drawScale.x, drawScale.y]);
 
@@ -139,7 +155,6 @@ export function KanjiPracticeModal({
     });
     refStrokesRef.current = strokes;
     setTotalStrokes(strokes.length);
-    setReady(strokes.length > 0);
   }, []);
 
   const resetPractice = useCallback(() => {
@@ -190,49 +205,35 @@ export function KanjiPracticeModal({
 
   const addPoint = useCallback(
     (clientX: number, clientY: number) => {
-      const area = areaRef.current;
-      if (!area) return;
-      const rect = area.getBoundingClientRect();
-      const pt = clientToViewBox(clientX, clientY, rect, viewWidth, viewHeight);
+      const pt = toCanvasPoint(clientX, clientY);
+      if (!pt) return;
       const last = currentStrokeRef.current[currentStrokeRef.current.length - 1];
       if (last && dist(last, pt) < 1.2) return;
       currentStrokeRef.current.push(pt);
       drawCanvas();
     },
-    [drawCanvas, viewWidth, viewHeight],
+    [drawCanvas, toCanvasPoint],
   );
 
-  const stopModalTouch = (e: React.SyntheticEvent) => {
-    e.stopPropagation();
-    if ("cancelable" in e && e.cancelable) e.preventDefault();
-  };
-
   const onPointerDown = (e: React.PointerEvent) => {
-    if (loading || error || !ready || feedback === "correct") return;
-    e.preventDefault();
+    if (loading || error || feedback === "correct") return;
     e.stopPropagation();
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    (e.currentTarget as HTMLCanvasElement).setPointerCapture(e.pointerId);
     drawingRef.current = true;
     currentStrokeRef.current = [];
-    const area = areaRef.current;
-    if (!area) return;
-    const rect = area.getBoundingClientRect();
-    currentStrokeRef.current.push(
-      clientToViewBox(e.clientX, e.clientY, rect, viewWidth, viewHeight),
-    );
+    const pt = toCanvasPoint(e.clientX, e.clientY);
+    if (pt) currentStrokeRef.current.push(pt);
     drawCanvas();
   };
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!drawingRef.current) return;
-    e.preventDefault();
     e.stopPropagation();
     addPoint(e.clientX, e.clientY);
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
     if (!drawingRef.current) return;
-    e.preventDefault();
     e.stopPropagation();
     drawingRef.current = false;
     handleStrokeEnd();
@@ -242,7 +243,6 @@ export function KanjiPracticeModal({
     if (chars.length === 0) return;
     setLoading(true);
     setError(false);
-    setReady(false);
     setStrokeIndex(0);
     currentStrokeRef.current = [];
     completedStrokesRef.current = [];
@@ -257,15 +257,14 @@ export function KanjiPracticeModal({
       .finally(() => setLoading(false));
   }, [kanji]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!combinedSvg) return;
-    const t = setTimeout(collectRefStrokes, 0);
-    return () => clearTimeout(t);
+    collectRefStrokes();
   }, [combinedSvg, collectRefStrokes]);
 
   useEffect(() => {
     drawCanvas();
-  }, [drawCanvas, strokeIndex, ready]);
+  }, [drawCanvas, loading, error, combinedSvg]);
 
   useEffect(() => () => clearFeedbackTimer(), []);
 
@@ -300,9 +299,6 @@ export function KanjiPracticeModal({
       }
       style={variant === "sheet" ? undefined : { alignItems: "center" }}
       onClick={handleBackdropClick}
-      onTouchStart={stopModalTouch}
-      onTouchMove={stopModalTouch}
-      onTouchEnd={stopModalTouch}
     >
       <div
         className="bg-app-surface shadow-2xl overflow-hidden"
@@ -317,17 +313,16 @@ export function KanjiPracticeModal({
               }
             : { width: 296, borderRadius: 16 }
         }
-        onTouchStart={stopModalTouch}
-        onTouchMove={stopModalTouch}
-        onTouchEnd={stopModalTouch}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
           <p className="text-[11px] font-semibold text-app-text-muted uppercase tracking-widest">
             {t("kanjiPractice.title")}
           </p>
           <div className="flex items-center gap-0.5">
-            {ready && !loading && (
+            {!loading && !error && totalStrokes > 0 && (
               <button
+                type="button"
                 onClick={resetPractice}
                 className="p-1.5 rounded-lg hover:bg-app-muted text-app-text-muted transition-colors"
                 title={t("kanjiPractice.reset")}
@@ -336,6 +331,7 @@ export function KanjiPracticeModal({
               </button>
             )}
             <button
+              type="button"
               onClick={onClose}
               className="p-1.5 rounded-lg hover:bg-app-muted text-app-text-muted transition-colors"
             >
@@ -355,7 +351,6 @@ export function KanjiPracticeModal({
         )}
 
         <div
-          ref={areaRef}
           className="mx-4 mb-4 rounded-xl flex items-center justify-center relative"
           style={{
             height: 248,
@@ -379,7 +374,7 @@ export function KanjiPracticeModal({
               style={{
                 width: canvasWidth,
                 height: CANVAS_HEIGHT,
-                cursor: ready ? "crosshair" : "default",
+                cursor: "crosshair",
                 touchAction: "none",
               }}
               onPointerDown={onPointerDown}
@@ -390,15 +385,16 @@ export function KanjiPracticeModal({
           )}
         </div>
 
-        {/* Hidden reference SVG for stroke validation only */}
+        {/* Hidden reference SVG — off-screen but sized so path geometry works */}
         <div
           ref={svgRef}
           aria-hidden
           style={{
-            position: "absolute",
-            width: 0,
-            height: 0,
-            overflow: "hidden",
+            position: "fixed",
+            left: -9999,
+            top: 0,
+            width: canvasWidth,
+            height: CANVAS_HEIGHT,
             visibility: "hidden",
             pointerEvents: "none",
           }}
