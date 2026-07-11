@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ArrowLeft, Dices, X } from "lucide-react";
 import { KanjiStrokeModal } from "../components/KanjiStrokeModal";
+import { KanjiPracticeModal } from "../components/KanjiPracticeModal";
 import { useLocation } from "wouter";
 import { getStudySession, StudyMode } from "../store/studyStore";
 import { Word } from "../types";
 import { themeVars } from "../theme";
 import { apiUrl } from "../lib/apiOrigin";
 import { useTranslation } from "../i18n/I18nProvider";
+import { hasKanji } from "../lib/japaneseScript";
 const LONG_PRESS_MS = 320;
 const LEVEL_STEP_PX = 30;
 
@@ -50,6 +52,7 @@ export function StudyPage() {
   const [index, setIndex] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const [showStroke, setShowStroke] = useState(false);
+  const [showPractice, setShowPractice] = useState(false);
   const [dragX, setDragX] = useState(0);
   const [isFlying, setIsFlying] = useState(false);
   const [done, setDone] = useState(false);
@@ -63,6 +66,7 @@ export function StudyPage() {
   const wordRef = useRef<HTMLParagraphElement>(null);
   const touchTargetRef = useRef<EventTarget | null>(null);
   const showStrokeRef = useRef(false);
+  const showPracticeRef = useRef(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const isDragging = useRef(false);
   const flyingRef = useRef(false);
@@ -105,7 +109,9 @@ export function StudyPage() {
     }
     setShowDetails(false);
     showStrokeRef.current = false;
+    showPracticeRef.current = false;
     setShowStroke(false);
+    setShowPractice(false);
     setDragX(0);
     setIsFlying(false);
     flyingRef.current = false;
@@ -224,15 +230,19 @@ export function StudyPage() {
         setIsFlying(true);
         setTimeout(() => advanceCard("left"), 195);
       } else if (!wasDragging && Math.abs(dx) < 12 && Math.abs(dy) < 12) {
-        if (showStrokeRef.current) {
-          // Stroke modal açıkken dışarıya dokunuldu — sadece modalı kapat, detay açma
+        if (showStrokeRef.current || showPracticeRef.current) {
           setDragX(0);
         } else {
           const tappedOnWord = wordRef.current && wordRef.current.contains(touchTargetRef.current as Node);
           const w = wordsRef.current[indexRef.current];
           if (tappedOnWord && w?.kanji) {
-            showStrokeRef.current = true;
-            setShowStroke(true);
+            if ((mode === "okunuş" || mode === "anlam") && hasKanji(w.kanji)) {
+              showPracticeRef.current = true;
+              setShowPractice(true);
+            } else {
+              showStrokeRef.current = true;
+              setShowStroke(true);
+            }
           } else {
             setShowDetails(v => !v);
           }
@@ -260,12 +270,23 @@ export function StudyPage() {
     setIndex(0);
     setShowDetails(false);
     showStrokeRef.current = false;
+    showPracticeRef.current = false;
     setShowStroke(false);
+    setShowPractice(false);
     setDragX(0);
     setIsFlying(false);
     setDone(false);
     setIsLevelMode(false);
   }
+
+  const handlePracticeSuccess = useCallback(() => {
+    showPracticeRef.current = false;
+    setShowPractice(false);
+    flyDirectionRef.current = "right";
+    flyingRef.current = true;
+    setIsFlying(true);
+    setTimeout(() => advanceCard("right"), 195);
+  }, []);
 
   const word = words[index];
 
@@ -329,6 +350,9 @@ export function StudyPage() {
     : "translateX(0) rotate(0deg)";
   const cardTransition = isFlying ? "transform 0.18s ease" : dragX !== 0 ? "none" : "transform 0.22s ease";
 
+  const practiceAvailable =
+    (mode === "okunuş" || mode === "anlam") && !!word.kanji && hasKanji(word.kanji);
+
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:border-l sm:border-r sm:border-app-border">
       <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
@@ -352,7 +376,10 @@ export function StudyPage() {
           >
             <p
               ref={wordRef}
-              className="font-bold text-app-text text-center leading-tight"
+              className={[
+                "font-bold text-app-text text-center leading-tight",
+                practiceAvailable ? "cursor-pointer active:opacity-80 transition-opacity" : "",
+              ].join(" ")}
               style={{ fontSize: mode === "anlam" ? "1.4rem" : "3rem" }}
             >
               {getPrimary(word, mode, t("common.emDash"))}
@@ -428,6 +455,15 @@ export function StudyPage() {
             )}
           </div>
         </div>
+
+        {showPractice && word.kanji && (
+          <KanjiPracticeModal
+            kanji={word.kanji}
+            onClose={() => { showPracticeRef.current = false; setShowPractice(false); }}
+            onSuccess={handlePracticeSuccess}
+            variant="sheet"
+          />
+        )}
 
         {showStroke && word.kanji && (
           <KanjiStrokeModal

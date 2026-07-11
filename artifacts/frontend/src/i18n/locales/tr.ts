@@ -393,6 +393,15 @@ export const tr: Messages = {
     svgNotFound: "SVG bulunamadı",
   },
 
+  kanjiPractice: {
+    title: "書 · Yaz",
+    hint: "Her vuruşu sırayla çiz",
+    strokeProgress: "Vuruş {current} / {total}",
+    reset: "Sıfırla",
+    tryAgain: "Tekrar dene",
+    correct: "Doğru!",
+  },
+
   levelChart: {
     title: "Öğrenme seviyesi",
     starAtLevel5Hint: "Seviye 5'te yıldız atanabilir",

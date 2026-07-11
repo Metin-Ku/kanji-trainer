@@ -391,6 +391,15 @@ export const en = {
     svgNotFound: "SVG not found",
   },
 
+  kanjiPractice: {
+    title: "書 · Write",
+    hint: "Draw each stroke in order on the canvas",
+    strokeProgress: "Stroke {current} / {total}",
+    reset: "Reset",
+    tryAgain: "Try again",
+    correct: "Correct!",
+  },
+
   levelChart: {
     title: "Learning level",
     starAtLevel5Hint: "Star can be assigned at level 5",
