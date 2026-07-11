@@ -404,7 +404,12 @@ export function WordListPanel({
                 </span>
               )}
             </button>
-            <div className="flex items-center gap-2 ml-auto mr-2">{toolbarExtra}</div>
+            <div className="flex items-center gap-2 ml-auto mr-2">
+              {toolbarExtra}
+            </div>
+            <span className="text-sm text-app-text-muted p-1.5 font-medium tabular-nums invisible">
+              5
+            </span>
             {diceButton}
           </div>
         )}

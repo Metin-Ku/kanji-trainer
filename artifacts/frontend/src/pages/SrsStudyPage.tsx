@@ -48,25 +48,25 @@ const RATING_KEYS: {
     rating: 1,
     labelKey: "again",
     key: "again",
-    className: "bg-app-muted hover:bg-red-600",
+    className: "bg-app-muted hover:bg-red-600 hover:text-red-100",
   },
   {
     rating: 2,
     labelKey: "hard",
     key: "hard",
-    className: "bg-app-muted hover:bg-main-800",
+    className: "bg-app-muted hover:bg-yellow-500/80 hover:text-yellow-100",
   },
   {
     rating: 3,
     labelKey: "good",
     key: "good",
-    className: "bg-app-muted hover:bg-main-600",
+    className: "bg-app-muted hover:bg-main-600/80 hover:text-main-100",
   },
   {
     rating: 4,
     labelKey: "easy",
     key: "easy",
-    className: "bg-app-muted hover:bg-green-500",
+    className: "bg-app-muted hover:bg-green-500 hover:text-green-100",
   },
 ];
 
