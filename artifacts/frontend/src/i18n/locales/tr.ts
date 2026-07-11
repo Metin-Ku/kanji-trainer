@@ -394,8 +394,8 @@ export const tr: Messages = {
   },
 
   kanjiPractice: {
-    title: "書 · Yaz",
-    hint: "Her vuruşu sırayla çiz",
+    title: "Kelime",
+    hint: "Kelimeyi görmeden yaz — her vuruşu sırayla çiz",
     strokeProgress: "Vuruş {current} / {total}",
     reset: "Sıfırla",
     tryAgain: "Tekrar dene",

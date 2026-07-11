@@ -392,8 +392,8 @@ export const en = {
   },
 
   kanjiPractice: {
-    title: "書 · Write",
-    hint: "Draw each stroke in order on the canvas",
+    title: "Word",
+    hint: "Write from memory — draw each stroke in order",
     strokeProgress: "Stroke {current} / {total}",
     reset: "Reset",
     tryAgain: "Try again",

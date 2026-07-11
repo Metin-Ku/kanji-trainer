@@ -138,7 +138,7 @@ export function StudyPage() {
     if (!el) return;
 
     function onTouchStart(e: TouchEvent) {
-      if (flyingRef.current) return;
+      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current) return;
       const t = e.touches[0];
       touchStart.current = { x: t.clientX, y: t.clientY };
       touchTargetRef.current = e.target;
@@ -164,7 +164,8 @@ export function StudyPage() {
     }
 
     function onTouchMove(e: TouchEvent) {
-      if (flyingRef.current || !touchStart.current) return;
+      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current) return;
+      if (!touchStart.current) return;
       const t = e.touches[0];
       const dx = t.clientX - touchStart.current.x;
       const dy = t.clientY - touchStart.current.y;
@@ -197,7 +198,8 @@ export function StudyPage() {
     }
 
     function onTouchEnd(e: TouchEvent) {
-      if (flyingRef.current || !touchStart.current) return;
+      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current) return;
+      if (!touchStart.current) return;
       clearLongPress();
 
       if (isLevelModeRef.current) {
@@ -455,24 +457,24 @@ export function StudyPage() {
             )}
           </div>
         </div>
-
-        {showPractice && word.kanji && (
-          <KanjiPracticeModal
-            kanji={word.kanji}
-            onClose={() => { showPracticeRef.current = false; setShowPractice(false); }}
-            onSuccess={handlePracticeSuccess}
-            variant="sheet"
-          />
-        )}
-
-        {showStroke && word.kanji && (
-          <KanjiStrokeModal
-            kanji={word.kanji}
-            onClose={() => { showStrokeRef.current = false; setShowStroke(false); }}
-            variant="sheet"
-          />
-        )}
       </div>
+
+      {showPractice && word.kanji && (
+        <KanjiPracticeModal
+          kanji={word.kanji}
+          onClose={() => { showPracticeRef.current = false; setShowPractice(false); }}
+          onSuccess={handlePracticeSuccess}
+          variant="sheet"
+        />
+      )}
+
+      {showStroke && word.kanji && (
+        <KanjiStrokeModal
+          kanji={word.kanji}
+          onClose={() => { showStrokeRef.current = false; setShowStroke(false); }}
+          variant="sheet"
+        />
+      )}
     </div>
   );
 }

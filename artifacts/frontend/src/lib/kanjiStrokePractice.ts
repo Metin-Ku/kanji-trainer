@@ -89,14 +89,16 @@ function scoreStroke(userPoints: Point[], refPoints: Point[], tolerance: number)
   return checkOrientation(userFwd) || checkOrientation(userRev);
 }
 
-/** Map client coordinates to KanjiVG viewBox (0–109). */
+/** Map client coordinates to viewBox space. */
 export function clientToViewBox(
   clientX: number,
   clientY: number,
   rect: DOMRect,
+  viewWidth = VIEW_SIZE,
+  viewHeight = VIEW_SIZE,
 ): Point {
-  const x = ((clientX - rect.left) / rect.width) * VIEW_SIZE;
-  const y = ((clientY - rect.top) / rect.height) * VIEW_SIZE;
+  const x = ((clientX - rect.left) / rect.width) * viewWidth;
+  const y = ((clientY - rect.top) / rect.height) * viewHeight;
   return { x, y };
 }
 
@@ -104,8 +106,12 @@ export function validateStroke(
   userPoints: Point[],
   refPath: SVGPathElement,
   tolerance = DEFAULT_TOLERANCE,
+  offsetX = 0,
 ): boolean {
-  const refPoints = sampleSvgPath(refPath, 16);
+  const refPoints = sampleSvgPath(refPath, 16).map((p) => ({
+    x: p.x + offsetX,
+    y: p.y,
+  }));
   if (refPoints.length < 2) return false;
   return scoreStroke(userPoints, refPoints, tolerance);
 }

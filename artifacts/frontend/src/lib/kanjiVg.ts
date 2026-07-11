@@ -29,3 +29,29 @@ export async function fetchKanjiSvg(char: string): Promise<string> {
   const text = await r.text();
   return cleanKanjiSvg(text);
 }
+
+const CHAR_VIEW = 109;
+
+/** Combine per-character KanjiVG SVGs side-by-side for whole-word practice. */
+export function buildCombinedStrokeSvg(charSvgs: string[]): string {
+  const groups = charSvgs
+    .map((svg, i) => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svg, "image/svg+xml");
+      const strokeGroup = doc.querySelector('[id*="StrokePaths"]');
+      if (!strokeGroup) return "";
+      const paths = Array.from(strokeGroup.querySelectorAll("path"))
+        .map((p) => {
+          const d = p.getAttribute("d");
+          return d ? `<path d="${d}" />` : "";
+        })
+        .join("");
+      return `<g transform="translate(${i * CHAR_VIEW}, 0)">${paths}</g>`;
+    })
+    .join("");
+
+  const w = CHAR_VIEW * charSvgs.length;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${CHAR_VIEW}">${groups}</svg>`;
+}
+
+export const KANJI_CHAR_VIEW = CHAR_VIEW;
