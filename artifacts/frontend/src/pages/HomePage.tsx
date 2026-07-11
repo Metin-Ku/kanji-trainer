@@ -172,7 +172,7 @@ export function HomePage() {
         {!isSearching && (
           <>
             <DailyGoalCard />
-            <div className="mt-4">
+            <div className="mt-3">
               <MiniHeatmapStrip activityByDate={activityByDate} />
             </div>
           </>
