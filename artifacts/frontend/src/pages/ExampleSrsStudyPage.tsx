@@ -81,7 +81,8 @@ export function ExampleSrsStudyPage() {
     setReviewing(true);
     try {
       await reviewSrsExample(current.card.id, correct);
-      if (correct) recordStudy.mutate({ deck: "example", date: localDateKey() });
+      if (correct)
+        recordStudy.mutate({ deck: "example", date: localDateKey() });
       queryClient.invalidateQueries({ queryKey: ["trouble-words"] });
     } catch {
       alert(t("srs.study.saveFailed"));
@@ -221,19 +222,23 @@ export function ExampleSrsStudyPage() {
     );
   }
 
-  function handleSaveCard(data: WordUpdate & {
-    relatedWordIds: number[];
-    categoryIds: number[];
-  }) {
+  function handleSaveCard(
+    data: WordUpdate & {
+      relatedWordIds: number[];
+      categoryIds: number[];
+    },
+  ) {
     const current = items[index];
     if (current) handleSaveWord(current.word.id, data);
     setShowCardDetails(false);
   }
 
-  function handleSaveSheet(data: WordUpdate & {
-    relatedWordIds: number[];
-    categoryIds: number[];
-  }) {
+  function handleSaveSheet(
+    data: WordUpdate & {
+      relatedWordIds: number[];
+      categoryIds: number[];
+    },
+  ) {
     if (sheetWord) handleSaveWord(sheetWord.id, data);
     setSheetWord(null);
   }
@@ -276,7 +281,9 @@ export function ExampleSrsStudyPage() {
             ★
           </div>
           <div>
-            <p className="text-2xl font-bold text-app-text mb-1">{t("common.completed")}</p>
+            <p className="text-2xl font-bold text-app-text mb-1">
+              {t("common.completed")}
+            </p>
             <p className="text-sm text-app-text-muted">
               {t("srs.study.examplesComplete")}
             </p>
@@ -332,7 +339,10 @@ export function ExampleSrsStudyPage() {
             <Pencil size={14} />
           </button>
           <span className="text-sm text-app-text-muted font-medium tabular-nums">
-            {t("common.cardProgress", { current: index + 1, total: items.length })}
+            {t("common.cardProgress", {
+              current: index + 1,
+              total: items.length,
+            })}
           </span>
         </div>
       </div>
@@ -356,14 +366,20 @@ export function ExampleSrsStudyPage() {
               />
               {examples.length > 1 && (
                 <p className="text-xs text-app-text-muted mt-3">
-                  {t("common.exampleProgress", { current: (cursor % examples.length) + 1, total: examples.length })}
+                  {t("common.exampleProgress", {
+                    current: (cursor % examples.length) + 1,
+                    total: examples.length,
+                  })}
                 </p>
               )}
             </div>
 
             <div className="space-y-2 text-center">
               {currentEx.hints.map((hint, i) => (
-                <p key={i} className="text-base text-app-text-secondary leading-relaxed">
+                <p
+                  key={i}
+                  className="text-base text-app-text-secondary leading-relaxed"
+                >
                   {renderHintParts(hint.text, hint.highlights).map((p, j) =>
                     p.highlight ? (
                       <span
@@ -394,20 +410,19 @@ export function ExampleSrsStudyPage() {
                 placeholder={settings.srsRomajiInput ? "答え" : ""}
                 // className={`w-full rounded-xl border border-app-border-strong bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 disabled:opacity-60 ${answerPhase === "revealed" ? "border-red-600" : ""} ${answerPhase === "correct" ? "border-green-500" : ""}`}
                 className={`
-       w-full rounded-xl border border-app-border-strong bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text 
-          outline-none
-          transition-all
-          duration-150
-          ${
-            focused
-              ? answerPhase === "revealed"
-                ? "border-transparent ring-2 ring-red-600 ring-inset"
-                : answerPhase === "correct"
-                  ? "border-transparent ring-2 ring-green-500 ring-inset"
-                  : "border-transparent ring-2 ring-main-400 ring-inset"
-              : ""
-          }
-          `}
+                  w-full rounded-xl border bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text
+                  outline-none
+                  transition-all duration-150
+                  ${
+                    focused
+                      ? answerPhase === "revealed"
+                        ? "border-red-600 ring-2 ring-red-600 ring-inset ring-offset-0"
+                        : answerPhase === "correct"
+                          ? "border-green-500 ring-2 ring-green-500 ring-inset ring-offset-0"
+                          : "border-main-400 ring-2 ring-main-400 ring-inset ring-offset-0"
+                      : "border-app-border-strong"
+                  }
+                `}
                 autoComplete="off"
                 autoFocus
               />
@@ -430,7 +445,9 @@ export function ExampleSrsStudyPage() {
                 disabled={reviewing}
                 className="w-full py-3 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white disabled:opacity-50"
               >
-                {answerPhase === "typing" ? t("common.check") : t("common.continue")}
+                {answerPhase === "typing"
+                  ? t("common.check")
+                  : t("common.continue")}
               </button>
             </div>
           </>

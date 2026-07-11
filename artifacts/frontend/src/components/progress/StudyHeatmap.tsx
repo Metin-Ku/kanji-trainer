@@ -555,7 +555,7 @@ export function StudyHeatmap({
   return (
     <div className={`min-w-0 w-full max-w-full ${className}`.trim()}>
       <div
-        className={`min-h-[1.25rem] mb-2 text-app-text-secondary tabular-nums ${
+        className={`min-h-[1.25rem] text-app-text-secondary tabular-nums ${
           compact ? "text-[10px]" : "text-xs"
         }`}
       >

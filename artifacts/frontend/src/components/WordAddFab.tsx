@@ -26,10 +26,10 @@ export function WordAddFab({ onNewWord, onBulkImport }: Props) {
   }, [fabOpen]);
 
   return (
-    <div ref={fabRef} className="fixed right-[max(1rem,calc((100vw-42rem)/2+1rem))] z-40" style={{ bottom: 32 }}>
+    <div ref={fabRef} className="fixed right-[max(1rem,calc((100vw-42rem)/2+1.2rem))] z-40" style={{ bottom: 32 }}>
       <div
         className={`flex items-center rounded-full w-[52px] transition-[height] duration-140 ease-in-out overflow-hidden 
-            shadow-[0_4px_100px] shadow-main-600 bg-linear-to-b 160deg from-main-400 to-main-600 flex-col-reverse ${fabOpen ? "h-[158px]" : "h-[52px]"}`}
+            shadow-main-600 bg-linear-to-b 160deg from-main-400 to-main-600 flex-col-reverse ${fabOpen ? "h-[158px]" : "h-[52px]"}`}
       >
         <button
           onClick={() => setFabOpen((v) => !v)}
