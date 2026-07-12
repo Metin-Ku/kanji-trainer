@@ -11,6 +11,7 @@ import {
 import {
   clientToViewBox,
   type Point,
+  sampleSvgPath,
   validateStroke,
 } from "../lib/kanjiStrokePractice";
 
@@ -24,8 +25,7 @@ interface Props {
 type Feedback = "none" | "correct" | "wrong";
 
 interface RefStroke {
-  path: SVGPathElement;
-  offsetX: number;
+  points: Point[];
 }
 
 const CANVAS_HEIGHT = 216;
@@ -151,14 +151,26 @@ export function KanjiPracticeModal({
 
   const collectRefStrokes = useCallback(() => {
     if (!svgRef.current) return;
-    const groups = svgRef.current.querySelectorAll("g");
+    const svgEl = svgRef.current.querySelector("svg");
+    if (!svgEl) return;
+
     const strokes: RefStroke[] = [];
-    groups.forEach((g, charIdx) => {
-      const paths = Array.from(g.querySelectorAll("path")) as SVGPathElement[];
+    const groups = svgEl.querySelectorAll(":scope > g[data-char]");
+
+    groups.forEach((g) => {
+      const charIdx = Number(g.getAttribute("data-char") ?? "0");
+      const offsetX = charIdx * KANJI_CHAR_VIEW;
+      const paths = Array.from(g.querySelectorAll(":scope > path")) as SVGPathElement[];
+
       paths.forEach((path) => {
-        strokes.push({ path, offsetX: charIdx * KANJI_CHAR_VIEW });
+        const sampled = sampleSvgPath(path, 24);
+        if (sampled.length < 2) return;
+        strokes.push({
+          points: sampled.map((p) => ({ x: p.x + offsetX, y: p.y })),
+        });
       });
     });
+
     refStrokesRef.current = strokes;
     setTotalStrokes(strokes.length);
   }, []);
@@ -174,7 +186,9 @@ export function KanjiPracticeModal({
   const advanceAfterCorrect = useCallback(() => {
     const nextStroke = strokeIndex + 1;
     if (nextStroke >= refStrokesRef.current.length) {
-      onSuccess();
+      setFeedback("correct");
+      clearFeedbackTimer();
+      feedbackTimerRef.current = setTimeout(onSuccess, 500);
       return;
     }
     setStrokeIndex(nextStroke);
@@ -198,7 +212,7 @@ export function KanjiPracticeModal({
     const ref = refStrokesRef.current[strokeIndex];
     if (!ref) return;
 
-    if (validateStroke(pts, ref.path, undefined, ref.offsetX)) {
+    if (validateStroke(pts, ref.points)) {
       setFeedback("correct");
       clearFeedbackTimer();
       feedbackTimerRef.current = setTimeout(advanceAfterCorrect, 280);
@@ -267,7 +281,10 @@ export function KanjiPracticeModal({
 
   useLayoutEffect(() => {
     if (!combinedSvg) return;
-    collectRefStrokes();
+    const id = requestAnimationFrame(() => {
+      collectRefStrokes();
+    });
+    return () => cancelAnimationFrame(id);
   }, [combinedSvg, collectRefStrokes]);
 
   useEffect(() => {
@@ -399,12 +416,14 @@ export function KanjiPracticeModal({
           aria-hidden
           style={{
             position: "fixed",
-            left: -9999,
+            left: 0,
             top: 0,
-            width: canvasWidth,
-            height: CANVAS_HEIGHT,
-            visibility: "hidden",
+            width: viewWidth,
+            height: viewHeight,
+            opacity: 0,
             pointerEvents: "none",
+            overflow: "hidden",
+            zIndex: -1,
           }}
           dangerouslySetInnerHTML={combinedSvg ? { __html: combinedSvg } : undefined}
         />
@@ -414,12 +433,14 @@ export function KanjiPracticeModal({
             {t("kanjiPractice.tryAgain")}
           </p>
         )}
-        {feedback === "correct" && strokeIndex < totalStrokes - 1 && (
+        {feedback === "correct" && (
           <p
             className="text-center text-xs font-medium pb-4 -mt-2"
             style={{ color: "var(--main-600)" }}
           >
-            {t("kanjiPractice.correct")}
+            {strokeIndex >= totalStrokes - 1 && totalStrokes > 0
+              ? t("kanjiPractice.wordCorrect")
+              : t("kanjiPractice.correct")}
           </p>
         )}
       </div>

@@ -400,6 +400,7 @@ export const tr: Messages = {
     reset: "Sıfırla",
     tryAgain: "Tekrar dene",
     correct: "Doğru!",
+    wordCorrect: "Doğru bildin!",
   },
 
   levelChart: {

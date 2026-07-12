@@ -43,15 +43,15 @@ export function buildCombinedStrokeSvg(charSvgs: string[]): string {
       const paths = Array.from(strokeGroup.querySelectorAll("path"))
         .map((p) => {
           const d = p.getAttribute("d");
-          return d ? `<path d="${d}" />` : "";
+          return d ? `<path d="${d.replace(/"/g, "&quot;")}" />` : "";
         })
         .join("");
-      return `<g transform="translate(${i * CHAR_VIEW}, 0)">${paths}</g>`;
+      return `<g data-char="${i}" transform="translate(${i * CHAR_VIEW}, 0)">${paths}</g>`;
     })
     .join("");
 
   const w = CHAR_VIEW * charSvgs.length;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${CHAR_VIEW}">${groups}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${CHAR_VIEW}" viewBox="0 0 ${w} ${CHAR_VIEW}">${groups}</svg>`;
 }
 
 export const KANJI_CHAR_VIEW = CHAR_VIEW;

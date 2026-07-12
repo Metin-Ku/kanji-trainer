@@ -398,6 +398,7 @@ export const en = {
     reset: "Reset",
     tryAgain: "Try again",
     correct: "Correct!",
+    wordCorrect: "You got it!",
   },
 
   levelChart: {
