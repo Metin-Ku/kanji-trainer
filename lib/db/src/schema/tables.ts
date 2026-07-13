@@ -137,6 +137,9 @@ export const srsCardsTable = pgTable(
   "srs_cards",
   {
     id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
     wordId: integer("word_id")
       .notNull()
       .references(() => wordsTable.id, { onDelete: "cascade" }),
@@ -159,7 +162,13 @@ export const srsCardsTable = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [uniqueIndex("srs_cards_word_deck_idx").on(t.wordId, t.deckType)],
+  (t) => [
+    uniqueIndex("srs_cards_user_word_deck_idx").on(
+      t.userId,
+      t.wordId,
+      t.deckType,
+    ),
+  ],
 );
 
 export const wordMistakesTable = pgTable(

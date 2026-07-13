@@ -14,11 +14,10 @@ import {
 } from "../lib/categoryWords";
 import { matchCategoryNames } from "../lib/categoryMatch";
 import { categoriesTable } from "@workspace/db";
-import { requireAuth } from "../middleware/auth";
-import { ownerOrLegacy } from "../lib/userScope";
+import { getUserId } from "../middleware/auth";
+import { ownerOnly } from "../lib/userScope";
 
 const router = Router();
-router.use(requireAuth);
 
 function parseIdArray(raw: unknown): number[] | undefined {
   if (!Array.isArray(raw)) return undefined;
@@ -74,11 +73,11 @@ async function setRelatedWords(wordId: number, relatedIds: number[]): Promise<vo
 
 router.get("/words", async (req, res, next) => {
   try {
-  const userId = req.user!.id;
+  const userId = getUserId(req);
   const words = await db
     .select()
     .from(wordsTable)
-    .where(ownerOrLegacy(userId, wordsTable.userId))
+    .where(ownerOnly(userId, wordsTable.userId))
     .orderBy(wordsTable.createdAt);
   const wordIds = words.map((w) => w.id);
   const relations = wordIds.length
@@ -146,7 +145,7 @@ router.post("/words/bulk", async (req, res) => {
   const existingRows = await db
     .select({ id: wordsTable.id, kanji: wordsTable.kanji })
     .from(wordsTable)
-    .where(ownerOrLegacy(req.user!.id, wordsTable.userId));
+    .where(ownerOnly(getUserId(req), wordsTable.userId));
   const existingSet = new Set(existingRows.map((w) => w.kanji.normalize("NFC")));
   const kanjiToId = new Map(
     existingRows.map((w) => [w.kanji.normalize("NFC"), w.id]),
@@ -160,7 +159,7 @@ router.post("/words/bulk", async (req, res) => {
   if (toAdd.length > 0) {
     const inserted = await db.insert(wordsTable).values(
       toAdd.map((w) => ({
-        userId: req.user!.id,
+        userId: getUserId(req),
         kanji: w.kanji,
         pronunciation: w.pronunciation ?? "",
         meaning: w.meaning ?? "",
@@ -171,7 +170,7 @@ router.post("/words/bulk", async (req, res) => {
         date: today,
       }))
     ).returning({ id: wordsTable.id, kanji: wordsTable.kanji });
-    await ensureSrsCardsForWords(inserted.map((w) => w.id));
+    await ensureSrsCardsForWords(inserted.map((w) => w.id), getUserId(req));
     for (const row of inserted) {
       kanjiToId.set(row.kanji.normalize("NFC"), row.id);
     }
@@ -191,7 +190,7 @@ router.post("/words/bulk", async (req, res) => {
       .where(
         and(
           eq(wordsTable.kanji, w.kanji),
-          ownerOrLegacy(req.user!.id, wordsTable.userId),
+          ownerOnly(getUserId(req), wordsTable.userId),
         ),
       );
 
@@ -201,7 +200,7 @@ router.post("/words/bulk", async (req, res) => {
       .where(
         and(
           eq(wordsTable.kanji, w.kanji),
-          ownerOrLegacy(req.user!.id, wordsTable.userId),
+          ownerOnly(getUserId(req), wordsTable.userId),
         ),
       )
       .limit(1);
@@ -214,7 +213,7 @@ router.post("/words/bulk", async (req, res) => {
   const allCategories = await db
     .select({ id: categoriesTable.id, name: categoriesTable.name })
     .from(categoriesTable)
-    .where(ownerOrLegacy(req.user!.id, categoriesTable.userId));
+    .where(ownerOnly(getUserId(req), categoriesTable.userId));
 
   for (const w of incoming) {
     const wordId = kanjiToId.get(w.kanji.normalize("NFC"));
@@ -259,7 +258,7 @@ router.post("/words", async (req, res) => {
   const [word] = await db
     .insert(wordsTable)
     .values({
-      userId: req.user!.id,
+      userId: getUserId(req),
       kanji,
       pronunciation,
       meaning,
@@ -276,7 +275,7 @@ router.post("/words", async (req, res) => {
   if (categoryIds && categoryIds.length > 0) {
     await setCategoryWords(word.id, categoryIds);
   }
-  await ensureSrsCardsForWord(word.id);
+  await ensureSrsCardsForWord(word.id, getUserId(req));
   res.status(201).json({
     ...word,
     relatedWordIds: relatedWordIds ?? [],
@@ -295,7 +294,7 @@ router.patch("/words/:id", async (req, res) => {
     .select()
     .from(wordsTable)
     .where(
-      and(eq(wordsTable.id, id), ownerOrLegacy(req.user!.id, wordsTable.userId)),
+      and(eq(wordsTable.id, id), ownerOnly(getUserId(req), wordsTable.userId)),
     );
   if (existing.length === 0) {
     res.status(404).json({ error: "Not found" });
@@ -344,7 +343,7 @@ router.delete("/words/:id", async (req, res) => {
     .select()
     .from(wordsTable)
     .where(
-      and(eq(wordsTable.id, id), ownerOrLegacy(req.user!.id, wordsTable.userId)),
+      and(eq(wordsTable.id, id), ownerOnly(getUserId(req), wordsTable.userId)),
     );
   if (existing.length === 0) {
     res.status(404).json({ error: "Not found" });

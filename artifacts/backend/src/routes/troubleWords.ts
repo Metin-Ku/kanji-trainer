@@ -5,10 +5,9 @@ import {
   dismissMistake,
   listTroubleWords,
 } from "../lib/wordMistakes";
-import { requireAuth } from "../middleware/auth";
+import { getUserId } from "../middleware/auth";
 
 const router = Router();
-router.use(requireAuth);
 
 function parseDeckType(value: string): SrsDeckType | null {
   return (srsDeckTypes as readonly string[]).includes(value)
@@ -18,7 +17,7 @@ function parseDeckType(value: string): SrsDeckType | null {
 
 router.get("/trouble-words", async (req, res, next) => {
   try {
-    const userId = req.user!.id;
+    const userId = getUserId(req);
     const deckParam = req.query.deck ? String(req.query.deck) : null;
     const deck = deckParam ? parseDeckType(deckParam) : null;
     if (deckParam && !deck) {
@@ -49,7 +48,7 @@ router.delete("/trouble-words/:wordId/:deckType", async (req, res, next) => {
       return;
     }
 
-    await dismissMistake(wordId, deckType, req.user!.id);
+    await dismissMistake(wordId, deckType, getUserId(req));
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -59,7 +58,7 @@ router.delete("/trouble-words/:wordId/:deckType", async (req, res, next) => {
 router.delete("/trouble-words/:wordId", async (req, res, next) => {
   try {
     const wordId = Number(req.params.wordId);
-    await dismissMistake(wordId, undefined, req.user!.id);
+    await dismissMistake(wordId, undefined, getUserId(req));
     res.json({ ok: true });
   } catch (err) {
     next(err);

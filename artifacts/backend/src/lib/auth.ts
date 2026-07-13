@@ -152,7 +152,12 @@ export async function resolveSession(
   }
 
   await refreshSession(session.sessionId);
-  return toPublicUser(session);
+  return toPublicUser({
+    id: session.userId,
+    email: session.email,
+    role: session.role,
+    createdAt: session.createdAt,
+  });
 }
 
 export async function createPasswordResetToken(

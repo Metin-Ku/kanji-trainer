@@ -7,11 +7,10 @@ import {
 } from "@workspace/db";
 import { asc, eq, inArray, count, sql, and } from "drizzle-orm";
 import { CATEGORY_SEED } from "../lib/categorySeed";
-import { requireAuth } from "../middleware/auth";
-import { ownerOrLegacy } from "../lib/userScope";
+import { getUserId } from "../middleware/auth";
+import { ownerOnly } from "../lib/userScope";
 
 const router = Router();
-router.use(requireAuth);
 
 function parseIconSvg(raw: unknown): string | null {
   if (raw == null) return null;
@@ -70,12 +69,12 @@ router.post("/categories", async (req, res, next) => {
     const [{ maxOrder }] = await db
       .select({ maxOrder: sql<number>`coalesce(max(${categoriesTable.sortOrder}), -1)` })
       .from(categoriesTable)
-      .where(ownerOrLegacy(req.user!.id, categoriesTable.userId));
+      .where(ownerOnly(getUserId(req), categoriesTable.userId));
 
     const [category] = await db
       .insert(categoriesTable)
       .values({
-        userId: req.user!.id,
+        userId: getUserId(req),
         name,
         iconSvg,
         sortOrder: Number(maxOrder) + 1,
@@ -93,7 +92,7 @@ router.get("/categories", async (req, res, next) => {
     const categories = await db
       .select()
       .from(categoriesTable)
-      .where(ownerOrLegacy(req.user!.id, categoriesTable.userId))
+      .where(ownerOnly(getUserId(req), categoriesTable.userId))
       .orderBy(asc(categoriesTable.sortOrder), asc(categoriesTable.id));
 
     const counts = await db
@@ -125,7 +124,7 @@ router.get("/categories/:id", async (req, res, next) => {
       .where(
         and(
           eq(categoriesTable.id, categoryId),
-          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+          ownerOnly(getUserId(req), categoriesTable.userId),
         ),
       );
     if (!category) {
@@ -169,7 +168,7 @@ router.patch("/categories/:id", async (req, res, next) => {
       .where(
         and(
           eq(categoriesTable.id, categoryId),
-          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+          ownerOnly(getUserId(req), categoriesTable.userId),
         ),
       )
       .returning();
@@ -196,7 +195,7 @@ router.delete("/categories/:id", async (req, res, next) => {
       .where(
         and(
           eq(categoriesTable.id, categoryId),
-          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+          ownerOnly(getUserId(req), categoriesTable.userId),
         ),
       );
 
@@ -213,7 +212,7 @@ router.delete("/categories/:id", async (req, res, next) => {
       .where(
         and(
           eq(categoriesTable.id, categoryId),
-          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+          ownerOnly(getUserId(req), categoriesTable.userId),
         ),
       );
 
@@ -225,17 +224,17 @@ router.delete("/categories/:id", async (req, res, next) => {
 
 router.post("/categories/seed", async (req, res, next) => {
   try {
-    const userId = req.user!.id;
+    const userId = getUserId(req);
     const existingWords = await db
       .select({ id: wordsTable.id })
       .from(wordsTable)
-      .where(ownerOrLegacy(userId, wordsTable.userId));
+      .where(ownerOnly(userId, wordsTable.userId));
     const validWordIds = new Set(existingWords.map((w) => w.id));
 
     const ownedCategories = await db
       .select({ id: categoriesTable.id })
       .from(categoriesTable)
-      .where(ownerOrLegacy(userId, categoriesTable.userId));
+      .where(ownerOnly(userId, categoriesTable.userId));
     const ownedIds = ownedCategories.map((c) => c.id);
 
     if (ownedIds.length > 0) {
@@ -244,7 +243,7 @@ router.post("/categories/seed", async (req, res, next) => {
         .where(inArray(categoryWordsTable.categoryId, ownedIds));
       await db
         .delete(categoriesTable)
-        .where(ownerOrLegacy(userId, categoriesTable.userId));
+        .where(ownerOnly(userId, categoriesTable.userId));
     }
 
     let categoriesCreated = 0;
@@ -306,7 +305,7 @@ router.put("/categories/:id/words", async (req, res, next) => {
       .where(
         and(
           eq(categoriesTable.id, categoryId),
-          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+          ownerOnly(getUserId(req), categoriesTable.userId),
         ),
       );
     if (!category) {
@@ -321,7 +320,7 @@ router.put("/categories/:id/words", async (req, res, next) => {
         .where(
           and(
             inArray(wordsTable.id, wordIds),
-            ownerOrLegacy(req.user!.id, wordsTable.userId),
+            ownerOnly(getUserId(req), wordsTable.userId),
           ),
         );
       const valid = new Set(existing.map((w) => w.id));

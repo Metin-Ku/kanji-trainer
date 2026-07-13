@@ -7,7 +7,7 @@ import {
   srsDeckTypes,
 } from "@workspace/db";
 import { and, desc, eq, gt, sql } from "drizzle-orm";
-import { ownerOrLegacy } from "./userScope";
+import { ownerOnly } from "./userScope";
 
 export type TroubleDeckEntry = {
   deckType: SrsDeckType;
@@ -99,7 +99,7 @@ export async function dismissMistake(
       .select({ id: wordsTable.id })
       .from(wordsTable)
       .where(
-        and(eq(wordsTable.id, wordId), ownerOrLegacy(userId, wordsTable.userId)),
+        and(eq(wordsTable.id, wordId), ownerOnly(userId, wordsTable.userId)),
       )
       .limit(1);
     if (!word) return;
@@ -165,7 +165,7 @@ export async function listTroubleWords(options: {
 
   const conditions = [
     gt(wordMistakesTable.mistakeCount, minCount - 1),
-    ownerOrLegacy(options.userId, wordsTable.userId),
+    ownerOnly(options.userId, wordsTable.userId),
   ];
   if (options.deck) {
     conditions.push(eq(wordMistakesTable.deckType, options.deck));
@@ -259,7 +259,7 @@ export async function countUniqueTroubleWords(
     .where(
       and(
         gt(wordMistakesTable.mistakeCount, minCount - 1),
-        ownerOrLegacy(userId, wordsTable.userId),
+        ownerOnly(userId, wordsTable.userId),
       ),
     );
 
@@ -280,7 +280,7 @@ export async function getTroubleWordIdsForDeckFilter(
         and(
           eq(wordMistakesTable.deckType, deck),
           gt(wordMistakesTable.mistakeCount, 0),
-          ownerOrLegacy(userId, wordsTable.userId),
+          ownerOnly(userId, wordsTable.userId),
         ),
       );
     return rows.map((r) => r.wordId);
@@ -294,7 +294,7 @@ export async function getTroubleWordIdsForDeckFilter(
     .where(
       and(
         gt(wordMistakesTable.mistakeCount, 0),
-        ownerOrLegacy(userId, wordsTable.userId),
+        ownerOnly(userId, wordsTable.userId),
       ),
     );
 

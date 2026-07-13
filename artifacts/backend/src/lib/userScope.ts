@@ -1,11 +1,10 @@
-import { eq, or, isNull, type SQL } from "drizzle-orm";
+import { eq, type SQL } from "drizzle-orm";
 import type { AnyColumn } from "drizzle-orm";
 
-/** Rows owned by user or legacy rows without user_id (pre-migration). */
-export function ownerOrLegacy(userId: number, column: AnyColumn): SQL {
-  return or(eq(column, userId), isNull(column))!;
-}
-
+/** Rows owned by the given user only. */
 export function ownerOnly(userId: number, column: AnyColumn): SQL {
   return eq(column, userId);
 }
+
+/** @deprecated Use ownerOnly — legacy null rows should be migrated via db:assign-owner */
+export const ownerOrLegacy = ownerOnly;

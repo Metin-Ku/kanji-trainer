@@ -9,20 +9,19 @@ import {
   categoryWordsTable,
 } from "@workspace/db";
 import { and, eq, inArray, asc } from "drizzle-orm";
-import { requireAuth } from "../middleware/auth";
-import { ownerOrLegacy } from "../lib/userScope";
+import { getUserId } from "../middleware/auth";
+import { ownerOnly } from "../lib/userScope";
 
 const router = Router();
-router.use(requireAuth);
 
 router.get("/backup", async (req, res, next) => {
   try {
-    const userId = req.user!.id;
+    const userId = getUserId(req);
 
     const words = await db
       .select()
       .from(wordsTable)
-      .where(ownerOrLegacy(userId, wordsTable.userId))
+      .where(ownerOnly(userId, wordsTable.userId))
       .orderBy(asc(wordsTable.id));
 
     const wordIds = words.map((w) => w.id);
@@ -30,7 +29,7 @@ router.get("/backup", async (req, res, next) => {
     const categories = await db
       .select()
       .from(categoriesTable)
-      .where(ownerOrLegacy(userId, categoriesTable.userId))
+      .where(ownerOnly(userId, categoriesTable.userId))
       .orderBy(asc(categoriesTable.id));
 
     const categoryIds = categories.map((c) => c.id);

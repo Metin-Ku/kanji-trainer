@@ -20,11 +20,12 @@ function readSessionToken(req: Request): string | undefined {
 
 export async function optionalAuth(
   req: Request,
-  _res: Response,
+  res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    req.user = (await resolveSession(readSessionToken(req))) ?? undefined;
+    const user = await resolveSession(readSessionToken(req));
+    req.user = user ?? undefined;
     next();
   } catch (err) {
     next(err);
@@ -47,4 +48,12 @@ export async function requireAuth(
   } catch (err) {
     next(err);
   }
+}
+
+export function getUserId(req: Request): number {
+  const id = req.user?.id;
+  if (id == null) {
+    throw new Error("Authenticated user id missing on request");
+  }
+  return id;
 }

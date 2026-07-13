@@ -7,6 +7,13 @@ function getTransport() {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
+  console.log("----------------------------");
+  console.log("host", host);
+  console.log("port", port);
+  console.log("user", user);
+  console.log("pass", pass);
+  console.log("----------------------------");
+
   if (!host || !user || !pass) return null;
 
   return nodemailer.createTransport({

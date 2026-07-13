@@ -19,10 +19,9 @@ import {
   recordMistake,
   recordSuccess,
 } from "../lib/wordMistakes";
-import { requireAuth } from "../middleware/auth";
+import { getUserId } from "../middleware/auth";
 
 const router = Router();
-router.use(requireAuth);
 
 const RATING_MAP: Record<number, ReviewRating> = {
   1: Rating.Again,
@@ -37,9 +36,9 @@ function parseDeckType(value: string): SrsDeckType | null {
     : null;
 }
 
-router.post("/srs/sync", async (_req, res, next) => {
+router.post("/srs/sync", async (req, res, next) => {
   try {
-    await backfillAllSrsCards();
+    await backfillAllSrsCards(getUserId(req));
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -48,11 +47,11 @@ router.post("/srs/sync", async (_req, res, next) => {
 
 router.get("/srs/decks", async (req, res, next) => {
   try {
-    await backfillAllSrsCards();
+    await backfillAllSrsCards(getUserId(req));
     const stats = await Promise.all(
       srsDeckTypes.map(async (deckType) => ({
         deckType,
-        ...(await getDeckStats(deckType, req.user!.id)),
+        ...(await getDeckStats(deckType, getUserId(req))),
       })),
     );
     res.json(stats);
@@ -88,7 +87,7 @@ router.get("/srs/queue", async (req, res, next) => {
       sort,
       wordIds,
       ignoreDue,
-      userId: req.user!.id,
+      userId: getUserId(req),
     });
     const now = new Date();
 
@@ -124,7 +123,7 @@ router.post("/srs/cards/:id/review", async (req, res, next) => {
     const correct = req.body?.correct;
     let rating = RATING_MAP[ratingNum];
 
-    const row = await getSrsCardById(cardId);
+    const row = await getSrsCardById(cardId, getUserId(req));
     if (!row) {
       res.status(404).json({ error: "Card not found" });
       return;
@@ -155,7 +154,7 @@ router.post("/srs/cards/:id/review", async (req, res, next) => {
       }
     }
 
-    const updated = await updateSrsCard(cardId, {
+    const updated = await updateSrsCard(cardId, getUserId(req), {
       ...fields,
       ...(exampleCursor !== undefined ? { exampleCursor } : {}),
     });

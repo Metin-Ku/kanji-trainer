@@ -4,7 +4,7 @@ import {
   studyActivityTable,
   type SrsDeckType,
 } from "@workspace/db";
-import { and, eq, isNull, or, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 export type ActivityByDate = Record<
   string,
@@ -27,10 +27,7 @@ function normalizeActivityRow(
 }
 
 function userActivityFilter(userId: number) {
-  return or(
-    eq(studyActivityTable.userId, userId),
-    isNull(studyActivityTable.userId),
-  );
+  return eq(studyActivityTable.userId, userId);
 }
 
 export async function getActivityByDate(
@@ -104,5 +101,5 @@ export async function claimOrphanStudyActivity(userId: number): Promise<void> {
   await db
     .update(studyActivityTable)
     .set({ userId })
-    .where(isNull(studyActivityTable.userId));
+    .where(sql`${studyActivityTable.userId} IS NULL`);
 }

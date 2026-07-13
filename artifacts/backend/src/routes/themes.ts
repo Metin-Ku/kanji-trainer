@@ -4,10 +4,11 @@ import {
   themesTable,
   themeWordsTable,
   themeQuizQuestionsTable,
+  wordsTable,
   type SrsExampleHint,
   type ThemeQuizChoice,
 } from "@workspace/db";
-import { eq, asc, and, count } from "drizzle-orm";
+import { eq, asc, and, count, inArray } from "drizzle-orm";
 import {
   CreateThemeBody,
   UpdateThemeBody,
@@ -16,11 +17,28 @@ import {
   ReplaceThemeQuestionsBody,
 } from "@workspace/api-zod";
 import { logger } from "../lib/logger";
-import { requireAuth } from "../middleware/auth";
-import { ownerOrLegacy } from "../lib/userScope";
+import { getUserId } from "../middleware/auth";
+import { ownerOnly } from "../lib/userScope";
 
 const router = Router();
-router.use(requireAuth);
+
+async function filterOwnedWordIds(
+  userId: number,
+  wordIds: number[],
+): Promise<number[]> {
+  if (wordIds.length === 0) return [];
+  const rows = await db
+    .select({ id: wordsTable.id })
+    .from(wordsTable)
+    .where(
+      and(
+        inArray(wordsTable.id, wordIds),
+        ownerOnly(userId, wordsTable.userId),
+      ),
+    );
+  const valid = new Set(rows.map((r) => r.id));
+  return [...new Set(wordIds.filter((id) => valid.has(id)))];
+}
 
 function parseIconSvg(raw: unknown): string | null {
   if (raw == null) return null;
@@ -90,7 +108,7 @@ async function buildThemeDetail(themeId: number, userId: number) {
     .where(
       and(
         eq(themesTable.id, themeId),
-        ownerOrLegacy(userId, themesTable.userId),
+        ownerOnly(userId, themesTable.userId),
       ),
     );
   if (!theme) return null;
@@ -125,7 +143,7 @@ async function themeExists(themeId: number, userId: number): Promise<boolean> {
     .where(
       and(
         eq(themesTable.id, themeId),
-        ownerOrLegacy(userId, themesTable.userId),
+        ownerOnly(userId, themesTable.userId),
       ),
     );
   return !!row;
@@ -161,10 +179,11 @@ async function appendThemeWords(themeId: number, wordIds: number[]) {
 
 router.get("/themes", async (req, res, next) => {
   try {
+    const userId = getUserId(req);
     const themes = await db
       .select()
       .from(themesTable)
-      .where(ownerOrLegacy(req.user!.id, themesTable.userId))
+      .where(ownerOnly(userId, themesTable.userId))
       .orderBy(asc(themesTable.sortOrder), asc(themesTable.id));
 
     const wordCounts = await db
@@ -216,14 +235,15 @@ router.post("/themes", async (req, res, next) => {
 
     const [theme] = await db
       .insert(themesTable)
-      .values({ userId: req.user!.id, name: parsed.data.name.trim(), iconSvg })
+      .values({ userId: getUserId(req), name: parsed.data.name.trim(), iconSvg })
       .returning();
 
     if (parsed.data.wordIds?.length) {
-      await setThemeWords(theme!.id, parsed.data.wordIds);
+      const owned = await filterOwnedWordIds(getUserId(req), parsed.data.wordIds);
+      await setThemeWords(theme!.id, owned);
     }
 
-    const detail = await buildThemeDetail(theme!.id, req.user!.id);
+    const detail = await buildThemeDetail(theme!.id, getUserId(req));
     res.status(201).json(detail);
   } catch (err) {
     logger.error({ err }, "POST /themes failed");
@@ -234,7 +254,7 @@ router.post("/themes", async (req, res, next) => {
 router.get("/themes/:id", async (req, res, next) => {
   try {
     const themeId = Number(req.params.id);
-    const detail = await buildThemeDetail(themeId, req.user!.id);
+    const detail = await buildThemeDetail(themeId, getUserId(req));
     if (!detail) {
       res.status(404).json({ error: "Not found" });
       return;
@@ -275,7 +295,7 @@ router.patch("/themes/:id", async (req, res, next) => {
       .where(
         and(
           eq(themesTable.id, themeId),
-          ownerOrLegacy(req.user!.id, themesTable.userId),
+          ownerOnly(getUserId(req), themesTable.userId),
         ),
       )
       .returning();
@@ -285,7 +305,7 @@ router.patch("/themes/:id", async (req, res, next) => {
       return;
     }
 
-    const detail = await buildThemeDetail(themeId, req.user!.id);
+    const detail = await buildThemeDetail(themeId, getUserId(req));
     res.json(detail);
   } catch (err) {
     logger.error({ err }, "PATCH /themes/:id failed");
@@ -301,7 +321,7 @@ router.delete("/themes/:id", async (req, res, next) => {
       .where(
         and(
           eq(themesTable.id, themeId),
-          ownerOrLegacy(req.user!.id, themesTable.userId),
+          ownerOnly(getUserId(req), themesTable.userId),
         ),
       )
       .returning({ id: themesTable.id });
@@ -325,18 +345,19 @@ router.put("/themes/:id/words", async (req, res, next) => {
       res.status(400).json({ error: parsed.error.message });
       return;
     }
-    if (!(await themeExists(themeId, req.user!.id))) {
+    if (!(await themeExists(themeId, getUserId(req)))) {
       res.status(404).json({ error: "Not found" });
       return;
     }
 
-    await setThemeWords(themeId, parsed.data.wordIds);
+    const owned = await filterOwnedWordIds(getUserId(req), parsed.data.wordIds);
+    await setThemeWords(themeId, owned);
     await db
       .update(themesTable)
       .set({ updatedAt: new Date() })
       .where(eq(themesTable.id, themeId));
 
-    const detail = await buildThemeDetail(themeId, req.user!.id);
+    const detail = await buildThemeDetail(themeId, getUserId(req));
     res.json(detail);
   } catch (err) {
     logger.error({ err }, "PUT /themes/:id/words failed");
@@ -352,18 +373,19 @@ router.post("/themes/:id/words", async (req, res, next) => {
       res.status(400).json({ error: parsed.error.message });
       return;
     }
-    if (!(await themeExists(themeId, req.user!.id))) {
+    if (!(await themeExists(themeId, getUserId(req)))) {
       res.status(404).json({ error: "Not found" });
       return;
     }
 
-    await appendThemeWords(themeId, parsed.data.wordIds);
+    const owned = await filterOwnedWordIds(getUserId(req), parsed.data.wordIds);
+    await appendThemeWords(themeId, owned);
     await db
       .update(themesTable)
       .set({ updatedAt: new Date() })
       .where(eq(themesTable.id, themeId));
 
-    const detail = await buildThemeDetail(themeId, req.user!.id);
+    const detail = await buildThemeDetail(themeId, getUserId(req));
     res.json(detail);
   } catch (err) {
     logger.error({ err }, "POST /themes/:id/words failed");
@@ -401,7 +423,7 @@ router.delete("/themes/:id/words/:wordId", async (req, res, next) => {
 router.get("/themes/:id/questions", async (req, res, next) => {
   try {
     const themeId = Number(req.params.id);
-    if (!(await themeExists(themeId, req.user!.id))) {
+    if (!(await themeExists(themeId, getUserId(req)))) {
       res.status(404).json({ error: "Not found" });
       return;
     }
@@ -431,7 +453,7 @@ router.put("/themes/:id/questions", async (req, res, next) => {
       res.status(400).json({ error: parsed.error.message });
       return;
     }
-    if (!(await themeExists(themeId, req.user!.id))) {
+    if (!(await themeExists(themeId, getUserId(req)))) {
       res.status(404).json({ error: "Not found" });
       return;
     }

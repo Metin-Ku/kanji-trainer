@@ -1,24 +1,23 @@
 import { db, srsCardsTable, wordsTable } from "@workspace/db";
 import type { SrsDeckType } from "@workspace/db";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
+import { ownerOnly } from "./userScope";
 import {
   SRS_DECK_TYPES,
   createNewSrsCardFields,
   type SrsCardRow,
 } from "./srs";
 
-function wordVisibleToUser(
-  word: { userId: number | null },
-  userId: number,
-): boolean {
-  return word.userId == null || word.userId === userId;
-}
-
-export async function ensureSrsCardsForWord(wordId: number) {
+export async function ensureSrsCardsForWord(wordId: number, userId: number) {
   const existing = await db
     .select({ deckType: srsCardsTable.deckType })
     .from(srsCardsTable)
-    .where(eq(srsCardsTable.wordId, wordId));
+    .where(
+      and(
+        eq(srsCardsTable.wordId, wordId),
+        ownerOnly(userId, srsCardsTable.userId),
+      ),
+    );
 
   const have = new Set(existing.map((r) => r.deckType));
   const missing = SRS_DECK_TYPES.filter((d) => !have.has(d));
@@ -27,6 +26,7 @@ export async function ensureSrsCardsForWord(wordId: number) {
   const fields = createNewSrsCardFields();
   await db.insert(srsCardsTable).values(
     missing.map((deckType) => ({
+      userId,
       wordId,
       deckType,
       ...fields,
@@ -34,17 +34,23 @@ export async function ensureSrsCardsForWord(wordId: number) {
   );
 }
 
-export async function ensureSrsCardsForWords(wordIds: number[]) {
+export async function ensureSrsCardsForWords(wordIds: number[], userId: number) {
   if (wordIds.length === 0) return;
 
   const existing = await db
     .select({ wordId: srsCardsTable.wordId, deckType: srsCardsTable.deckType })
     .from(srsCardsTable)
-    .where(inArray(srsCardsTable.wordId, wordIds));
+    .where(
+      and(
+        inArray(srsCardsTable.wordId, wordIds),
+        ownerOnly(userId, srsCardsTable.userId),
+      ),
+    );
 
   const have = new Set(existing.map((r) => `${r.wordId}:${r.deckType}`));
   const fields = createNewSrsCardFields();
   const toInsert: {
+    userId: number;
     wordId: number;
     deckType: SrsDeckType;
     due: Date;
@@ -62,7 +68,7 @@ export async function ensureSrsCardsForWords(wordIds: number[]) {
   for (const wordId of wordIds) {
     for (const deckType of SRS_DECK_TYPES) {
       if (!have.has(`${wordId}:${deckType}`)) {
-        toInsert.push({ wordId, deckType, ...fields });
+        toInsert.push({ userId, wordId, deckType, ...fields });
       }
     }
   }
@@ -72,9 +78,15 @@ export async function ensureSrsCardsForWords(wordIds: number[]) {
   }
 }
 
-export async function backfillAllSrsCards() {
-  const words = await db.select({ id: wordsTable.id }).from(wordsTable);
-  await ensureSrsCardsForWords(words.map((w) => w.id));
+export async function backfillAllSrsCards(userId: number) {
+  const words = await db
+    .select({ id: wordsTable.id })
+    .from(wordsTable)
+    .where(ownerOnly(userId, wordsTable.userId));
+  await ensureSrsCardsForWords(
+    words.map((w) => w.id),
+    userId,
+  );
 }
 
 export function mapSrsRow(row: typeof srsCardsTable.$inferSelect): SrsCardRow {
@@ -103,19 +115,24 @@ function hasSrsExamples(word: typeof wordsTable.$inferSelect): boolean {
   return Array.isArray(ex) && ex.length > 0;
 }
 
-export async function getDeckStats(deckType: SrsDeckType, userId?: number) {
+export async function getDeckStats(deckType: SrsDeckType, userId: number) {
   const now = new Date();
   const rows = await db
     .select({ card: srsCardsTable, word: wordsTable })
     .from(srsCardsTable)
     .innerJoin(wordsTable, eq(srsCardsTable.wordId, wordsTable.id))
-    .where(eq(srsCardsTable.deckType, deckType));
+    .where(
+      and(
+        eq(srsCardsTable.deckType, deckType),
+        ownerOnly(userId, srsCardsTable.userId),
+        ownerOnly(userId, wordsTable.userId),
+      ),
+    );
 
   let due = 0;
   let newCount = 0;
   let total = 0;
   for (const { card, word } of rows) {
-    if (userId && !wordVisibleToUser(word, userId)) continue;
     if (deckType === "example" && !hasSrsExamples(word)) continue;
     total++;
     const mapped = mapSrsRow(card);
@@ -144,10 +161,10 @@ export async function getReviewQueue(
     limit?: number;
     wordIds?: number[];
     ignoreDue?: boolean;
-    userId?: number;
-  } = {},
+    userId: number;
+  },
 ) {
-  await backfillAllSrsCards();
+  await backfillAllSrsCards(options.userId);
 
   const now = new Date();
   const minRank = options.jlptMin ? jlptRank(options.jlptMin) : 1;
@@ -170,10 +187,15 @@ export async function getReviewQueue(
     })
     .from(srsCardsTable)
     .innerJoin(wordsTable, eq(srsCardsTable.wordId, wordsTable.id))
-    .where(eq(srsCardsTable.deckType, deckType));
+    .where(
+      and(
+        eq(srsCardsTable.deckType, deckType),
+        ownerOnly(options.userId, srsCardsTable.userId),
+        ownerOnly(options.userId, wordsTable.userId),
+      ),
+    );
 
   const filtered = rows.filter(({ card, word }) => {
-    if (options.userId && !wordVisibleToUser(word, options.userId)) return false;
     if (wordIdSet && !wordIdSet.has(word.id)) return false;
     const rank = jlptRank(word.jlptLevel);
     if (rank !== 99 && (rank < minRank || rank > maxRank)) return false;
@@ -202,7 +224,6 @@ export async function getReviewQueue(
       return b.word.createdAt.getTime() - a.word.createdAt.getTime();
     }
 
-    // due-asc: overdue first, then new cards, then by due date
     if (aNew && !bNew) return 1;
     if (!aNew && bNew) return -1;
     return ca.due.getTime() - cb.due.getTime();
@@ -214,18 +235,25 @@ export async function getReviewQueue(
   }));
 }
 
-export async function getSrsCardById(cardId: number) {
+export async function getSrsCardById(cardId: number, userId: number) {
   const rows = await db
     .select({ card: srsCardsTable, word: wordsTable })
     .from(srsCardsTable)
     .innerJoin(wordsTable, eq(srsCardsTable.wordId, wordsTable.id))
-    .where(eq(srsCardsTable.id, cardId))
+    .where(
+      and(
+        eq(srsCardsTable.id, cardId),
+        ownerOnly(userId, srsCardsTable.userId),
+        ownerOnly(userId, wordsTable.userId),
+      ),
+    )
     .limit(1);
   return rows[0] ?? null;
 }
 
 export async function updateSrsCard(
   cardId: number,
+  userId: number,
   fields: ReturnType<typeof import("./srs").fsrsCardToRowFields> & {
     exampleCursor?: number;
   },
@@ -233,7 +261,12 @@ export async function updateSrsCard(
   const [updated] = await db
     .update(srsCardsTable)
     .set(fields)
-    .where(eq(srsCardsTable.id, cardId))
+    .where(
+      and(
+        eq(srsCardsTable.id, cardId),
+        ownerOnly(userId, srsCardsTable.userId),
+      ),
+    )
     .returning();
   return updated ? mapSrsRow(updated) : null;
 }
