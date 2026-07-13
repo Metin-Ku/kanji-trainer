@@ -29,10 +29,24 @@ export default defineConfig(async ({ mode }) => {
     .trim()
     .replace(/\/+$/, "");
 
+  const viteDemoModeRaw = (
+    process.env.VITE_DEMO_MODE ??
+    envFromFiles.VITE_DEMO_MODE ??
+    ""
+  )
+    .trim()
+    .toLowerCase();
+  const viteDemoMode =
+    viteDemoModeRaw === "true" || viteDemoModeRaw === "1" ? "true" : "";
+
   if (mode === "production" && !viteApiOrigin) {
     console.warn(
       "[vite] VITE_API_ORIGIN is not set — production will request relative /api/* (404 on Vercel without a proxy).",
     );
+  }
+
+  if (mode === "production" && viteDemoMode) {
+    console.log("[vite] VITE_DEMO_MODE enabled (CV portfolio build)");
   }
 
   return {
@@ -40,6 +54,7 @@ export default defineConfig(async ({ mode }) => {
     envDir: repoRoot,
     define: {
       "import.meta.env.VITE_API_ORIGIN": JSON.stringify(viteApiOrigin),
+      "import.meta.env.VITE_DEMO_MODE": JSON.stringify(viteDemoMode),
     },
     plugins: [
       react(),

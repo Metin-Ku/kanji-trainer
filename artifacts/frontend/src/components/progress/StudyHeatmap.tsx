@@ -616,8 +616,6 @@ export function StudyHeatmap({
     </div>
   );
 
-  
-
   return (
     <div className={`min-w-0 w-full max-w-full ${className}`.trim()}>
       <div
