@@ -10,7 +10,6 @@ import {
   wordsTable,
   themesTable,
   categoriesTable,
-  studyActivityTable,
 } from "@workspace/db";
 import { eq, isNull, sql } from "drizzle-orm";
 
@@ -202,23 +201,62 @@ export async function updateUserPassword(
     .where(eq(usersTable.id, userId));
 }
 
-/** Assign legacy rows without user_id to the given user. */
+/** Assign legacy rows without user_id to the given user (skips missing columns). */
 export async function migrateOrphanDataToUser(userId: number): Promise<void> {
-  await db
-    .update(wordsTable)
-    .set({ userId })
-    .where(isNull(wordsTable.userId));
-  await db
-    .update(themesTable)
-    .set({ userId })
-    .where(isNull(themesTable.userId));
-  await db
-    .update(categoriesTable)
-    .set({ userId })
-    .where(isNull(categoriesTable.userId));
+  const updates = [
+    () => db.update(wordsTable).set({ userId }).where(isNull(wordsTable.userId)),
+    () => db.update(themesTable).set({ userId }).where(isNull(themesTable.userId)),
+    () =>
+      db.update(categoriesTable).set({ userId }).where(isNull(categoriesTable.userId)),
+  ];
+
+  for (const run of updates) {
+    try {
+      await run();
+    } catch {
+      // Column may not exist until pnpm db:migrate-auth runs
+    }
+  }
 }
 
-/** Ensure admin exists from env and legacy study_activity rows are assigned. */
+async function finalizeStudyActivitySchema(ownerId: number): Promise<void> {
+  try {
+    await db.execute(sql`
+      UPDATE study_activity SET user_id = ${ownerId} WHERE user_id IS NULL
+    `);
+  } catch {
+    return;
+  }
+
+  try {
+    await db.execute(sql`
+      ALTER TABLE study_activity ALTER COLUMN user_id SET NOT NULL
+    `);
+  } catch {
+    // Already NOT NULL
+  }
+
+  try {
+    await db.execute(sql`
+      ALTER TABLE study_activity
+      ADD CONSTRAINT study_activity_pkey PRIMARY KEY (user_id, date, deck_type)
+    `);
+  } catch {
+    // PK already exists
+  }
+
+  try {
+    await db.execute(sql`
+      ALTER TABLE study_activity
+      ADD CONSTRAINT study_activity_user_id_users_id_fk
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    `);
+  } catch {
+    // FK already exists
+  }
+}
+
+/** Ensure admin exists from env and legacy rows are assigned. */
 export async function ensureBootstrapUser(): Promise<void> {
   const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD;
@@ -235,12 +273,20 @@ export async function ensureBootstrapUser(): Promise<void> {
       })
       .returning()
       .then((rows) => rows[0]!);
-  } else if (admin && adminEmail && admin.role !== "admin") {
-    await db
-      .update(usersTable)
-      .set({ role: "admin", updatedAt: new Date() })
-      .where(eq(usersTable.id, admin.id));
-    admin = { ...admin, role: "admin" };
+  } else if (admin && adminEmail) {
+    if (admin.role !== "admin") {
+      await db
+        .update(usersTable)
+        .set({ role: "admin", updatedAt: new Date() })
+        .where(eq(usersTable.id, admin.id));
+      admin = { ...admin, role: "admin" };
+    }
+    if (adminPassword) {
+      const matches = await verifyPassword(adminPassword, admin.passwordHash);
+      if (!matches) {
+        await updateUserPassword(admin.id, adminPassword);
+      }
+    }
   }
 
   const [anyUser] = await db.select({ id: usersTable.id }).from(usersTable).limit(1);
@@ -248,15 +294,5 @@ export async function ensureBootstrapUser(): Promise<void> {
   if (!ownerId) return;
 
   await migrateOrphanDataToUser(ownerId);
-
-  // Legacy study_activity rows may lack user_id after schema change — handled by push + manual migration
-  try {
-    await db.execute(sql`
-      UPDATE study_activity
-      SET user_id = ${ownerId}
-      WHERE user_id IS NULL
-    `);
-  } catch {
-    // Column may already be NOT NULL after fresh push
-  }
+  await finalizeStudyActivitySchema(ownerId);
 }

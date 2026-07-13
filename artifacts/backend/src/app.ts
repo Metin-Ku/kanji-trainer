@@ -4,11 +4,9 @@ import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { getAllowedFrontendOrigins, isAllowedFrontendOrigin } from "./lib/corsOrigins";
 
 const app: Express = express();
-
-const frontendOrigin =
-  process.env.FRONTEND_ORIGIN?.replace(/\/+$/, "") || "http://localhost:3000";
 
 app.use(
   pinoHttp({
@@ -31,7 +29,14 @@ app.use(
 );
 app.use(
   cors({
-    origin: frontendOrigin,
+    origin(origin, callback) {
+      if (isAllowedFrontendOrigin(origin)) {
+        callback(null, origin ?? getAllowedFrontendOrigins()[0]);
+      } else {
+        logger.warn({ origin, allowed: getAllowedFrontendOrigins() }, "CORS blocked");
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );

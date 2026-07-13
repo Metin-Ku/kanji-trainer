@@ -204,6 +204,17 @@ Her ikisi de:
 - Root Directory: `artifacts/backend`
 - Build / Start / Health check: Adim 3 ile ayni
 - `NODE_ENV` = `production`
+- `ADMIN_EMAIL` / `ADMIN_PASSWORD` — bootstrap admin (Render env, repoya yazmayin)
+- `FRONTEND_ORIGINS` — CORS icin virgulle ayrilmis Vercel + local URL'ler (sonunda `/` yok)
+
+Ornek Render env:
+
+| Render servisi | `FRONTEND_ORIGINS` |
+|----------------|-------------------|
+| Kisisel (`kanji-trainer.onrender.com`) | `http://localhost:3000,https://kanji-trainer-five.vercel.app` |
+| CV (`kanji-trainer-cv.onrender.com`) | `http://localhost:3000,https://kanji-trainer-cv-two.vercel.app` |
+
+Auth semasini her Supabase'e bir kez uygulayin: `pnpm db:migrate-auth` (lokal `.env` icindeki `DATABASE_URL` hedef DB olmali).
 
 Deploy sonrasi URL'leri not edin ve test edin:
 

@@ -14,6 +14,8 @@ import {
 } from "../lib/auth";
 import { sendPasswordResetEmail } from "../lib/email";
 import { requireAuth } from "../middleware/auth";
+import { primaryFrontendOrigin } from "../lib/corsOrigins";
+import type { Request } from "express";
 
 const router = Router();
 
@@ -22,18 +24,17 @@ function sessionCookieOptions(expiresAt: Date) {
   return {
     httpOnly: true,
     secure: isProd,
-    sameSite: "lax" as const,
+    sameSite: (isProd ? "none" : "lax") as "none" | "lax",
     path: "/",
     expires: expiresAt,
     maxAge: SESSION_DAYS * 24 * 60 * 60 * 1000,
   };
 }
 
-function frontendBaseUrl(): string {
-  return (
-    process.env.FRONTEND_ORIGIN?.replace(/\/+$/, "") ||
-    "http://localhost:3000"
-  );
+function frontendBaseUrl(req?: Request): string {
+  const origin = req?.headers.origin?.replace(/\/+$/, "");
+  if (origin) return origin;
+  return primaryFrontendOrigin();
 }
 
 router.post("/auth/register", async (req, res, next) => {
@@ -95,7 +96,11 @@ router.post("/auth/logout", async (req, res, next) => {
     if (typeof token === "string") {
       await deleteSessionByToken(token);
     }
-    res.clearCookie(SESSION_COOKIE, { path: "/" });
+    res.clearCookie(SESSION_COOKIE, {
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    });
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -126,7 +131,7 @@ router.post("/auth/forgot-password", async (req, res, next) => {
     // Always return success to avoid email enumeration
     if (row) {
       const token = await createPasswordResetToken(row.id);
-      const resetUrl = `${frontendBaseUrl()}/reset-password?token=${encodeURIComponent(token)}`;
+      const resetUrl = `${frontendBaseUrl(req)}/reset-password?token=${encodeURIComponent(token)}`;
       await sendPasswordResetEmail(row.email, resetUrl);
     }
 
