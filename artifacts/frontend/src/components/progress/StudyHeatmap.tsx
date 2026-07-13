@@ -15,6 +15,7 @@ import {
   getHeatmapCells,
   getYearHeatmapCells,
   getYearToDateHeatmapCells,
+  HEATMAP_LEVEL_CLASSES,
   HEATMAP_LEVEL_COLORS,
   type HeatmapCell,
 } from "../../lib/progressStats";
@@ -372,7 +373,10 @@ export function StudyHeatmap({
   }, [activityByDate, resolvedRange]);
 
   const columns = useMemo(() => chunkIntoWeeks(cells), [cells]);
-  const anchorWeekCol = useMemo(() => findAnchorWeekColumn(columns), [columns]);
+  const anchorWeekCol = useMemo(
+    () => findAnchorWeekColumn(columns),
+    [columns],
+  );
   const cellByDate = useMemo(
     () => new Map(cells.map((c) => [c.date, c])),
     [cells],
@@ -612,28 +616,6 @@ export function StudyHeatmap({
     </div>
   );
 
-  const gridHeight = 7 * cellPx + 6 * gapPx;
-  const skeletonHeight = gridHeight + (compact ? 28 : 36);
-  const skeletonHeightRem = (skeletonHeight - 22.5) / 16;
-
-  if (isActivityLoading) {
-    return (
-      <div
-        className={`min-w-0 w-full space-y-3 max-w-full ${className}`.trim()}
-      >
-        <div
-          className={`rounded bg-app-muted animate-pulse ${
-            compact ? "h-3 w-28" : "h-4 w-36"
-          }`}
-        />
-        <div
-          className="mt-2 rounded-lg bg-app-muted animate-pulse"
-          style={{ height: `${skeletonHeightRem}rem` }}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className={`min-w-0 w-full max-w-full ${className}`.trim()}>
       <div
@@ -708,12 +690,8 @@ export function StudyHeatmap({
       {!compact && (
         <div className="flex items-center gap-1.5 mt-3 text-[10px] text-app-text-muted">
           <span>{t("progress.heatmap.less")}</span>
-          {HEATMAP_LEVEL_COLORS.map((color, i) => (
-            <div
-              key={i}
-              className="w-3 h-3 rounded-sm"
-              style={{ backgroundColor: color }}
-            />
+          {HEATMAP_LEVEL_CLASSES.map((cls, i) => (
+            <div key={i} className={`w-3 h-3 rounded-sm ${cls}`} />
           ))}
           <span>{t("progress.heatmap.more")}</span>
         </div>
