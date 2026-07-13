@@ -372,10 +372,7 @@ export function StudyHeatmap({
   }, [activityByDate, resolvedRange]);
 
   const columns = useMemo(() => chunkIntoWeeks(cells), [cells]);
-  const anchorWeekCol = useMemo(
-    () => findAnchorWeekColumn(columns),
-    [columns],
-  );
+  const anchorWeekCol = useMemo(() => findAnchorWeekColumn(columns), [columns]);
   const cellByDate = useMemo(
     () => new Map(cells.map((c) => [c.date, c])),
     [cells],
@@ -617,10 +614,13 @@ export function StudyHeatmap({
 
   const gridHeight = 7 * cellPx + 6 * gapPx;
   const skeletonHeight = gridHeight + (compact ? 28 : 36);
-  console.log(skeletonHeight);
+  const skeletonHeightRem = (skeletonHeight - 22.5) / 16;
+
   if (isActivityLoading) {
     return (
-      <div className={`min-w-0 w-full space-y-3 max-w-full ${className}`.trim()}>
+      <div
+        className={`min-w-0 w-full space-y-3 max-w-full ${className}`.trim()}
+      >
         <div
           className={`rounded bg-app-muted animate-pulse ${
             compact ? "h-3 w-28" : "h-4 w-36"
@@ -628,7 +628,7 @@ export function StudyHeatmap({
         />
         <div
           className="mt-2 rounded-lg bg-app-muted animate-pulse"
-          style={{ height: skeletonHeight-22.5 }}
+          style={{ height: `${skeletonHeightRem}rem` }}
         />
       </div>
     );
