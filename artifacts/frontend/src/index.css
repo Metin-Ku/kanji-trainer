@@ -20,6 +20,7 @@ html.theme-switching *::after {
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
   --color-muted: hsl(var(--muted));
+  --color-muted-alternative: hsl(var(--muted-alternative));
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-primary: var(--primary);
   --color-primary-foreground: hsl(var(--primary-foreground));
@@ -37,6 +38,7 @@ html.theme-switching *::after {
   --color-app-bg: var(--app-bg);
   --color-app-surface: var(--app-surface);
   --color-app-muted: var(--app-muted);
+  --color-app-muted-alternative: var(--app-muted-alternative);
   --color-app-border: var(--app-border);
   --color-app-border-strong: var(--app-border-strong);
   --color-app-text: var(--app-text);
@@ -90,6 +92,7 @@ html.theme-switching *::after {
   --app-bg: #f9fafb;
   --app-surface: #ffffff;
   --app-muted: #f3f4f6;
+  --app-muted-alternative: #eeeff2;
   --app-border: #f3f4f6;
   --app-border-strong: #e5e7eb;
   --app-text: #111827;
@@ -114,6 +117,7 @@ html.theme-switching *::after {
   --app-bg: #0f1117;
   --app-surface: #181b24;
   --app-muted: #1f2430;
+  --app-muted-alternative: #222835;
   --app-border: #252a36;
   --app-border-strong: #323845;
   --app-text: #f3f4f6;

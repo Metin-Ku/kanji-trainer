@@ -19,6 +19,8 @@ export type HeatmapCell = {
   count: number;
   /** 0 = empty, 1-4 = intensity bucket */
   level: number;
+  /** True when the day is after today (not yet reached). */
+  isFuture?: boolean;
 };
 
 export type LevelBucket = {
@@ -115,6 +117,7 @@ function buildHeatmapGrid(
     const isFuture = parseDateKey(c.date).getTime() > endMs;
     return {
       ...c,
+      isFuture,
       level: isFuture ? 0 : heatmapIntensity(c.count, maxCount),
     };
   });
@@ -136,11 +139,13 @@ export function getYearToDateHeatmapCells(
   endDate = new Date(),
 ): HeatmapCell[] {
   const end = startOfLocalDay(endDate);
-  const yearStart = new Date(end.getFullYear(), 0, 1);
+  const year = end.getFullYear();
+  const yearStart = new Date(year, 0, 1);
+  const yearEnd = new Date(year, 11, 31);
   const gridStart = addDays(yearStart, -yearStart.getDay());
-  const daysUntilEnd =
-    Math.floor((end.getTime() - gridStart.getTime()) / 86_400_000) + 1;
-  const gridDays = Math.ceil(daysUntilEnd / 7) * 7;
+  const spanDays =
+    Math.floor((yearEnd.getTime() - gridStart.getTime()) / 86_400_000) + 1;
+  const gridDays = Math.ceil(spanDays / 7) * 7;
   return buildHeatmapGrid(activityByDate, gridStart, gridDays, end);
 }
 

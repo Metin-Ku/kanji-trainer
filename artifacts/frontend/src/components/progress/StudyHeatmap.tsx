@@ -173,7 +173,11 @@ function HeatmapGrid({
                   date: formatTooltipDate(cell.date, dateLocale),
                   count: cell.count,
                 })}
-                className={`rounded-sm shrink-0 ${HEATMAP_LEVEL_CLASSES[cell.level]} transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                className={`rounded-sm shrink-0 ${
+                  cell.isFuture
+                    ? "bg-app-muted-alternative"
+                    : HEATMAP_LEVEL_CLASSES[cell.level]
+                } transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
                   isRing
                     ? "ring-2 ring-main-500 ring-offset-1 ring-offset-app-bg z-[300]"
                     : ""
