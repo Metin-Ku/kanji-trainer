@@ -45,6 +45,7 @@ html.theme-switching *::after {
   --color-app-text-secondary: var(--app-text-secondary);
   --color-app-text-muted: var(--app-text-muted);
   --color-app-accent: var(--app-accent);
+  --color-app-accent-banner: var(--app-accent-banner);
   --color-app-vibrant: var(--app-vibrant);
   --font-sans: var(--app-font-sans);
   --radius-sm: calc(var(--radius) - 4px);
@@ -99,7 +100,7 @@ html.theme-switching *::after {
   --app-text-secondary: #6b7280;
   --app-text-muted: #9ca3af;
   --app-accent: color-mix(in oklch, var(--main-500) 10%, #ffffff);
-  --app-accent: color-mix(in oklch, var(--main-500) 10%, #ffffff);
+  --app-accent-banner: color-mix(in oklch, var(--main-500) 10%, #ffffff);
 }
 
 .dark {
@@ -132,6 +133,7 @@ html.theme-switching *::after {
     color-mix(in oklch, var(--main-600) 14%, transparent)
   );
   --app-accent: color-mix(in oklch, var(--main-500) 16%, #181b24);
+  --app-accent-banner: color-mix(in oklch, var(--main-500) 24%, #181b24);
   /* --app-vibrant: color-mix(in oklch, var(--main-500) 32%, #181b24); */
   /* --app-xxx-yyy: oklch(0.29 0.08 38.36); */
   --icon-bg: linear-gradient(

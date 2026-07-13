@@ -18,6 +18,7 @@ import {
   HEATMAP_LEVEL_CLASSES,
   type HeatmapCell,
 } from "../../lib/progressStats";
+import { localDateKey } from "../../lib/dailyGoal";
 import { HeatmapYearSelect } from "./HeatmapYearSelect";
 
 export type HeatmapRange =
@@ -57,6 +58,31 @@ function chunkIntoWeeks(cells: HeatmapCell[]): HeatmapCell[][] {
     cols.push(cells.slice(i, i + 7));
   }
   return cols;
+}
+
+/** Week column that contains today, or the last week with real (non-future) days. */
+function findAnchorWeekColumn(columns: HeatmapCell[][]): number {
+  const todayKey = localDateKey(new Date());
+  for (let wi = 0; wi < columns.length; wi++) {
+    if (columns[wi]?.some((c) => c.date === todayKey)) return wi;
+  }
+  let last = 0;
+  for (let wi = 0; wi < columns.length; wi++) {
+    if (columns[wi]?.some((c) => !c.isFuture)) last = wi;
+  }
+  return last;
+}
+
+function scrollLeftForAnchorWeek(
+  el: HTMLDivElement,
+  anchorCol: number,
+  cellPx: number,
+  gapPx: number,
+): number {
+  const step = cellPx + gapPx;
+  const columnRight = (anchorCol + 1) * step - gapPx;
+  const maxScroll = Math.max(0, el.scrollWidth - el.clientWidth);
+  return Math.max(0, Math.min(columnRight - el.clientWidth, maxScroll));
 }
 
 type GridPos = { col: number; row: number };
@@ -344,6 +370,10 @@ export function StudyHeatmap({
   }, [activityByDate, resolvedRange]);
 
   const columns = useMemo(() => chunkIntoWeeks(cells), [cells]);
+  const anchorWeekCol = useMemo(
+    () => findAnchorWeekColumn(columns),
+    [columns],
+  );
   const cellByDate = useMemo(
     () => new Map(cells.map((c) => [c.date, c])),
     [cells],
@@ -351,6 +381,12 @@ export function StudyHeatmap({
 
   const cellPx = compact ? 9 : 12;
   const gapPx = compact ? 2 : 4;
+
+  const scrollToAnchor = useCallback(
+    (el: HTMLDivElement) =>
+      scrollLeftForAnchorWeek(el, anchorWeekCol, cellPx, gapPx),
+    [anchorWeekCol, cellPx, gapPx],
+  );
   const magnify = compact ? MAGNIFY.compact : MAGNIFY.full;
   const hitPad = Math.round((cellPx + gapPx) * 1.1);
   const lensSize = compact ? LENS_SIZE.compact : LENS_SIZE.full;
@@ -604,7 +640,8 @@ export function StudyHeatmap({
       </div>
       <HorizontalScroll
         ref={gridRef}
-        scrollDeps={[cells.length, compact, columns.length]}
+        scrollDeps={[cells.length, compact, columns.length, anchorWeekCol]}
+        scrollTo={scrollToAnchor}
         className="select-none"
         //style={{ padding: hitPad }}
         onPointerDown={handlePointerDown}

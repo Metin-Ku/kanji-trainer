@@ -88,7 +88,7 @@ export function SrsHubPage() {
           className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
         >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{t("nav.srs")}</span>
+          <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">{t("nav.srs")}</span>
         </button>
         <h1 className="text-xl font-bold text-app-text mt-2">{t("srs.hub.title")}</h1>
         <p className="text-sm text-app-text-secondary mt-1">{t("srs.hub.subtitle")}</p>

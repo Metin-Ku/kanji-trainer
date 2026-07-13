@@ -10,8 +10,10 @@ import {
 import { cn } from "@/lib/utils";
 
 type HorizontalScrollProps = ComponentPropsWithoutRef<"div"> & {
-  /** Re-run scroll-to-end when these values change. */
+  /** Re-run scroll positioning when these values change. */
   scrollDeps?: unknown[];
+  /** `end` = far right; function = custom scrollLeft (e.g. anchor on today). */
+  scrollTo?: "end" | ((el: HTMLDivElement) => number);
   /** Whether the scroll is touchable. */
   isTouchable?: boolean;
   /** `auto` shows a track on touch/coarse pointers (iOS/Android). */
@@ -42,6 +44,7 @@ export const HorizontalScroll = forwardRef<
     children,
     className,
     scrollDeps = [],
+    scrollTo = "end",
     isTouchable = false,
     showTrack = "auto",
     interactiveTrack = true,
@@ -85,11 +88,15 @@ export const HorizontalScroll = forwardRef<
     setTrack({ visible: true, left: leftPct, width: widthPct });
   }, []);
 
-  const scrollToEnd = useCallback(() => {
+  const applyScroll = useCallback(() => {
     const el = innerRef.current;
     if (!el) return;
-    el.scrollLeft = Math.max(0, el.scrollWidth - el.clientWidth);
-  }, []);
+    if (typeof scrollTo === "function") {
+      el.scrollLeft = scrollTo(el);
+    } else {
+      el.scrollLeft = Math.max(0, el.scrollWidth - el.clientWidth);
+    }
+  }, [scrollTo]);
 
   const scrollFromClientX = useCallback(
     (clientX: number) => {
@@ -142,8 +149,8 @@ export const HorizontalScroll = forwardRef<
   );
 
   useEffect(() => {
-    scrollToEnd();
-    const raf = requestAnimationFrame(scrollToEnd);
+    applyScroll();
+    const raf = requestAnimationFrame(applyScroll);
 
     const el = innerRef.current;
     if (!el) return () => cancelAnimationFrame(raf);
@@ -152,7 +159,7 @@ export const HorizontalScroll = forwardRef<
     el.addEventListener("scroll", updateTrack, { passive: true });
 
     const ro = new ResizeObserver(() => {
-      scrollToEnd();
+      applyScroll();
       updateTrack();
     });
     ro.observe(el);
@@ -164,7 +171,7 @@ export const HorizontalScroll = forwardRef<
       ro.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- scrollDeps is intentional
-  }, [scrollToEnd, updateTrack, ...scrollDeps]);
+  }, [applyScroll, updateTrack, ...scrollDeps]);
 
   const trackEnabled = showTrack === true || (showTrack === "auto" && coarse);
 

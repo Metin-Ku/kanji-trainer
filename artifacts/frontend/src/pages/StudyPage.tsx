@@ -307,7 +307,7 @@ export function StudyPage() {
         <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center">
           <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted">
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
+            <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">{title}</span>
           </button>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
@@ -360,7 +360,7 @@ export function StudyPage() {
       <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
         <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted">
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{title}</span>
+          <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">{title}</span>
         </button>
         <span className="text-sm text-app-text-muted p-1.5 font-medium tabular-nums">{t("common.cardProgress", { current: index + 1, total: words.length })}</span>
       </div>

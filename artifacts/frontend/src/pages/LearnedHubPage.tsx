@@ -16,7 +16,7 @@ export function LearnedHubPage() {
             className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
           >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
+            <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
               {t("learned.hubTitle")}
             </span>
           </button>

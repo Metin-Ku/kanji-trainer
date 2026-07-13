@@ -197,7 +197,7 @@ export function MeaningPage() {
           <div className="flex items-center justify-between">
             <button onClick={() => navigate("/")} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors">
               <ArrowLeft size={18} />
-              <span className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">{t("nav.meaning")}</span>
+              <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">{t("nav.meaning")}</span>
             </button>
             <button
               onClick={() => { if (displayed.length === 0) return; startStudy(displayed, "anlam", t("nav.meaning"), "/meaning"); navigate("/study"); }}
