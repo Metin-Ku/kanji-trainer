@@ -20,6 +20,10 @@ import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
 import { pageTitleLabelClass } from "../lib/japaneseScript";
 import { useConfirm } from "../components/ConfirmProvider";
+import {
+  getWordsListPrefs,
+  saveWordsListPrefs,
+} from "../lib/listPreferences";
 
 export type SortMode =
   | "level-asc"
@@ -169,20 +173,31 @@ export function WordListPanel({
     { key: "kanji", label: t("common.clustering") },
   ];
 
+  const prefsScope = studyReturnPath;
+  const defaultPrefs = { query: "", sorts: ["level-asc"] as SortMode[] };
+  const savedPrefs = getWordsListPrefs(prefsScope, defaultPrefs);
+
   const [showForm, setShowForm] = useState(false);
   const [editingWord, setEditingWord] = useState<Word | undefined>(undefined);
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [activeSorts, setActiveSorts] = useState<Set<SortMode>>(
-    new Set<SortMode>(["level-asc"]),
+    () => new Set<SortMode>(savedPrefs.sorts),
   );
   const [showSortMenu, setShowSortMenu] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(savedPrefs.query);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   const headerRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    saveWordsListPrefs(prefsScope, {
+      query,
+      sorts: [...activeSorts],
+    });
+  }, [prefsScope, query, activeSorts]);
 
   useEffect(() => {
     if (!showSortMenu) return;

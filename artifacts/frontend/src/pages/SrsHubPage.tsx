@@ -13,6 +13,7 @@ import { srsDeckLabel } from "../i18n/srsDeckLabels";
 import { DailyGoalCard } from "../components/DailyGoalCard";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useTroubleWordCount } from "../hooks/useTroubleWords";
+import { getSrsListPrefs, saveSrsListPrefs } from "../lib/listPreferences";
 
 const DECK_ICONS: Record<SrsDeckType, typeof Languages> = {
   word: Languages,
@@ -34,10 +35,18 @@ export function SrsHubPage() {
     { value: "date-asc", label: t("srs.sort.dateAsc") },
   ];
 
-  const [jlptMin, setJlptMin] = useState<string>("");
-  const [jlptMax, setJlptMax] = useState<string>("");
-  const [sort, setSort] = useState<SrsSortMode>("due-asc");
+  const prefsScope = "srs";
+  const defaultPrefs = { jlptMin: "", jlptMax: "", sort: "due-asc" as SrsSortMode };
+  const savedPrefs = getSrsListPrefs(prefsScope, defaultPrefs);
+
+  const [jlptMin, setJlptMin] = useState<string>(savedPrefs.jlptMin);
+  const [jlptMax, setJlptMax] = useState<string>(savedPrefs.jlptMax);
+  const [sort, setSort] = useState<SrsSortMode>(savedPrefs.sort);
   const [starting, setStarting] = useState<SrsDeckType | null>(null);
+
+  useEffect(() => {
+    saveSrsListPrefs(prefsScope, { jlptMin, jlptMax, sort });
+  }, [prefsScope, jlptMin, jlptMax, sort]);
 
   useEffect(() => {
     sync.mutate();
