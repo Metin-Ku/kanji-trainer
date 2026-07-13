@@ -323,7 +323,7 @@ export function StudyHeatmap({
     [cells],
   );
 
-  const cellPx = compact ? 10 : 12;
+  const cellPx = compact ? 9 : 12;
   const gapPx = compact ? 2 : 4;
   const magnify = compact ? MAGNIFY.compact : MAGNIFY.full;
   const hitPad = Math.round((cellPx + gapPx) * 1.1);
