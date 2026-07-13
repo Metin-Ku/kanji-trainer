@@ -66,6 +66,8 @@ export function useStudyActivity() {
   const query = useQuery({
     queryKey: STUDY_ACTIVITY_QUERY_KEY,
     queryFn: fetchStudyActivity,
+    staleTime: 5 * 60_000,
+    placeholderData: (prev) => prev,
   });
 
   const increment = useMutation({

@@ -15,7 +15,7 @@ import {
   getHeatmapCells,
   getYearHeatmapCells,
   getYearToDateHeatmapCells,
-  HEATMAP_LEVEL_CLASSES,
+  HEATMAP_LEVEL_COLORS,
   type HeatmapCell,
 } from "../../lib/progressStats";
 import { localDateKey } from "../../lib/dailyGoal";
@@ -29,6 +29,8 @@ export type HeatmapRange =
 type StudyHeatmapProps = {
   isMainPage: boolean;
   activityByDate: Record<string, Partial<Record<string, number>>>;
+  /** Wait for study activity before painting intensity colors. */
+  isActivityLoading?: boolean;
   years: number[];
   heatmapYear: number;
   currentYear: number;
@@ -213,11 +215,7 @@ function HeatmapGrid({
                   date: formatTooltipDate(cell.date, dateLocale),
                   count: cell.count,
                 })}
-                className={`rounded-sm shrink-0 ${
-                  cell.isFuture
-                    ? "bg-app-muted-alternative"
-                    : HEATMAP_LEVEL_CLASSES[cell.level]
-                } transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                className={`rounded-sm shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
                   isRing
                     ? "ring-2 ring-main-500 ring-offset-1 ring-offset-app-bg z-[300]"
                     : ""
@@ -225,6 +223,9 @@ function HeatmapGrid({
                 style={{
                   width: cellPx,
                   height: cellPx,
+                  backgroundColor: cell.isFuture
+                    ? "var(--app-muted-alternative)"
+                    : HEATMAP_LEVEL_COLORS[cell.level],
                   transform: `scale(${scale})`,
                   zIndex: isRing
                     ? 300
@@ -325,6 +326,7 @@ function TouchLoupe({
 export function StudyHeatmap({
   isMainPage,
   activityByDate,
+  isActivityLoading = false,
   years,
   heatmapYear,
   currentYear,
@@ -613,6 +615,25 @@ export function StudyHeatmap({
     </div>
   );
 
+  const gridHeight = 7 * cellPx + 6 * gapPx;
+  const skeletonHeight = gridHeight + (compact ? 28 : 36);
+  console.log(skeletonHeight);
+  if (isActivityLoading) {
+    return (
+      <div className={`min-w-0 w-full space-y-3 max-w-full ${className}`.trim()}>
+        <div
+          className={`rounded bg-app-muted animate-pulse ${
+            compact ? "h-3 w-28" : "h-4 w-36"
+          }`}
+        />
+        <div
+          className="mt-2 rounded-lg bg-app-muted animate-pulse"
+          style={{ height: skeletonHeight-22.5 }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className={`min-w-0 w-full max-w-full ${className}`.trim()}>
       <div
@@ -687,8 +708,12 @@ export function StudyHeatmap({
       {!compact && (
         <div className="flex items-center gap-1.5 mt-3 text-[10px] text-app-text-muted">
           <span>{t("progress.heatmap.less")}</span>
-          {HEATMAP_LEVEL_CLASSES.map((cls, i) => (
-            <div key={i} className={`w-3 h-3 rounded-sm ${cls}`} />
+          {HEATMAP_LEVEL_COLORS.map((color, i) => (
+            <div
+              key={i}
+              className="w-3 h-3 rounded-sm"
+              style={{ backgroundColor: color }}
+            />
           ))}
           <span>{t("progress.heatmap.more")}</span>
         </div>

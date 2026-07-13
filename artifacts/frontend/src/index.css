@@ -101,6 +101,12 @@ html.theme-switching *::after {
   --app-text-muted: #9ca3af;
   --app-accent: color-mix(in oklch, var(--main-500) 10%, #ffffff);
   --app-accent-banner: color-mix(in oklch, var(--main-500) 10%, #ffffff);
+
+  --heatmap-0: var(--app-muted);
+  --heatmap-1: var(--main-100);
+  --heatmap-2: var(--main-200);
+  --heatmap-3: var(--main-400);
+  --heatmap-4: var(--main-500);
 }
 
 .dark {
@@ -141,6 +147,12 @@ html.theme-switching *::after {
     color-mix(in oklch, var(--main-400) 22%, transparent),
     color-mix(in oklch, var(--main-600) 14%, transparent)
   );
+
+  --heatmap-0: var(--app-muted);
+  --heatmap-1: var(--main-200);
+  --heatmap-2: var(--main-300);
+  --heatmap-3: var(--main-500);
+  --heatmap-4: var(--main-600);
 }
 
 @layer base {

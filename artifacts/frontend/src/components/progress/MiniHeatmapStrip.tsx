@@ -5,9 +5,13 @@ import { StudyHeatmap } from "./StudyHeatmap";
 type MiniHeatmapStripProps = {
   isMainPage: boolean;
   activityByDate: Record<string, Partial<Record<string, number>>>;
+  isActivityLoading?: boolean;
 };
 
-export function MiniHeatmapStrip({ activityByDate }: MiniHeatmapStripProps) {
+export function MiniHeatmapStrip({
+  activityByDate,
+  isActivityLoading,
+}: MiniHeatmapStripProps) {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
 
@@ -23,6 +27,7 @@ export function MiniHeatmapStrip({ activityByDate }: MiniHeatmapStripProps) {
         currentYear={0}
         setHeatmapYear={() => {}}
         activityByDate={activityByDate}
+        isActivityLoading={isActivityLoading}
         range={{ kind: "ytd" }}
         compact
         onTap={() => navigate("/progress")}

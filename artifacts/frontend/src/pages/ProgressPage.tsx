@@ -34,7 +34,7 @@ export function ProgressPage() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const { words, isLoading } = useWords();
-  const activityByDate = useStudyHistory();
+  const { activityByDate, isLoading: activityLoading } = useStudyHistory();
 
   const currentYear = new Date().getFullYear();
   
@@ -76,6 +76,7 @@ export function ProgressPage() {
                 currentYear={currentYear}
                 setHeatmapYear={setHeatmapYear}
                 activityByDate={activityByDate}
+                isActivityLoading={activityLoading}
                 range={{ kind: "year", year: heatmapYear }}
               />
             </Section>

@@ -59,7 +59,7 @@ export function HomePage() {
     useWords();
   const { themes, isLoading: themesLoading } = useThemes();
   const { data: categories = [], isLoading: categoriesLoading } = useCategories();
-  const activityByDate = useStudyHistory();
+  const { activityByDate, isLoading: activityLoading } = useStudyHistory();
   const [query, setQuery] = useState("");
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [relatedOpenIds, setRelatedOpenIds] = useState<Set<number>>(new Set());
@@ -173,7 +173,11 @@ export function HomePage() {
           <>
             <DailyGoalCard />
             <div className="mt-3">
-              <MiniHeatmapStrip isMainPage={true} activityByDate={activityByDate} />
+              <MiniHeatmapStrip
+                isMainPage={true}
+                activityByDate={activityByDate}
+                isActivityLoading={activityLoading}
+              />
             </div>
           </>
         )}

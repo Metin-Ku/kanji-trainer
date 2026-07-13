@@ -242,6 +242,16 @@ export const SRS_DECK_CHART_COLORS: Record<SrsDeckType, string> = {
   example: "var(--main-200)",
 };
 
+/** CSS variables — available on first paint, follow theme palette. */
+export const HEATMAP_LEVEL_COLORS = [
+  "var(--heatmap-0)",
+  "var(--heatmap-1)",
+  "var(--heatmap-2)",
+  "var(--heatmap-3)",
+  "var(--heatmap-4)",
+] as const;
+
+/** @deprecated Use HEATMAP_LEVEL_COLORS for cell backgrounds */
 export const HEATMAP_LEVEL_CLASSES = [
   "bg-app-muted",
   "bg-main-100 dark:bg-main-200",
