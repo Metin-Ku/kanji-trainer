@@ -13,6 +13,10 @@ import { clusterByKanji } from "../utils/kanjiCluster";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
 import { useConfirm } from "../components/ConfirmProvider";
+import {
+  getSingleSortListPrefs,
+  saveSingleSortListPrefs,
+} from "../lib/listPreferences";
 
 type SortMode = "level-asc" | "level-desc" | "date-asc" | "date-desc" | "jlpt-asc" | "jlpt-desc" | "kanji-cluster";
 type SortGroup = "jlpt" | "level" | "date" | "kanji";
@@ -126,15 +130,23 @@ export function MeaningPage() {
     { key: "date", label: t("common.date") },
     { key: "kanji", label: t("common.clustering") },
   ];
+  const prefsScope = "meaning";
+  const defaultPrefs = { query: "", sort: "level-asc" as SortMode };
+  const savedPrefs = getSingleSortListPrefs(prefsScope, defaultPrefs);
+
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortMode>("level-asc");
+  const [query, setQuery] = useState(savedPrefs.query);
+  const [sort, setSort] = useState<SortMode>(savedPrefs.sort);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const headerRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    saveSingleSortListPrefs(prefsScope, { query, sort });
+  }, [prefsScope, query, sort]);
 
   useEffect(() => {
     if (!showSortMenu) return;
