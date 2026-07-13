@@ -18,6 +18,7 @@ import {
   HEATMAP_LEVEL_CLASSES,
   type HeatmapCell,
 } from "../../lib/progressStats";
+import { HeatmapYearSelect } from "./HeatmapYearSelect";
 
 export type HeatmapRange =
   | { kind: "weeks"; weeks: number }
@@ -25,7 +26,12 @@ export type HeatmapRange =
   | { kind: "ytd" };
 
 type StudyHeatmapProps = {
+  isMainPage: boolean;
   activityByDate: Record<string, Partial<Record<string, number>>>;
+  years: number[];
+  heatmapYear: number;
+  currentYear: number;
+  setHeatmapYear: (year: number) => void;
   /** @deprecated Prefer `range`. */
   weeks?: number;
   range?: HeatmapRange;
@@ -113,8 +119,14 @@ function pointerToFocus(
   const gridWidth = colCount * step - gapPx;
   const gridHeight = rowCount * step - gapPx;
 
-  const x = Math.max(-extend, Math.min(gridWidth + extend, clientX - innerRect.left));
-  const y = Math.max(-extend, Math.min(gridHeight + extend, clientY - innerRect.top));
+  const x = Math.max(
+    -extend,
+    Math.min(gridWidth + extend, clientX - innerRect.left),
+  );
+  const y = Math.max(
+    -extend,
+    Math.min(gridHeight + extend, clientY - innerRect.top),
+  );
 
   const focus: FocusPos = {
     col: Math.max(0, Math.min(maxCol, x / step)),
@@ -285,7 +297,12 @@ function TouchLoupe({
 }
 
 export function StudyHeatmap({
+  isMainPage,
   activityByDate,
+  years,
+  heatmapYear,
+  currentYear,
+  setHeatmapYear,
   weeks = 26,
   range,
   compact = false,
@@ -338,19 +355,18 @@ export function StudyHeatmap({
   const hitPad = Math.round((cellPx + gapPx) * 1.1);
   const lensSize = compact ? LENS_SIZE.compact : LENS_SIZE.full;
   const lensZoom = compact ? LENS_ZOOM.compact : LENS_ZOOM.full;
-  const touchLoupeLift = compact ? TOUCH_LOUPE_LIFT.compact : TOUCH_LOUPE_LIFT.full;
+  const touchLoupeLift = compact
+    ? TOUCH_LOUPE_LIFT.compact
+    : TOUCH_LOUPE_LIFT.full;
 
-  const syncTouchLoupe = useCallback(
-    (clientX: number, clientY: number) => {
-      const wrap = gridWrapRef.current;
-      if (!wrap) return;
-      const rect = wrap.getBoundingClientRect();
-      gridRectRef.current = rect;
-      setTouchGridRect(rect);
-      setTouchPoint({ x: clientX, y: clientY });
-    },
-    [],
-  );
+  const syncTouchLoupe = useCallback((clientX: number, clientY: number) => {
+    const wrap = gridWrapRef.current;
+    if (!wrap) return;
+    const rect = wrap.getBoundingClientRect();
+    gridRectRef.current = rect;
+    setTouchGridRect(rect);
+    setTouchPoint({ x: clientX, y: clientY });
+  }, []);
 
   const applyPointer = useCallback(
     (clientX: number, clientY: number) => {
@@ -564,18 +580,28 @@ export function StudyHeatmap({
   return (
     <div className={`min-w-0 w-full max-w-full ${className}`.trim()}>
       <div
-        className={`min-h-[1.25rem] text-app-text-secondary tabular-nums ${
+        className={`min-h-[1.25rem] text-app-text-secondary tabular-nums flex items-center justify-between ${
           compact ? "text-[10px]" : "text-xs"
         }`}
       >
-        {activeCell
-          ? t("progress.heatmap.tooltip", {
-              date: formatTooltipDate(activeCell.date, dateLocale),
-              count: activeCell.count,
-            })
-          : t("progress.heatmap.hint")}
+        <span>
+          {" "}
+          {activeCell
+            ? t("progress.heatmap.tooltip", {
+                date: formatTooltipDate(activeCell.date, dateLocale),
+                count: activeCell.count,
+              })
+            : t("progress.heatmap.hint")}
+        </span>
+        {!isMainPage && (
+          <HeatmapYearSelect
+            years={years}
+            value={heatmapYear}
+            currentYear={currentYear}
+            onChange={setHeatmapYear}
+          />
+        )}
       </div>
-
       <HorizontalScroll
         ref={gridRef}
         scrollDeps={[cells.length, compact, columns.length]}

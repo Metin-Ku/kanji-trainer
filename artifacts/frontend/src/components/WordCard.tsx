@@ -121,7 +121,7 @@ export function WordCard({
             className={[
               "text-lg font-bold leading-none shrink-0",
               kanjiClickable
-                ? "text-app-text active:text-main-400 transition-colors"
+                ? "text-app-text active:text-main-500 dark:active:text-main-600 transition-colors"
                 : "text-app-text",
             ].join(" ")}
             style={kanjiClickable ? { cursor: "zoom-in" } : {}}

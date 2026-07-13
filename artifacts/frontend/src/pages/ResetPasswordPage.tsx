@@ -66,7 +66,7 @@ export function ResetPasswordPage() {
       )}
 
       <p className="mt-6 text-sm text-center">
-        <Link href="/login" className="text-main-500 hover:underline">
+        <Link href="/login" className="text-main-500 dark:text-main-600 hover:underline">
           {t("auth.backToLogin")}
         </Link>
       </p>

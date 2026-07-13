@@ -66,7 +66,7 @@ const DeckRow = memo(function DeckRow({
             {label}
           </span>
           {deck.goalMet && (
-            <Check size={12} className="text-main-500 shrink-0" strokeWidth={2.5} />
+            <Check size={12} className="text-main-500 dark:text-main-600 shrink-0" strokeWidth={2.5} />
           )}
         </div>
         <span
@@ -119,7 +119,7 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
                 {t("dailyGoal.title")}
               </p>
               {goalMet && (
-                <Check size={14} className="text-main-500 shrink-0" strokeWidth={2.5} />
+                <Check size={14} className="text-main-500 dark:text-main-600 shrink-0" strokeWidth={2.5} />
               )}
             </div>
             <p
@@ -132,7 +132,7 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
           <div className="flex items-center gap-2 shrink-0">
             {streak > 0 ? (
               <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-surface/80 border border-main-100">
-                <Flame size={variant === "banner" ? 14 : 16} className="text-main-500" />
+                <Flame size={variant === "banner" ? 14 : 16} className="text-main-500 dark:text-main-600" />
                 <span className="text-sm font-bold text-main-600">{streak}</span>
               </div>
             ) : (

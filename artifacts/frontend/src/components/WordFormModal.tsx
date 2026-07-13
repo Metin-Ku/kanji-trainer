@@ -213,7 +213,7 @@ export function WordFormModal({
                       <button
                         type="button"
                         onClick={syncDescriptionFromSrs}
-                        className="text-[10px] font-semibold text-main-500 hover:text-main-600"
+                        className="text-[10px] font-semibold text-main-500 dark:text-main-600 hover:text-main-600"
                       >
                         {t("wordForm.actions.generateFromSrs")}
                       </button>

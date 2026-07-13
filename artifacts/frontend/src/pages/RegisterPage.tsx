@@ -71,7 +71,7 @@ export function RegisterPage() {
 
       <p className="mt-6 text-sm text-center text-app-text-secondary">
         {t("auth.hasAccount")}{" "}
-        <Link href="/login" className="text-main-500 hover:underline">
+        <Link href="/login" className="text-main-500 dark:text-main-600 hover:underline">
           {t("auth.login")}
         </Link>
       </p>

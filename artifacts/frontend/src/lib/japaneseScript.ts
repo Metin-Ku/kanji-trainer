@@ -25,5 +25,5 @@ export function hasLatin(str: string): boolean {
  */
 export function pageTitleLabelClass(text: string): string {
   const size = hasKanji(text) ? "text-[14px]" : "text-[11px]";
-  return `${size} font-semibold text-main-400 uppercase tracking-widest inline-flex items-center gap-1.5 min-w-0`;
+  return `${size} font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest inline-flex items-center gap-1.5 min-w-0`;
 }

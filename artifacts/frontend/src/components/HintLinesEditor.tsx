@@ -74,7 +74,7 @@ export function HintLinesEditor({
             <button
               type="button"
               onClick={() => addHighlight(hintIndex)}
-              className="shrink-0 p-2 rounded-lg border border-app-border-strong bg-app-surface text-app-text-secondary hover:text-main-500 hover:border-main-300"
+              className="shrink-0 p-2 rounded-lg border border-app-border-strong bg-app-surface text-app-text-secondary hover:text-main-500 dark:hover:text-main-600 hover:border-main-300 dark:hover:border-main-400"
               title={t("srs.editor.highlightSelection")}
             >
               <Highlighter size={14} />
@@ -124,7 +124,7 @@ export function HintLinesEditor({
       <button
         type="button"
         onClick={addHint}
-        className="text-xs font-semibold text-app-text-muted hover:text-main-500"
+        className="text-xs font-semibold text-app-text-muted hover:text-main-500 dark:hover:text-main-600"
       >
         {t("srs.editor.addLine")}
       </button>

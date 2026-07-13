@@ -140,21 +140,21 @@ export function HomePage() {
           <div className="flex items-center gap-0.5 -mr-2 -mt-1">
             <button
               onClick={() => navigate("/srs")}
-              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 hover:bg-app-accent transition-colors"
+              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent transition-colors"
               aria-label={t("a11y.srs")}
             >
               <Layers size={20} strokeWidth={2} />
             </button>
             <button
               onClick={() => navigate("/progress")}
-              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 hover:bg-app-accent transition-colors"
+              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent transition-colors"
               aria-label={t("a11y.progress")}
             >
               <BarChart2 size={20} strokeWidth={2} />
             </button>
             <button
               onClick={() => navigate("/settings")}
-              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 hover:bg-app-accent transition-colors"
+              className="p-2 rounded-xl text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent transition-colors"
               aria-label={t("a11y.settings")}
             >
               <Settings size={20} strokeWidth={2} />
@@ -398,7 +398,7 @@ export function HomePage() {
                       Icon && (
                         <Icon
                           size={18}
-                          className="text-main-500"
+                          className="text-main-500 dark:text-main-600"
                           strokeWidth={1.8}
                         />
                       )

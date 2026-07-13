@@ -181,7 +181,7 @@ export function SrsHubPage() {
                 className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-4 active:scale-[0.99] transition-transform disabled:opacity-60"
               >
                 <div className="w-11 h-11 rounded-xl bg-app-accent flex items-center justify-center shrink-0">
-                  <Icon size={20} className="text-main-500" strokeWidth={1.8} />
+                  <Icon size={20} className="text-main-500 dark:text-main-600" strokeWidth={1.8} />
                 </div>
                 <div className="flex-1 text-left min-w-0">
                   <p className="text-[10px] font-semibold text-app-text-muted uppercase tracking-wider">{label.subtitle}</p>

@@ -195,7 +195,7 @@ export function SrsExamplesEditor({
           <button
             type="button"
             onClick={addExample}
-            className="inline-flex items-center gap-1 text-xs font-semibold text-main-500 hover:text-main-600"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-main-500 dark:text-main-600 hover:text-main-600"
           >
             <Plus size={14} /> {t("srs.editor.add")}
           </button>
@@ -336,7 +336,7 @@ export function SrsExamplesEditor({
                     )}
                     {t("srs.editor.linkWords")}
                     {linkCount > 0 && (
-                      <span className="text-main-500">({linkCount})</span>
+                      <span className="text-main-500 dark:text-main-600">({linkCount})</span>
                     )}
                   </button>
                 </div>
@@ -369,7 +369,7 @@ export function SrsExamplesEditor({
       <button
         type="button"
         onClick={addExample}
-        className="w-full py-2 rounded-xl border border-dashed border-app-border-strong text-sm font-semibold text-app-text-muted hover:border-main-300 hover:text-main-500"
+        className="w-full py-2 rounded-xl border border-dashed border-app-border-strong text-sm font-semibold text-app-text-muted hover:border-main-300 dark:hover:border-main-400 hover:text-main-500 dark:hover:text-main-600"
       >
         + {t("srs.editor.addExample")}
       </button>

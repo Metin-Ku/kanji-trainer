@@ -183,7 +183,7 @@ export function SettingsPage() {
             onClick={() => setSection("styling")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors ${
               section === "styling"
-                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
+                ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
@@ -194,7 +194,7 @@ export function SettingsPage() {
             onClick={() => setSection("srs")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "srs"
-                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
+                ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
@@ -205,7 +205,7 @@ export function SettingsPage() {
             onClick={() => setSection("database")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "database"
-                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
+                ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
@@ -216,7 +216,7 @@ export function SettingsPage() {
             onClick={() => setSection("language")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "language"
-                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
+                ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
@@ -227,7 +227,7 @@ export function SettingsPage() {
             onClick={() => setSection("account")}
             className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
               section === "account"
-                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
+                ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
             }`}
           >
@@ -276,7 +276,7 @@ export function SettingsPage() {
                           {name}
                         </span>
                         {selected && (
-                          <span className="flex items-center gap-1 text-xs font-medium text-main-500">
+                          <span className="flex items-center gap-1 text-xs font-medium text-main-500 dark:text-main-600">
                             <Check size={14} strokeWidth={2.5} />
                             {t("settings.styling.selected")}
                           </span>
@@ -445,7 +445,7 @@ export function SettingsPage() {
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-app-border-strong bg-app-surface text-app-text text-sm font-semibold hover:border-main-300 hover:text-main-600 disabled:opacity-50"
                 >
                   {relinkBusy ? (
-                    <LoadingSpinner size={16} className="text-main-500" />
+                    <LoadingSpinner size={16} className="text-main-500 dark:text-main-600" />
                   ) : (
                     <Link2 size={16} />
                   )}
@@ -498,7 +498,7 @@ export function SettingsPage() {
                           {t(labelKey)}
                         </span>
                         {/* {selected && (
-                          <span className="flex items-center gap-1 text-xs font-medium text-main-500">
+                          <span className="flex items-center gap-1 text-xs font-medium text-main-500 dark:text-main-600">
                             <Check size={14} strokeWidth={2.5} />
                             {t("settings.styling.selected")}
                           </span>

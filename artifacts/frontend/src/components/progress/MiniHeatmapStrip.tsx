@@ -3,6 +3,7 @@ import { useTranslation } from "../../i18n/I18nProvider";
 import { StudyHeatmap } from "./StudyHeatmap";
 
 type MiniHeatmapStripProps = {
+  isMainPage: boolean;
   activityByDate: Record<string, Partial<Record<string, number>>>;
 };
 
@@ -16,6 +17,11 @@ export function MiniHeatmapStrip({ activityByDate }: MiniHeatmapStripProps) {
         {t("progress.miniHeatmap.title")}
       </p>
       <StudyHeatmap
+        isMainPage={true}
+        years={[]}
+        heatmapYear={0}
+        currentYear={0}
+        setHeatmapYear={() => {}}
         activityByDate={activityByDate}
         range={{ kind: "ytd" }}
         compact

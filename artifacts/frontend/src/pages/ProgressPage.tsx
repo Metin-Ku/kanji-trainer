@@ -6,7 +6,6 @@ import { useAuth } from "../auth/AuthProvider";
 import { useWords } from "../hooks/useWords";
 import { useStudyHistory } from "../hooks/useStudyHistory";
 import { StudyHeatmap } from "../components/progress/StudyHeatmap";
-import { HeatmapYearSelect } from "../components/progress/HeatmapYearSelect";
 import { DeckActivityChart } from "../components/progress/DeckActivityChart";
 import { LevelDistributionChart } from "../components/progress/LevelDistributionChart";
 import { JlptProgressSection } from "../components/progress/JlptProgressSection";
@@ -38,13 +37,14 @@ export function ProgressPage() {
   const activityByDate = useStudyHistory();
 
   const currentYear = new Date().getFullYear();
+  
   const minYear = user ? membershipYear(user.createdAt) : currentYear;
   const years = useMemo(
     () => yearRange(minYear, currentYear),
     [minYear, currentYear],
   );
   const [heatmapYear, setHeatmapYear] = useState(currentYear);
-
+  
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
       <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
@@ -69,13 +69,12 @@ export function ProgressPage() {
         ) : (
           <>
             <Section title={t("progress.sections.heatmap")}>
-              <HeatmapYearSelect
-                years={years}
-                value={heatmapYear}
-                currentYear={currentYear}
-                onChange={setHeatmapYear}
-              />
               <StudyHeatmap
+                isMainPage={false}
+                years={years}
+                heatmapYear={heatmapYear}
+                currentYear={currentYear}
+                setHeatmapYear={setHeatmapYear}
                 activityByDate={activityByDate}
                 range={{ kind: "year", year: heatmapYear }}
               />

@@ -210,7 +210,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
               <button
                 onClick={handleParse}
                 disabled={!html.trim()}
-                className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 border-app-border-strong text-app-text-secondary hover:border-main-300 hover:text-main-500 transition-colors disabled:opacity-40"
+                className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 border-app-border-strong text-app-text-secondary hover:border-main-300 hover:text-main-500 dark:hover:text-main-600 transition-colors disabled:opacity-40"
               >
                 {html.trim() ? t("common.preview") : t("bulkImport.pasteTable")}
               </button>

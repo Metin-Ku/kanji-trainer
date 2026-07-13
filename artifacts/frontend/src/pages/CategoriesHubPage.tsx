@@ -125,7 +125,7 @@ export function CategoriesHubPage() {
                   onClick={() => setLayout(value)}
                   className={`p-1.5 rounded-lg transition-colors ${
                     layout === value
-                      ? "bg-app-surface text-main-500 shadow-sm"
+                      ? "bg-app-surface text-main-500 dark:text-main-600 shadow-sm"
                       : "text-app-text-muted hover:text-app-text-secondary"
                   }`}
                 >
