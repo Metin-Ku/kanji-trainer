@@ -5,10 +5,13 @@ import {
   categoryWordsTable,
   wordsTable,
 } from "@workspace/db";
-import { asc, eq, inArray, count, sql } from "drizzle-orm";
+import { asc, eq, inArray, count, sql, and } from "drizzle-orm";
 import { CATEGORY_SEED } from "../lib/categorySeed";
+import { requireAuth } from "../middleware/auth";
+import { ownerOrLegacy } from "../lib/userScope";
 
 const router = Router();
+router.use(requireAuth);
 
 function parseIconSvg(raw: unknown): string | null {
   if (raw == null) return null;
@@ -66,11 +69,17 @@ router.post("/categories", async (req, res, next) => {
 
     const [{ maxOrder }] = await db
       .select({ maxOrder: sql<number>`coalesce(max(${categoriesTable.sortOrder}), -1)` })
-      .from(categoriesTable);
+      .from(categoriesTable)
+      .where(ownerOrLegacy(req.user!.id, categoriesTable.userId));
 
     const [category] = await db
       .insert(categoriesTable)
-      .values({ name, iconSvg, sortOrder: Number(maxOrder) + 1 })
+      .values({
+        userId: req.user!.id,
+        name,
+        iconSvg,
+        sortOrder: Number(maxOrder) + 1,
+      })
       .returning();
 
     res.status(201).json(categorySummaryDto(category, 0));
@@ -79,11 +88,12 @@ router.post("/categories", async (req, res, next) => {
   }
 });
 
-router.get("/categories", async (_req, res, next) => {
+router.get("/categories", async (req, res, next) => {
   try {
     const categories = await db
       .select()
       .from(categoriesTable)
+      .where(ownerOrLegacy(req.user!.id, categoriesTable.userId))
       .orderBy(asc(categoriesTable.sortOrder), asc(categoriesTable.id));
 
     const counts = await db
@@ -112,7 +122,12 @@ router.get("/categories/:id", async (req, res, next) => {
     const [category] = await db
       .select()
       .from(categoriesTable)
-      .where(eq(categoriesTable.id, categoryId));
+      .where(
+        and(
+          eq(categoriesTable.id, categoryId),
+          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+        ),
+      );
     if (!category) {
       res.status(404).json({ error: "Category not found" });
       return;
@@ -151,7 +166,12 @@ router.patch("/categories/:id", async (req, res, next) => {
     const [category] = await db
       .update(categoriesTable)
       .set(patch)
-      .where(eq(categoriesTable.id, categoryId))
+      .where(
+        and(
+          eq(categoriesTable.id, categoryId),
+          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+        ),
+      )
       .returning();
 
     if (!category) {
@@ -173,7 +193,12 @@ router.delete("/categories/:id", async (req, res, next) => {
     const [category] = await db
       .select({ id: categoriesTable.id })
       .from(categoriesTable)
-      .where(eq(categoriesTable.id, categoryId));
+      .where(
+        and(
+          eq(categoriesTable.id, categoryId),
+          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+        ),
+      );
 
     if (!category) {
       res.status(404).json({ error: "Category not found" });
@@ -183,7 +208,14 @@ router.delete("/categories/:id", async (req, res, next) => {
     await db
       .delete(categoryWordsTable)
       .where(eq(categoryWordsTable.categoryId, categoryId));
-    await db.delete(categoriesTable).where(eq(categoriesTable.id, categoryId));
+    await db
+      .delete(categoriesTable)
+      .where(
+        and(
+          eq(categoriesTable.id, categoryId),
+          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+        ),
+      );
 
     res.json({ ok: true });
   } catch (err) {
@@ -191,15 +223,29 @@ router.delete("/categories/:id", async (req, res, next) => {
   }
 });
 
-router.post("/categories/seed", async (_req, res, next) => {
+router.post("/categories/seed", async (req, res, next) => {
   try {
+    const userId = req.user!.id;
     const existingWords = await db
       .select({ id: wordsTable.id })
-      .from(wordsTable);
+      .from(wordsTable)
+      .where(ownerOrLegacy(userId, wordsTable.userId));
     const validWordIds = new Set(existingWords.map((w) => w.id));
 
-    await db.delete(categoryWordsTable);
-    await db.delete(categoriesTable);
+    const ownedCategories = await db
+      .select({ id: categoriesTable.id })
+      .from(categoriesTable)
+      .where(ownerOrLegacy(userId, categoriesTable.userId));
+    const ownedIds = ownedCategories.map((c) => c.id);
+
+    if (ownedIds.length > 0) {
+      await db
+        .delete(categoryWordsTable)
+        .where(inArray(categoryWordsTable.categoryId, ownedIds));
+      await db
+        .delete(categoriesTable)
+        .where(ownerOrLegacy(userId, categoriesTable.userId));
+    }
 
     let categoriesCreated = 0;
     let linksCreated = 0;
@@ -209,7 +255,7 @@ router.post("/categories/seed", async (_req, res, next) => {
       const item = CATEGORY_SEED[i]!;
       const [category] = await db
         .insert(categoriesTable)
-        .values({ name: item.name, sortOrder: i })
+        .values({ userId, name: item.name, sortOrder: i })
         .returning();
       categoriesCreated++;
 
@@ -257,7 +303,12 @@ router.put("/categories/:id/words", async (req, res, next) => {
     const [category] = await db
       .select({ id: categoriesTable.id })
       .from(categoriesTable)
-      .where(eq(categoriesTable.id, categoryId));
+      .where(
+        and(
+          eq(categoriesTable.id, categoryId),
+          ownerOrLegacy(req.user!.id, categoriesTable.userId),
+        ),
+      );
     if (!category) {
       res.status(404).json({ error: "Category not found" });
       return;
@@ -267,7 +318,12 @@ router.put("/categories/:id/words", async (req, res, next) => {
       const existing = await db
         .select({ id: wordsTable.id })
         .from(wordsTable)
-        .where(inArray(wordsTable.id, wordIds));
+        .where(
+          and(
+            inArray(wordsTable.id, wordIds),
+            ownerOrLegacy(req.user!.id, wordsTable.userId),
+          ),
+        );
       const valid = new Set(existing.map((w) => w.id));
       const unique = [...new Set(wordIds.filter((id) => valid.has(id)))];
 

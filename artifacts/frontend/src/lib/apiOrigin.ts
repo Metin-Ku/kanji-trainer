@@ -11,3 +11,8 @@ export function apiUrl(path: string): string {
   if (!origin) return path;
   return path.startsWith("/") ? `${origin}${path}` : `${origin}/${path}`;
 }
+
+/** Fetch with session cookies (httpOnly `kt_session`). */
+export function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  return fetch(apiUrl(path), { credentials: "include", ...init });
+}

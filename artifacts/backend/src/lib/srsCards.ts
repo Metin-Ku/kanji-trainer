@@ -7,6 +7,13 @@ import {
   type SrsCardRow,
 } from "./srs";
 
+function wordVisibleToUser(
+  word: { userId: number | null },
+  userId: number,
+): boolean {
+  return word.userId == null || word.userId === userId;
+}
+
 export async function ensureSrsCardsForWord(wordId: number) {
   const existing = await db
     .select({ deckType: srsCardsTable.deckType })
@@ -96,7 +103,7 @@ function hasSrsExamples(word: typeof wordsTable.$inferSelect): boolean {
   return Array.isArray(ex) && ex.length > 0;
 }
 
-export async function getDeckStats(deckType: SrsDeckType) {
+export async function getDeckStats(deckType: SrsDeckType, userId?: number) {
   const now = new Date();
   const rows = await db
     .select({ card: srsCardsTable, word: wordsTable })
@@ -108,6 +115,7 @@ export async function getDeckStats(deckType: SrsDeckType) {
   let newCount = 0;
   let total = 0;
   for (const { card, word } of rows) {
+    if (userId && !wordVisibleToUser(word, userId)) continue;
     if (deckType === "example" && !hasSrsExamples(word)) continue;
     total++;
     const mapped = mapSrsRow(card);
@@ -136,6 +144,7 @@ export async function getReviewQueue(
     limit?: number;
     wordIds?: number[];
     ignoreDue?: boolean;
+    userId?: number;
   } = {},
 ) {
   await backfillAllSrsCards();
@@ -164,6 +173,7 @@ export async function getReviewQueue(
     .where(eq(srsCardsTable.deckType, deckType));
 
   const filtered = rows.filter(({ card, word }) => {
+    if (options.userId && !wordVisibleToUser(word, options.userId)) return false;
     if (wordIdSet && !wordIdSet.has(word.id)) return false;
     const rank = jlptRank(word.jlptLevel);
     if (rank !== 99 && (rank < minRank || rank > maxRank)) return false;

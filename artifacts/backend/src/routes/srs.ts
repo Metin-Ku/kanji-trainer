@@ -19,8 +19,10 @@ import {
   recordMistake,
   recordSuccess,
 } from "../lib/wordMistakes";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
+router.use(requireAuth);
 
 const RATING_MAP: Record<number, ReviewRating> = {
   1: Rating.Again,
@@ -44,13 +46,13 @@ router.post("/srs/sync", async (_req, res, next) => {
   }
 });
 
-router.get("/srs/decks", async (_req, res, next) => {
+router.get("/srs/decks", async (req, res, next) => {
   try {
     await backfillAllSrsCards();
     const stats = await Promise.all(
       srsDeckTypes.map(async (deckType) => ({
         deckType,
-        ...(await getDeckStats(deckType)),
+        ...(await getDeckStats(deckType, req.user!.id)),
       })),
     );
     res.json(stats);
@@ -86,6 +88,7 @@ router.get("/srs/queue", async (req, res, next) => {
       sort,
       wordIds,
       ignoreDue,
+      userId: req.user!.id,
     });
     const now = new Date();
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Check, Palette, BookOpen, Database, Download, Link2, Languages } from "lucide-react";
+import { ArrowLeft, Check, Palette, BookOpen, Database, Download, Link2, Languages, LogOut, User } from "lucide-react";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useLocation } from "wouter";
 import {
@@ -17,7 +17,8 @@ import {
   type AppSettings,
 } from "../settings/appSettings";
 import { useWords } from "../hooks/useWords";
-import { apiUrl } from "../lib/apiOrigin";
+import { apiFetch } from "../lib/apiOrigin";
+import { useAuth } from "../auth/AuthProvider";
 import { relinkAllWordsSrsExamples } from "../lib/wordLinking";
 import { sanitizeSrsExamples } from "../lib/srsExamples";
 import { useTranslation } from "../i18n/I18nProvider";
@@ -31,7 +32,7 @@ import {
 } from "../lib/dailyGoal";
 import { srsDeckLabel } from "../i18n/srsDeckLabels";
 
-type Section = "styling" | "srs" | "database" | "language";
+type Section = "styling" | "srs" | "database" | "language" | "account";
 
 function Toggle({
   label,
@@ -71,6 +72,7 @@ function Toggle({
 
 export function SettingsPage() {
   const { t, locale, setLocale } = useTranslation();
+  const { user, logout } = useAuth();
   const [, navigate] = useLocation();
   const [section, setSection] = useState<Section>("styling");
   const [palette, setPalette] = useState<PaletteName>(() => getStoredPalette());
@@ -100,7 +102,7 @@ export function SettingsPage() {
     setBackupBusy(true);
     setStatusMessage(null);
     try {
-      const res = await fetch(apiUrl("/api/backup"));
+      const res = await apiFetch("/api/backup");
       if (!res.ok) throw new Error("backup failed");
       const data = await res.json();
       const stamp = new Date().toISOString().slice(0, 10);
@@ -220,6 +222,17 @@ export function SettingsPage() {
           >
             <Languages size={16} strokeWidth={2} />
             {t("settings.language.nav")}
+          </button>
+          <button
+            onClick={() => setSection("account")}
+            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
+              section === "account"
+                ? "bg-main-50 dark:bg-main-950 text-main-600 dark:text-main-400"
+                : "text-app-text-secondary hover:bg-app-muted"
+            }`}
+          >
+            <User size={16} strokeWidth={2} />
+            {t("settings.account.nav")}
           </button>
         </aside>
 
@@ -495,6 +508,52 @@ export function SettingsPage() {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {section === "account" && user && (
+            <div className="max-w-lg space-y-4">
+              <div>
+                <h2 className="text-lg font-bold text-app-text mb-1">
+                  {t("settings.account.title")}
+                </h2>
+                <p className="text-sm text-app-text-secondary mb-5">
+                  {t("settings.account.description")}
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-app-border-strong bg-app-surface p-4 space-y-3">
+                <div>
+                  <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wider">
+                    {t("settings.account.email")}
+                  </p>
+                  <p className="text-sm text-app-text mt-1">{user.email}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wider">
+                    {t("settings.account.role")}
+                  </p>
+                  <p className="text-sm text-app-text mt-1">
+                    {user.role === "admin"
+                      ? t("auth.roleAdmin")
+                      : user.role === "moderator"
+                        ? t("auth.roleModerator")
+                        : t("auth.roleUser")}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  await logout();
+                  navigate("/login");
+                }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-app-border-strong bg-app-surface text-app-text text-sm font-semibold hover:border-red-300 hover:text-red-600"
+              >
+                <LogOut size={16} />
+                {t("settings.account.logout")}
+              </button>
             </div>
           )}
         </main>

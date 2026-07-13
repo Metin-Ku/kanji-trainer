@@ -5,8 +5,10 @@ import {
   dismissMistake,
   listTroubleWords,
 } from "../lib/wordMistakes";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
+router.use(requireAuth);
 
 function parseDeckType(value: string): SrsDeckType | null {
   return (srsDeckTypes as readonly string[]).includes(value)
@@ -16,6 +18,7 @@ function parseDeckType(value: string): SrsDeckType | null {
 
 router.get("/trouble-words", async (req, res, next) => {
   try {
+    const userId = req.user!.id;
     const deckParam = req.query.deck ? String(req.query.deck) : null;
     const deck = deckParam ? parseDeckType(deckParam) : null;
     if (deckParam && !deck) {
@@ -27,8 +30,8 @@ router.get("/trouble-words", async (req, res, next) => {
     const limit = Math.min(500, Math.max(1, Number(req.query.limit) || 500));
 
     const [items, totalWords] = await Promise.all([
-      listTroubleWords({ deck, minCount, limit }),
-      countUniqueTroubleWords(minCount),
+      listTroubleWords({ userId, deck, minCount, limit }),
+      countUniqueTroubleWords(userId, minCount),
     ]);
 
     res.json({ items, totalWords });
@@ -40,13 +43,13 @@ router.get("/trouble-words", async (req, res, next) => {
 router.delete("/trouble-words/:wordId/:deckType", async (req, res, next) => {
   try {
     const wordId = Number(req.params.wordId);
-    const deckType = parseDeckType(String(req.params.deckType));
-    if (!Number.isFinite(wordId) || wordId <= 0 || !deckType) {
-      res.status(400).json({ error: "Invalid word or deck type" });
+    const deckType = parseDeckType(req.params.deckType);
+    if (!deckType) {
+      res.status(400).json({ error: "Invalid deck type" });
       return;
     }
 
-    await dismissMistake(wordId, deckType);
+    await dismissMistake(wordId, deckType, req.user!.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);
@@ -56,12 +59,7 @@ router.delete("/trouble-words/:wordId/:deckType", async (req, res, next) => {
 router.delete("/trouble-words/:wordId", async (req, res, next) => {
   try {
     const wordId = Number(req.params.wordId);
-    if (!Number.isFinite(wordId) || wordId <= 0) {
-      res.status(400).json({ error: "Invalid word id" });
-      return;
-    }
-
-    await dismissMistake(wordId);
+    await dismissMistake(wordId, undefined, req.user!.id);
     res.json({ ok: true });
   } catch (err) {
     next(err);

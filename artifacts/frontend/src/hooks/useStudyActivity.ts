@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiUrl } from "../lib/apiOrigin";
+import { apiFetch } from "../lib/apiOrigin";
 import {
   DAILY_GOAL_STORAGE_KEY,
   type DailyGoalDeckId,
@@ -40,7 +40,7 @@ function clearLegacyActivity(): void {
 }
 
 async function fetchStudyActivity(): Promise<ActivityByDate> {
-  const res = await fetch(apiUrl("/api/study-activity"));
+  const res = await apiFetch("/api/study-activity");
   if (!res.ok) throw new Error("Failed to load study activity");
   const data = (await res.json()) as { activityByDate: ActivityByDate };
 
@@ -49,7 +49,7 @@ async function fetchStudyActivity(): Promise<ActivityByDate> {
     return data.activityByDate;
   }
 
-  const importRes = await fetch(apiUrl("/api/study-activity/import"), {
+  const importRes = await apiFetch("/api/study-activity/import", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ activityByDate: legacy }),
@@ -78,7 +78,7 @@ export function useStudyActivity() {
       units?: number;
       date: string;
     }) => {
-      const res = await fetch(apiUrl("/api/study-activity/increment"), {
+      const res = await apiFetch("/api/study-activity/increment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deck, units, date }),
@@ -103,7 +103,7 @@ export async function recordStudyUnitOnServer(
   date: string,
   units = 1,
 ): Promise<ActivityByDate> {
-  const res = await fetch(apiUrl("/api/study-activity/increment"), {
+  const res = await apiFetch("/api/study-activity/increment", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ deck, units, date }),

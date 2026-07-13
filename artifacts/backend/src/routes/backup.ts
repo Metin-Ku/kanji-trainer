@@ -8,19 +8,63 @@ import {
   categoriesTable,
   categoryWordsTable,
 } from "@workspace/db";
+import { and, eq, inArray, asc } from "drizzle-orm";
+import { requireAuth } from "../middleware/auth";
+import { ownerOrLegacy } from "../lib/userScope";
 
 const router = Router();
+router.use(requireAuth);
 
-router.get("/backup", async (_req, res, next) => {
+router.get("/backup", async (req, res, next) => {
   try {
-    const [words, relations, srsCards, studyActivity, categories, categoryWords] =
-      await Promise.all([
-      db.select().from(wordsTable).orderBy(wordsTable.id),
-      db.select().from(wordRelationsTable),
-      db.select().from(srsCardsTable).orderBy(srsCardsTable.id),
-      db.select().from(studyActivityTable).orderBy(studyActivityTable.date),
-      db.select().from(categoriesTable).orderBy(categoriesTable.id),
-      db.select().from(categoryWordsTable),
+    const userId = req.user!.id;
+
+    const words = await db
+      .select()
+      .from(wordsTable)
+      .where(ownerOrLegacy(userId, wordsTable.userId))
+      .orderBy(asc(wordsTable.id));
+
+    const wordIds = words.map((w) => w.id);
+
+    const categories = await db
+      .select()
+      .from(categoriesTable)
+      .where(ownerOrLegacy(userId, categoriesTable.userId))
+      .orderBy(asc(categoriesTable.id));
+
+    const categoryIds = categories.map((c) => c.id);
+
+    const [
+      relations,
+      srsCards,
+      studyActivity,
+      categoryWords,
+    ] = await Promise.all([
+      wordIds.length > 0
+        ? db
+            .select()
+            .from(wordRelationsTable)
+            .where(inArray(wordRelationsTable.wordId, wordIds))
+        : Promise.resolve([]),
+      wordIds.length > 0
+        ? db
+            .select()
+            .from(srsCardsTable)
+            .where(inArray(srsCardsTable.wordId, wordIds))
+            .orderBy(asc(srsCardsTable.id))
+        : Promise.resolve([]),
+      db
+        .select()
+        .from(studyActivityTable)
+        .where(eq(studyActivityTable.userId, userId))
+        .orderBy(asc(studyActivityTable.date)),
+      categoryIds.length > 0
+        ? db
+            .select()
+            .from(categoryWordsTable)
+            .where(inArray(categoryWordsTable.categoryId, categoryIds))
+        : Promise.resolve([]),
     ]);
 
     res.json({

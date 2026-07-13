@@ -4,7 +4,7 @@ import {
   studyActivityTable,
   type SrsDeckType,
 } from "@workspace/db";
-import { sql } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 
 export type ActivityByDate = Record<
   string,
@@ -26,10 +26,20 @@ function normalizeActivityRow(
   out[date] = day;
 }
 
-export async function getActivityByDate(): Promise<ActivityByDate> {
+function userActivityFilter(userId: number) {
+  return or(
+    eq(studyActivityTable.userId, userId),
+    isNull(studyActivityTable.userId),
+  );
+}
+
+export async function getActivityByDate(
+  userId: number,
+): Promise<ActivityByDate> {
   const rows = await db
     .select()
     .from(studyActivityTable)
+    .where(userActivityFilter(userId))
     .orderBy(studyActivityTable.date);
 
   const out: ActivityByDate = {};
@@ -40,6 +50,7 @@ export async function getActivityByDate(): Promise<ActivityByDate> {
 }
 
 export async function incrementStudyUnit(
+  userId: number,
   deckType: SrsDeckType,
   date: string,
   units = 1,
@@ -48,9 +59,13 @@ export async function incrementStudyUnit(
 
   await db
     .insert(studyActivityTable)
-    .values({ date, deckType, count: units })
+    .values({ userId, date, deckType, count: units })
     .onConflictDoUpdate({
-      target: [studyActivityTable.date, studyActivityTable.deckType],
+      target: [
+        studyActivityTable.userId,
+        studyActivityTable.date,
+        studyActivityTable.deckType,
+      ],
       set: {
         count: sql`${studyActivityTable.count} + ${units}`,
       },
@@ -58,6 +73,7 @@ export async function incrementStudyUnit(
 }
 
 export async function importActivityByDate(
+  userId: number,
   activityByDate: ActivityByDate,
 ): Promise<void> {
   for (const [date, decks] of Object.entries(activityByDate)) {
@@ -68,13 +84,25 @@ export async function importActivityByDate(
 
       await db
         .insert(studyActivityTable)
-        .values({ date, deckType: deck, count })
+        .values({ userId, date, deckType: deck, count })
         .onConflictDoUpdate({
-          target: [studyActivityTable.date, studyActivityTable.deckType],
+          target: [
+            studyActivityTable.userId,
+            studyActivityTable.date,
+            studyActivityTable.deckType,
+          ],
           set: {
             count: sql`GREATEST(${studyActivityTable.count}, ${count})`,
           },
         });
     }
   }
+}
+
+/** Reassign legacy rows without user_id to the given user. */
+export async function claimOrphanStudyActivity(userId: number): Promise<void> {
+  await db
+    .update(studyActivityTable)
+    .set({ userId })
+    .where(isNull(studyActivityTable.userId));
 }

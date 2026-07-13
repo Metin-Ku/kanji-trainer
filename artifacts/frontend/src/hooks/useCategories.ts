@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiUrl } from "../lib/apiOrigin";
+import { apiFetch } from "../lib/apiOrigin";
 
 export interface CategorySummary {
   id: number;
@@ -40,7 +40,7 @@ export function useCategories() {
   const query = useQuery({
     queryKey: CATEGORIES_QUERY_KEY,
     queryFn: async (): Promise<CategorySummary[]> => {
-      const res = await fetch(apiUrl("/api/categories"));
+      const res = await apiFetch("/api/categories");
       if (!res.ok) throw new Error("Failed to load categories");
       return res.json();
     },
@@ -48,7 +48,7 @@ export function useCategories() {
 
   const createMutation = useMutation({
     mutationFn: async (input: CategoryInput): Promise<CategorySummary> => {
-      const res = await fetch(apiUrl("/api/categories"), {
+      const res = await apiFetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -77,7 +77,7 @@ export function useCategory(id: number) {
   const query = useQuery({
     queryKey: [...CATEGORIES_QUERY_KEY, id],
     queryFn: async (): Promise<CategoryDetail> => {
-      const res = await fetch(apiUrl(`/api/categories/${id}`));
+      const res = await apiFetch(`/api/categories/${id}`);
       if (!res.ok) throw new Error("Failed to load category");
       return res.json();
     },
@@ -91,7 +91,7 @@ export function useCategory(id: number) {
 
   const updateMutation = useMutation({
     mutationFn: async (input: CategoryInput): Promise<CategoryDetail> => {
-      const res = await fetch(apiUrl(`/api/categories/${id}`), {
+      const res = await apiFetch(`/api/categories/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -107,7 +107,7 @@ export function useCategory(id: number) {
 
   const deleteMutation = useMutation({
     mutationFn: async (): Promise<void> => {
-      const res = await fetch(apiUrl(`/api/categories/${id}`), {
+      const res = await apiFetch(`/api/categories/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete category");

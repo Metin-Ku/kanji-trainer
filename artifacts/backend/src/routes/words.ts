@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, wordsTable, wordRelationsTable, categoryWordsTable } from "@workspace/db";
-import { eq, or, inArray } from "drizzle-orm";
+import { eq, or, inArray, and } from "drizzle-orm";
 import {
   CreateWordBody,
   UpdateWordBody,
@@ -14,8 +14,11 @@ import {
 } from "../lib/categoryWords";
 import { matchCategoryNames } from "../lib/categoryMatch";
 import { categoriesTable } from "@workspace/db";
+import { requireAuth } from "../middleware/auth";
+import { ownerOrLegacy } from "../lib/userScope";
 
 const router = Router();
+router.use(requireAuth);
 
 function parseIdArray(raw: unknown): number[] | undefined {
   if (!Array.isArray(raw)) return undefined;
@@ -71,9 +74,30 @@ async function setRelatedWords(wordId: number, relatedIds: number[]): Promise<vo
 
 router.get("/words", async (req, res, next) => {
   try {
-  const words = await db.select().from(wordsTable).orderBy(wordsTable.createdAt);
-  const relations = await db.select().from(wordRelationsTable);
-  const categoryLinks = await db.select().from(categoryWordsTable);
+  const userId = req.user!.id;
+  const words = await db
+    .select()
+    .from(wordsTable)
+    .where(ownerOrLegacy(userId, wordsTable.userId))
+    .orderBy(wordsTable.createdAt);
+  const wordIds = words.map((w) => w.id);
+  const relations = wordIds.length
+    ? await db
+        .select()
+        .from(wordRelationsTable)
+        .where(
+          or(
+            inArray(wordRelationsTable.wordId, wordIds),
+            inArray(wordRelationsTable.relatedWordId, wordIds),
+          ),
+        )
+    : [];
+  const categoryLinks = wordIds.length
+    ? await db
+        .select()
+        .from(categoryWordsTable)
+        .where(inArray(categoryWordsTable.wordId, wordIds))
+    : [];
 
   // Build a map: wordId → Set of relatedWordIds (bidirectional)
   const relMap = new Map<number, number[]>();
@@ -121,7 +145,8 @@ router.post("/words/bulk", async (req, res) => {
 
   const existingRows = await db
     .select({ id: wordsTable.id, kanji: wordsTable.kanji })
-    .from(wordsTable);
+    .from(wordsTable)
+    .where(ownerOrLegacy(req.user!.id, wordsTable.userId));
   const existingSet = new Set(existingRows.map((w) => w.kanji.normalize("NFC")));
   const kanjiToId = new Map(
     existingRows.map((w) => [w.kanji.normalize("NFC"), w.id]),
@@ -135,6 +160,7 @@ router.post("/words/bulk", async (req, res) => {
   if (toAdd.length > 0) {
     const inserted = await db.insert(wordsTable).values(
       toAdd.map((w) => ({
+        userId: req.user!.id,
         kanji: w.kanji,
         pronunciation: w.pronunciation ?? "",
         meaning: w.meaning ?? "",
@@ -162,12 +188,22 @@ router.post("/words/bulk", async (req, res) => {
         srsExamples,
         jlptLevel: w.jlptLevel ?? null,
       })
-      .where(eq(wordsTable.kanji, w.kanji));
+      .where(
+        and(
+          eq(wordsTable.kanji, w.kanji),
+          ownerOrLegacy(req.user!.id, wordsTable.userId),
+        ),
+      );
 
     const [updated] = await db
       .select({ id: wordsTable.id })
       .from(wordsTable)
-      .where(eq(wordsTable.kanji, w.kanji))
+      .where(
+        and(
+          eq(wordsTable.kanji, w.kanji),
+          ownerOrLegacy(req.user!.id, wordsTable.userId),
+        ),
+      )
       .limit(1);
     if (updated) {
       kanjiToId.set(w.kanji.normalize("NFC"), updated.id);
@@ -177,7 +213,8 @@ router.post("/words/bulk", async (req, res) => {
 
   const allCategories = await db
     .select({ id: categoriesTable.id, name: categoriesTable.name })
-    .from(categoriesTable);
+    .from(categoriesTable)
+    .where(ownerOrLegacy(req.user!.id, categoriesTable.userId));
 
   for (const w of incoming) {
     const wordId = kanjiToId.get(w.kanji.normalize("NFC"));
@@ -221,7 +258,17 @@ router.post("/words", async (req, res) => {
   const categoryIds = parseIdArray(req.body?.categoryIds);
   const [word] = await db
     .insert(wordsTable)
-    .values({ kanji, pronunciation, meaning, description, srsExamples, level, jlptLevel: jlptLevel ?? null, date })
+    .values({
+      userId: req.user!.id,
+      kanji,
+      pronunciation,
+      meaning,
+      description,
+      srsExamples,
+      level,
+      jlptLevel: jlptLevel ?? null,
+      date,
+    })
     .returning();
   if (relatedWordIds && relatedWordIds.length > 0) {
     await setRelatedWords(word.id, relatedWordIds);
@@ -244,7 +291,12 @@ router.patch("/words/:id", async (req, res) => {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
-  const existing = await db.select().from(wordsTable).where(eq(wordsTable.id, id));
+  const existing = await db
+    .select()
+    .from(wordsTable)
+    .where(
+      and(eq(wordsTable.id, id), ownerOrLegacy(req.user!.id, wordsTable.userId)),
+    );
   if (existing.length === 0) {
     res.status(404).json({ error: "Not found" });
     return;
@@ -288,7 +340,12 @@ router.patch("/words/:id", async (req, res) => {
 
 router.delete("/words/:id", async (req, res) => {
   const id = Number(req.params.id);
-  const existing = await db.select().from(wordsTable).where(eq(wordsTable.id, id));
+  const existing = await db
+    .select()
+    .from(wordsTable)
+    .where(
+      and(eq(wordsTable.id, id), ownerOrLegacy(req.user!.id, wordsTable.userId)),
+    );
   if (existing.length === 0) {
     res.status(404).json({ error: "Not found" });
     return;

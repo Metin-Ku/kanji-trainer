@@ -1,4 +1,7 @@
-import { Router, Route, Switch } from "wouter";
+import type { ReactNode } from "react";
+import { Router, Route, Switch, Redirect, useLocation } from "wouter";
+import { useAuth } from "@/auth/AuthProvider";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { HomePage } from "@/pages/HomePage";
 import { WordListPage } from "@/pages/WordListPage";
 import { PronunciationPage } from "@/pages/PronunciationPage";
@@ -19,11 +22,48 @@ import { CategoryDetailPage } from "@/pages/CategoryDetailPage";
 import { ThemeDetailPage } from "@/pages/ThemeDetailPage";
 import { ThemeQuizEditorPage } from "@/pages/ThemeQuizEditorPage";
 import { ThemeQuizStudyPage } from "@/pages/ThemeQuizStudyPage";
+import { LoginPage } from "@/pages/LoginPage";
+import { RegisterPage } from "@/pages/RegisterPage";
+import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
+import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 
-function App() {
+const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password", "/reset-password"];
+
+function isPublicPath(path: string) {
+  return PUBLIC_PREFIXES.some((p) => path === p || path.startsWith(`${p}?`));
+}
+
+function AuthGate({ children }: { children: ReactNode }) {
+  const { user, loading } = useAuth();
+  const [path] = useLocation();
+
+  if (loading) {
+    return (
+      <div className="min-h-dvh flex items-center justify-center bg-app-bg">
+        <LoadingSpinner size={36} className="text-app-text-muted" />
+      </div>
+    );
+  }
+
+  if (!user && !isPublicPath(path)) {
+    return <Redirect to="/login" />;
+  }
+
+  if (user && (path === "/login" || path === "/register")) {
+    return <Redirect to="/" />;
+  }
+
+  return <>{children}</>;
+}
+
+function AppRoutes() {
   return (
-    <Router>
+    <AuthGate>
       <Switch>
+        <Route path="/login" component={LoginPage} />
+        <Route path="/register" component={RegisterPage} />
+        <Route path="/forgot-password" component={ForgotPasswordPage} />
+        <Route path="/reset-password" component={ResetPasswordPage} />
         <Route path="/" component={HomePage} />
         <Route path="/progress" component={ProgressPage} />
         <Route path="/settings" component={SettingsPage} />
@@ -45,6 +85,14 @@ function App() {
         <Route path="/learned/meaning" component={LearnedMeaningPage} />
         <Route path="/study" component={StudyPage} />
       </Switch>
+    </AuthGate>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppRoutes />
     </Router>
   );
 }

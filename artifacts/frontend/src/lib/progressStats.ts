@@ -134,19 +134,32 @@ export function getHeatmapCells(
   return buildHeatmapGrid(activityByDate, gridStart, weeks * 7, end);
 }
 
-export function getYearToDateHeatmapCells(
+export function getYearHeatmapCells(
   activityByDate: Record<string, Partial<Record<DailyGoalDeckId, number>>>,
-  endDate = new Date(),
+  year: number,
+  today = new Date(),
 ): HeatmapCell[] {
-  const end = startOfLocalDay(endDate);
-  const year = end.getFullYear();
+  const todayNorm = startOfLocalDay(today);
   const yearStart = new Date(year, 0, 1);
   const yearEnd = new Date(year, 11, 31);
+  const end =
+    year === todayNorm.getFullYear() ? todayNorm : startOfLocalDay(yearEnd);
   const gridStart = addDays(yearStart, -yearStart.getDay());
   const spanDays =
     Math.floor((yearEnd.getTime() - gridStart.getTime()) / 86_400_000) + 1;
   const gridDays = Math.ceil(spanDays / 7) * 7;
   return buildHeatmapGrid(activityByDate, gridStart, gridDays, end);
+}
+
+export function getYearToDateHeatmapCells(
+  activityByDate: Record<string, Partial<Record<DailyGoalDeckId, number>>>,
+  endDate = new Date(),
+): HeatmapCell[] {
+  return getYearHeatmapCells(
+    activityByDate,
+    endDate.getFullYear(),
+    endDate,
+  );
 }
 
 export function getLevelDistribution(

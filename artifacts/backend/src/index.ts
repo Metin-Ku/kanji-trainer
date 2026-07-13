@@ -1,5 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { ensureBootstrapUser } from "./lib/auth";
+import { claimOrphanStudyActivity } from "./lib/studyActivity";
 
 const rawPort = process.env["PORT"];
 
@@ -15,11 +17,27 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-app.listen(port, (err) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
+async function start() {
+  try {
+    await ensureBootstrapUser();
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    if (adminEmail) {
+      const { findUserByEmail } = await import("./lib/auth");
+      const admin = await findUserByEmail(adminEmail);
+      if (admin) await claimOrphanStudyActivity(admin.id);
+    }
+  } catch (err) {
+    logger.error({ err }, "Bootstrap user migration failed");
   }
 
-  logger.info({ port }, "Server listening");
-});
+  app.listen(port, (err) => {
+    if (err) {
+      logger.error({ err }, "Error listening on port");
+      process.exit(1);
+    }
+
+    logger.info({ port }, "Server listening");
+  });
+}
+
+start();

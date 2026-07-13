@@ -5,6 +5,7 @@ import App from "./App";
 import { initTheme, initColorScheme } from "./theme";
 import { I18nProvider } from "./i18n/I18nProvider";
 import { ConfirmProvider } from "./components/ConfirmProvider";
+import { AuthProvider } from "./auth/AuthProvider";
 import { getApiOrigin } from "./lib/apiOrigin";
 import "./index.css";
 
@@ -26,9 +27,11 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById("root")!).render(
   <QueryClientProvider client={queryClient}>
     <I18nProvider>
-      <ConfirmProvider>
-        <App />
-      </ConfirmProvider>
+      <AuthProvider>
+        <ConfirmProvider>
+          <App />
+        </ConfirmProvider>
+      </AuthProvider>
     </I18nProvider>
   </QueryClientProvider>
 );

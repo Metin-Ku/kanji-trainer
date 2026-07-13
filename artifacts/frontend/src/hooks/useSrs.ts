@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiUrl } from "../lib/apiOrigin";
+import { apiFetch } from "../lib/apiOrigin";
 import type {
   ReviewRating,
   SrsDeckStats,
@@ -12,7 +12,7 @@ export function useSrsDecks() {
   return useQuery({
     queryKey: ["srs", "decks"],
     queryFn: async (): Promise<SrsDeckStats[]> => {
-      const res = await fetch(apiUrl("/api/srs/decks"));
+      const res = await apiFetch("/api/srs/decks");
       if (!res.ok) throw new Error("Failed to load SRS decks");
       return res.json();
     },
@@ -23,7 +23,7 @@ export function useSrsSync() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async () => {
-      const res = await fetch(apiUrl("/api/srs/sync"), { method: "POST" });
+      const res = await apiFetch("/api/srs/sync", { method: "POST" });
       if (!res.ok) throw new Error("Failed to sync SRS");
       return res.json();
     },
@@ -47,13 +47,13 @@ export async function fetchSrsQueue(
   if (options.jlptMax) params.set("jlptMax", options.jlptMax);
   if (options.sort) params.set("sort", options.sort);
 
-  const res = await fetch(apiUrl(`/api/srs/queue?${params}`));
+  const res = await apiFetch(`/api/srs/queue?${params}`);
   if (!res.ok) throw new Error("Failed to load review queue");
   return res.json();
 }
 
 export async function reviewSrsCard(cardId: number, rating: ReviewRating) {
-  const res = await fetch(apiUrl(`/api/srs/cards/${cardId}/review`), {
+  const res = await apiFetch(`/api/srs/cards/${cardId}/review`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ rating }),
@@ -63,7 +63,7 @@ export async function reviewSrsCard(cardId: number, rating: ReviewRating) {
 }
 
 export async function reviewSrsExample(cardId: number, correct: boolean) {
-  const res = await fetch(apiUrl(`/api/srs/cards/${cardId}/review`), {
+  const res = await apiFetch(`/api/srs/cards/${cardId}/review`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ correct }),

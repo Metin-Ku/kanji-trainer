@@ -6,8 +6,11 @@ import {
   incrementStudyUnit,
   type ActivityByDate,
 } from "../lib/studyActivity";
+import { requireAuth } from "../middleware/auth";
 
 const router = Router();
+
+router.use(requireAuth);
 
 function parseDeckType(value: unknown): SrsDeckType | null {
   return typeof value === "string" &&
@@ -38,9 +41,9 @@ function parseActivityByDate(raw: unknown): ActivityByDate | null {
   return out;
 }
 
-router.get("/study-activity", async (_req, res, next) => {
+router.get("/study-activity", async (req, res, next) => {
   try {
-    const activityByDate = await getActivityByDate();
+    const activityByDate = await getActivityByDate(req.user!.id);
     res.json({ activityByDate });
   } catch (err) {
     next(err);
@@ -61,8 +64,8 @@ router.post("/study-activity/increment", async (req, res, next) => {
       return;
     }
 
-    await incrementStudyUnit(deckType, date, Math.round(units));
-    const activityByDate = await getActivityByDate();
+    await incrementStudyUnit(req.user!.id, deckType, date, Math.round(units));
+    const activityByDate = await getActivityByDate(req.user!.id);
     res.json({ activityByDate });
   } catch (err) {
     next(err);
@@ -77,8 +80,8 @@ router.post("/study-activity/import", async (req, res, next) => {
       return;
     }
 
-    await importActivityByDate(activityByDate);
-    const merged = await getActivityByDate();
+    await importActivityByDate(req.user!.id, activityByDate);
+    const merged = await getActivityByDate(req.user!.id);
     res.json({ activityByDate: merged });
   } catch (err) {
     next(err);

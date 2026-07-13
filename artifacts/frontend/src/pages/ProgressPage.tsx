@@ -1,13 +1,17 @@
+import { useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTranslation } from "../i18n/I18nProvider";
+import { useAuth } from "../auth/AuthProvider";
 import { useWords } from "../hooks/useWords";
 import { useStudyHistory } from "../hooks/useStudyHistory";
 import { StudyHeatmap } from "../components/progress/StudyHeatmap";
+import { HeatmapYearSelect } from "../components/progress/HeatmapYearSelect";
 import { DeckActivityChart } from "../components/progress/DeckActivityChart";
 import { LevelDistributionChart } from "../components/progress/LevelDistributionChart";
 import { JlptProgressSection } from "../components/progress/JlptProgressSection";
 import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
+import { membershipYear, yearRange } from "../lib/authApi";
 
 function Section({
   title,
@@ -28,9 +32,18 @@ function Section({
 
 export function ProgressPage() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [, navigate] = useLocation();
   const { words, isLoading } = useWords();
   const activityByDate = useStudyHistory();
+
+  const currentYear = new Date().getFullYear();
+  const minYear = user ? membershipYear(user.createdAt) : currentYear;
+  const years = useMemo(
+    () => yearRange(minYear, currentYear),
+    [minYear, currentYear],
+  );
+  const [heatmapYear, setHeatmapYear] = useState(currentYear);
 
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
@@ -56,7 +69,16 @@ export function ProgressPage() {
         ) : (
           <>
             <Section title={t("progress.sections.heatmap")}>
-              <StudyHeatmap activityByDate={activityByDate} weeks={26} />
+              <HeatmapYearSelect
+                years={years}
+                value={heatmapYear}
+                currentYear={currentYear}
+                onChange={setHeatmapYear}
+              />
+              <StudyHeatmap
+                activityByDate={activityByDate}
+                range={{ kind: "year", year: heatmapYear }}
+              />
             </Section>
 
             <Section title={t("progress.sections.deckActivity")}>

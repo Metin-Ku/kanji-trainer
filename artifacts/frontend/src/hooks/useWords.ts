@@ -6,7 +6,7 @@ import {
   useDeleteWord,
   getListWordsQueryKey,
 } from "@workspace/api-client-react";
-import { apiUrl } from "../lib/apiOrigin";
+import { apiFetch } from "../lib/apiOrigin";
 import type { WordInput, WordUpdate, Word } from "../types";
 import { CATEGORIES_QUERY_KEY } from "./useCategories";
 
@@ -64,7 +64,7 @@ export function useWords() {
     categoryNames?: string[];
     synonymKanji?: string[];
   }[]) =>
-    fetch(apiUrl("/api/words/bulk"), {
+    apiFetch("/api/words/bulk", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ words }),
@@ -82,7 +82,7 @@ export function useWords() {
 
   const deleteWords = async (ids: number[]) => {
     await Promise.allSettled(
-      ids.map((id) => fetch(apiUrl(`/api/words/${id}`), { method: "DELETE" }))
+      ids.map((id) => apiFetch(`/api/words/${id}`, { method: "DELETE" }))
     );
     invalidate();
   };

@@ -11,7 +11,7 @@ import {
   getGetThemeQueryKey,
 } from "@workspace/api-client-react";
 import type { ThemeInput, ThemeUpdate, ThemeQuestionsInput, ThemeSummary, ThemeDetail } from "../types";
-import { apiUrl } from "../lib/apiOrigin";
+import { apiFetch } from "../lib/apiOrigin";
 
 function normalizeIconSvg(iconSvg?: string | null): string | null {
   if (iconSvg == null) return null;
@@ -55,7 +55,7 @@ export function useThemes() {
     isLoading: listQuery.isLoading,
     isError: listQuery.isError,
     createTheme: async (data: ThemeInput) => {
-      const res = await fetch(apiUrl("/api/themes"), {
+      const res = await apiFetch("/api/themes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -70,7 +70,7 @@ export function useThemes() {
       return theme;
     },
     updateTheme: async (id: number, data: ThemeUpdate) => {
-      const res = await fetch(apiUrl(`/api/themes/${id}`), {
+      const res = await apiFetch(`/api/themes/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -143,7 +143,7 @@ export function useTheme(id: number) {
     isError: query.isError,
     refetch: query.refetch,
     updateTheme: async (data: ThemeUpdate) => {
-      const res = await fetch(apiUrl(`/api/themes/${id}`), {
+      const res = await apiFetch(`/api/themes/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

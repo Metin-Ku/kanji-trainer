@@ -1,10 +1,14 @@
 import express, { type Express, type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
+
+const frontendOrigin =
+  process.env.FRONTEND_ORIGIN?.replace(/\/+$/, "") || "http://localhost:3000";
 
 app.use(
   pinoHttp({
@@ -25,7 +29,13 @@ app.use(
     },
   }),
 );
-app.use(cors());
+app.use(
+  cors({
+    origin: frontendOrigin,
+    credentials: true,
+  }),
+);
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

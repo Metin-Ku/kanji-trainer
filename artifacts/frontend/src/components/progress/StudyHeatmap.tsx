@@ -13,6 +13,7 @@ import { Lens } from "@/components/ui/lens";
 import { useTranslation } from "../../i18n/I18nProvider";
 import {
   getHeatmapCells,
+  getYearHeatmapCells,
   getYearToDateHeatmapCells,
   HEATMAP_LEVEL_CLASSES,
   type HeatmapCell,
@@ -20,6 +21,7 @@ import {
 
 export type HeatmapRange =
   | { kind: "weeks"; weeks: number }
+  | { kind: "year"; year: number }
   | { kind: "ytd" };
 
 type StudyHeatmapProps = {
@@ -315,6 +317,9 @@ export function StudyHeatmap({
   const resolvedRange: HeatmapRange = range ?? { kind: "weeks", weeks };
 
   const cells = useMemo(() => {
+    if (resolvedRange.kind === "year") {
+      return getYearHeatmapCells(activityByDate, resolvedRange.year);
+    }
     if (resolvedRange.kind === "ytd") {
       return getYearToDateHeatmapCells(activityByDate);
     }

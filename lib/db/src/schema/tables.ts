@@ -48,8 +48,51 @@ export type SrsExample = {
   hints: SrsExampleHint[];
 };
 
+export const userRoles = ["admin", "moderator", "user"] as const;
+export type UserRole = (typeof userRoles)[number];
+
+export const usersTable = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  role: text("role").notNull().default("user"),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const sessionsTable = pgTable("sessions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const passwordResetTokensTable = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => usersTable.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
 export const wordsTable = pgTable("words", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
   kanji: text("kanji").notNull(),
   pronunciation: text("pronunciation").notNull().default(""),
   meaning: text("meaning").notNull().default(""),
@@ -144,6 +187,9 @@ export type ThemeQuizQuestionType = (typeof themeQuizQuestionTypes)[number];
 
 export const themesTable = pgTable("themes", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   iconSvg: text("icon_svg"),
   sortOrder: integer("sort_order").notNull().default(0),
@@ -192,15 +238,23 @@ export const themeQuizQuestionsTable = pgTable("theme_quiz_questions", {
 export const studyActivityTable = pgTable(
   "study_activity",
   {
+    userId: integer("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
     date: text("date").notNull(),
     deckType: text("deck_type").notNull(),
     count: integer("count").notNull().default(0),
   },
-  (t) => [primaryKey({ columns: [t.date, t.deckType] })],
+  (t) => [
+    primaryKey({ columns: [t.userId, t.date, t.deckType] }),
+  ],
 );
 
 export const categoriesTable = pgTable("categories", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => usersTable.id, {
+    onDelete: "cascade",
+  }),
   name: text("name").notNull(),
   iconSvg: text("icon_svg"),
   sortOrder: integer("sort_order").notNull().default(0),

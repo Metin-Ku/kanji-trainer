@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiUrl } from "../lib/apiOrigin";
+import { apiFetch } from "../lib/apiOrigin";
 import type { SrsDeckType } from "../types/srs";
 
 export type TroubleDeckEntry = {
@@ -33,7 +33,7 @@ export function useTroubleWords(deckFilter: TroubleDeckFilter = "all") {
       const params = new URLSearchParams();
       if (deckFilter !== "all") params.set("deck", deckFilter);
       const qs = params.toString();
-      const res = await fetch(apiUrl(`/api/trouble-words${qs ? `?${qs}` : ""}`));
+      const res = await apiFetch(`/api/trouble-words${qs ? `?${qs}` : ""}`);
       if (!res.ok) throw new Error("Failed to load trouble words");
       return res.json();
     },
@@ -44,7 +44,7 @@ export function useTroubleWordCount() {
   return useQuery({
     queryKey: ["trouble-words", "count"],
     queryFn: async (): Promise<number> => {
-      const res = await fetch(apiUrl("/api/trouble-words?limit=1"));
+      const res = await apiFetch("/api/trouble-words?limit=1");
       if (!res.ok) throw new Error("Failed to load trouble word count");
       const data = (await res.json()) as TroubleWordsResponse;
       return data.totalWords;
@@ -65,7 +65,7 @@ export function useDismissTroubleWord() {
       const path = deckType
         ? `/api/trouble-words/${wordId}/${deckType}`
         : `/api/trouble-words/${wordId}`;
-      const res = await fetch(apiUrl(path), { method: "DELETE" });
+      const res = await apiFetch(path, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to dismiss trouble word");
       return res.json();
     },
@@ -86,7 +86,7 @@ export async function fetchTroubleSrsQueue(
     ignoreDue: "1",
     sort: "due-asc",
   });
-  const res = await fetch(apiUrl(`/api/srs/queue?${params}`));
+  const res = await apiFetch(`/api/srs/queue?${params}`);
   if (!res.ok) throw new Error("Failed to load trouble review queue");
   return res.json();
 }

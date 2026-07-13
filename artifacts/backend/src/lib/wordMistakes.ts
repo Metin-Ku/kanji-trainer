@@ -7,6 +7,7 @@ import {
   srsDeckTypes,
 } from "@workspace/db";
 import { and, desc, eq, gt, sql } from "drizzle-orm";
+import { ownerOrLegacy } from "./userScope";
 
 export type TroubleDeckEntry = {
   deckType: SrsDeckType;
@@ -88,7 +89,22 @@ export async function recordSuccess(wordId: number, deckType: SrsDeckType) {
     );
 }
 
-export async function dismissMistake(wordId: number, deckType?: SrsDeckType) {
+export async function dismissMistake(
+  wordId: number,
+  deckType?: SrsDeckType,
+  userId?: number,
+) {
+  if (userId != null) {
+    const [word] = await db
+      .select({ id: wordsTable.id })
+      .from(wordsTable)
+      .where(
+        and(eq(wordsTable.id, wordId), ownerOrLegacy(userId, wordsTable.userId)),
+      )
+      .limit(1);
+    if (!word) return;
+  }
+
   if (deckType) {
     await db
       .delete(wordMistakesTable)
@@ -137,16 +153,20 @@ export async function backfillMistakesFromLapses() {
 }
 
 export async function listTroubleWords(options: {
+  userId: number;
   deck?: SrsDeckType | null;
   minCount?: number;
   limit?: number;
-} = {}): Promise<TroubleWordRow[]> {
+}): Promise<TroubleWordRow[]> {
   await backfillMistakesFromLapses();
 
   const minCount = options.minCount ?? 1;
   const limit = options.limit ?? 500;
 
-  const conditions = [gt(wordMistakesTable.mistakeCount, minCount - 1)];
+  const conditions = [
+    gt(wordMistakesTable.mistakeCount, minCount - 1),
+    ownerOrLegacy(options.userId, wordsTable.userId),
+  ];
   if (options.deck) {
     conditions.push(eq(wordMistakesTable.deckType, options.deck));
   }
@@ -226,27 +246,57 @@ export async function getTroubleWordIds(deckType: SrsDeckType): Promise<number[]
   return rows.map((r) => r.wordId);
 }
 
-export async function countUniqueTroubleWords(minCount = 1): Promise<number> {
+export async function countUniqueTroubleWords(
+  userId: number,
+  minCount = 1,
+): Promise<number> {
   await backfillMistakesFromLapses();
 
   const rows = await db
     .selectDistinct({ wordId: wordMistakesTable.wordId })
     .from(wordMistakesTable)
-    .where(gt(wordMistakesTable.mistakeCount, minCount - 1));
+    .innerJoin(wordsTable, eq(wordMistakesTable.wordId, wordsTable.id))
+    .where(
+      and(
+        gt(wordMistakesTable.mistakeCount, minCount - 1),
+        ownerOrLegacy(userId, wordsTable.userId),
+      ),
+    );
 
   return rows.length;
 }
 
 export async function getTroubleWordIdsForDeckFilter(
+  userId: number,
   deck: SrsDeckType | null,
 ): Promise<number[]> {
-  if (deck) return getTroubleWordIds(deck);
+  if (deck) {
+    await backfillMistakesFromLapses();
+    const rows = await db
+      .select({ wordId: wordMistakesTable.wordId })
+      .from(wordMistakesTable)
+      .innerJoin(wordsTable, eq(wordMistakesTable.wordId, wordsTable.id))
+      .where(
+        and(
+          eq(wordMistakesTable.deckType, deck),
+          gt(wordMistakesTable.mistakeCount, 0),
+          ownerOrLegacy(userId, wordsTable.userId),
+        ),
+      );
+    return rows.map((r) => r.wordId);
+  }
 
   await backfillMistakesFromLapses();
   const rows = await db
     .selectDistinct({ wordId: wordMistakesTable.wordId })
     .from(wordMistakesTable)
-    .where(gt(wordMistakesTable.mistakeCount, 0));
+    .innerJoin(wordsTable, eq(wordMistakesTable.wordId, wordsTable.id))
+    .where(
+      and(
+        gt(wordMistakesTable.mistakeCount, 0),
+        ownerOrLegacy(userId, wordsTable.userId),
+      ),
+    );
 
   return rows.map((r) => r.wordId);
 }
