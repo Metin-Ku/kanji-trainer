@@ -132,7 +132,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
-      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-5 shrink-0">
+      <div className="bg-app-surface border-b border-app-border-strong px-5 pt-4 pb-5 shrink-0">
         <div className="flex items-center justify-between gap-3 mb-0.5">
           <p className="text-[11px] font-semibold text-main-400 uppercase tracking-widest">
             {t("home.appSubtitle")}
@@ -386,7 +386,7 @@ export function HomePage() {
                     (titleKey === "nav.themes" && themesLoading) ||
                     (titleKey === "nav.categories" && categoriesLoading)
                   }
-                  className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-3.5 active:scale-[0.99] transition-transform disabled:opacity-60"
+                  className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border-strong px-4 py-3.5 active:scale-[0.99] transition-transform disabled:opacity-60"
                 >
                   <div className="w-10 h-10 rounded-xl bg-app-accent flex items-center justify-center shrink-0">
                     {star ? (
