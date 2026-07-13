@@ -1,4 +1,5 @@
 import { apiUrl } from "./apiOrigin";
+import { isDemoMode } from "./demoMode";
 import {
   clearSessionToken,
   getSessionToken,
@@ -29,6 +30,21 @@ async function parseJson<T>(res: Response): Promise<T> {
     throw new Error(msg || "Request failed");
   }
   return data as T;
+}
+
+/** Passwordless showcase login (CV backend with DEMO_AUTO_LOGIN). */
+export async function demoLogin(): Promise<AuthUser | null> {
+  if (!isDemoMode()) return null;
+
+  const res = await fetch(apiUrl("/api/auth/demo"), {
+    method: "POST",
+    credentials: "include",
+    headers: authHeaders(),
+  });
+  if (res.status === 404) return null;
+  const data = await parseJson<{ user: AuthUser; token?: string }>(res);
+  if (data.token) setSessionToken(data.token);
+  return data.user;
 }
 
 export async function fetchMe(): Promise<AuthUser | null> {

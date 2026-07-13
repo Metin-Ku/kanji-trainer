@@ -213,6 +213,7 @@ Ornek Render env:
 |----------------|-------------------|
 | Kisisel (`kanji-trainer.onrender.com`) | `http://localhost:3000,https://kanji-trainer-five.vercel.app` |
 | CV (`kanji-trainer-cv.onrender.com`) | `http://localhost:3000,https://kanji-trainer-cv-two.vercel.app` |
+| CV only | `DEMO_AUTO_LOGIN=true`, `DEMO_USER_ID=1` |
 
 Auth semasini her Supabase'e bir kez uygulayin: `pnpm db:migrate-auth` (lokal `.env` icindeki `DATABASE_URL` hedef DB olmali).
 
@@ -230,6 +231,7 @@ Her proje Adim 4 ile ayni build ayarlarina sahip olmali. **Environment Variables
 | Vercel projesi | `VITE_API_ORIGIN` (Production) |
 |----------------|--------------------------------|
 | CV (or. `kanji-trainer-cv`) | `https://kanji-trainer-api-cv.onrender.com` |
+| CV only | `VITE_DEMO_MODE=true` |
 | Kisisel (or. `kanji-trainer-five`) | `https://kanji-trainer.onrender.com` |
 
 - Sonunda `/` olmamali

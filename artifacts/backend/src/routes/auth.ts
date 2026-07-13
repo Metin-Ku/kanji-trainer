@@ -6,6 +6,9 @@ import {
   consumePasswordResetToken,
   deleteSessionByToken,
   findUserByEmail,
+  findUserById,
+  getDemoUserId,
+  isDemoAutoLoginEnabled,
   resolveSession,
   readSessionTokenFromRequest,
   SESSION_COOKIE,
@@ -38,8 +41,42 @@ function frontendBaseUrl(req?: Request): string {
   return primaryFrontendOrigin();
 }
 
+router.post("/auth/demo", async (req, res, next) => {
+  try {
+    if (!isDemoAutoLoginEnabled()) {
+      res.status(404).json({ error: "Not found" });
+      return;
+    }
+
+    const row = await findUserById(getDemoUserId());
+    if (!row) {
+      res.status(503).json({ error: "Demo user not configured" });
+      return;
+    }
+
+    const { token, expiresAt } = await createSession(row.id);
+    res.cookie(SESSION_COOKIE, token, sessionCookieOptions(expiresAt));
+    res.json({
+      user: {
+        id: row.id,
+        email: row.email,
+        role: row.role,
+        createdAt: row.createdAt.toISOString(),
+      },
+      token,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post("/auth/register", async (req, res, next) => {
   try {
+    if (isDemoAutoLoginEnabled()) {
+      res.status(403).json({ error: "Registration disabled" });
+      return;
+    }
+
     const email = typeof req.body?.email === "string" ? req.body.email : "";
     const password =
       typeof req.body?.password === "string" ? req.body.password : "";

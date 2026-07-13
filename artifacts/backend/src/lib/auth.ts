@@ -107,6 +107,27 @@ export async function findUserByEmail(email: string) {
   return row ?? null;
 }
 
+export async function findUserById(id: number) {
+  const [row] = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, id))
+    .limit(1);
+  return row ?? null;
+}
+
+/** CV / portfolio: passwordless auto-login for showcase visitors. */
+export function isDemoAutoLoginEnabled(): boolean {
+  const v = process.env.DEMO_AUTO_LOGIN?.trim().toLowerCase();
+  return v === "true" || v === "1";
+}
+
+export function getDemoUserId(): number {
+  const raw = process.env.DEMO_USER_ID ?? "1";
+  const id = Number(raw);
+  return Number.isFinite(id) && id > 0 ? Math.floor(id) : 1;
+}
+
 export async function createSession(userId: number): Promise<{
   token: string;
   expiresAt: Date;

@@ -11,6 +11,10 @@
         value: production
       - key: DATABASE_URL
         sync: false
+      - key: DEMO_AUTO_LOGIN
+        value: "true"
+      - key: DEMO_USER_ID
+        value: "1"
 
   - type: web
     name: kanji-trainer-api-personal

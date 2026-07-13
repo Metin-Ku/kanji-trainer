@@ -8,16 +8,19 @@ import {
   type ReactNode,
 } from "react";
 import {
+  demoLogin,
   fetchMe,
   login as apiLogin,
   logout as apiLogout,
   register as apiRegister,
   type AuthUser,
 } from "../lib/authApi";
+import { isDemoMode } from "../lib/demoMode";
 
 interface AuthContextValue {
   user: AuthUser | null;
   loading: boolean;
+  isDemoMode: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -26,18 +29,25 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+async function resolveUser(): Promise<AuthUser | null> {
+  const me = await fetchMe();
+  if (me) return me;
+  if (isDemoMode()) return demoLogin();
+  return null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const demo = isDemoMode();
 
   const refresh = useCallback(async () => {
-    const me = await fetchMe();
-    setUser(me);
+    setUser(await resolveUser());
   }, []);
 
   useEffect(() => {
-    refresh().finally(() => setLoading(false));
-  }, [refresh]);
+    resolveUser().finally(() => setLoading(false));
+  }, []);
 
   const login = useCallback(async (email: string, password: string) => {
     const u = await apiLogin(email, password);
@@ -51,12 +61,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await apiLogout();
-    setUser(null);
-  }, []);
+    if (demo) {
+      setUser(await demoLogin());
+    } else {
+      setUser(null);
+    }
+  }, [demo]);
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, refresh }),
-    [user, loading, login, register, logout, refresh],
+    () => ({
+      user,
+      loading,
+      isDemoMode: demo,
+      login,
+      register,
+      logout,
+      refresh,
+    }),
+    [user, loading, demo, login, register, logout, refresh],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

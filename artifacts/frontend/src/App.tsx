@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Router, Route, Switch, Redirect, useLocation } from "wouter";
 import { useAuth } from "@/auth/AuthProvider";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { isDemoMode } from "@/lib/demoMode";
 import { HomePage } from "@/pages/HomePage";
 import { WordListPage } from "@/pages/WordListPage";
 import { PronunciationPage } from "@/pages/PronunciationPage";
@@ -36,6 +37,7 @@ function isPublicPath(path: string) {
 function AuthGate({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const [path] = useLocation();
+  const demo = isDemoMode();
 
   if (loading) {
     return (
@@ -45,8 +47,12 @@ function AuthGate({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user && !isPublicPath(path)) {
+  if (!user && !demo && !isPublicPath(path)) {
     return <Redirect to="/login" />;
+  }
+
+  if (demo && isPublicPath(path)) {
+    return <Redirect to="/" />;
   }
 
   if (user && (path === "/login" || path === "/register")) {
