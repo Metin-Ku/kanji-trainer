@@ -1,4 +1,9 @@
 import { apiUrl } from "./apiOrigin";
+import {
+  clearSessionToken,
+  getSessionToken,
+  setSessionToken,
+} from "./sessionToken";
 
 export type UserRole = "admin" | "moderator" | "user";
 
@@ -8,6 +13,11 @@ export type AuthUser = {
   role: UserRole;
   createdAt: string;
 };
+
+function authHeaders(): HeadersInit {
+  const token = getSessionToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 async function parseJson<T>(res: Response): Promise<T> {
   const data = await res.json().catch(() => ({}));
@@ -22,8 +32,14 @@ async function parseJson<T>(res: Response): Promise<T> {
 }
 
 export async function fetchMe(): Promise<AuthUser | null> {
-  const res = await fetch(apiUrl("/api/auth/me"), { credentials: "include" });
-  if (res.status === 401) return null;
+  const res = await fetch(apiUrl("/api/auth/me"), {
+    credentials: "include",
+    headers: authHeaders(),
+  });
+  if (res.status === 401) {
+    clearSessionToken();
+    return null;
+  }
   const data = await parseJson<{ user: AuthUser }>(res);
   return data.user;
 }
@@ -32,10 +48,11 @@ export async function login(email: string, password: string): Promise<AuthUser> 
   const res = await fetch(apiUrl("/api/auth/login"), {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ email, password }),
   });
-  const data = await parseJson<{ user: AuthUser }>(res);
+  const data = await parseJson<{ user: AuthUser; token?: string }>(res);
+  if (data.token) setSessionToken(data.token);
   return data.user;
 }
 
@@ -43,10 +60,11 @@ export async function register(email: string, password: string): Promise<AuthUse
   const res = await fetch(apiUrl("/api/auth/register"), {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ email, password }),
   });
-  const data = await parseJson<{ user: AuthUser }>(res);
+  const data = await parseJson<{ user: AuthUser; token?: string }>(res);
+  if (data.token) setSessionToken(data.token);
   return data.user;
 }
 
@@ -54,14 +72,16 @@ export async function logout(): Promise<void> {
   await fetch(apiUrl("/api/auth/logout"), {
     method: "POST",
     credentials: "include",
+    headers: authHeaders(),
   });
+  clearSessionToken();
 }
 
 export async function forgotPassword(email: string): Promise<void> {
   const res = await fetch(apiUrl("/api/auth/forgot-password"), {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ email }),
   });
   await parseJson<{ ok: boolean }>(res);
@@ -71,7 +91,7 @@ export async function resetPassword(token: string, password: string): Promise<vo
   const res = await fetch(apiUrl("/api/auth/reset-password"), {
     method: "POST",
     credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ token, password }),
   });
   await parseJson<{ ok: boolean }>(res);

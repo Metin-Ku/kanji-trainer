@@ -66,7 +66,7 @@ export function LoginPage() {
                 ${
                   focusedInput === "email"
                     ? "border-main-400 dark:border-main-500 ring-2 ring-main-400 dark:ring-main-500 ring-inset"
-                    : "border-app-border"
+                    : "border-app-border-strong"
                 }
               `}
             />
@@ -92,7 +92,7 @@ export function LoginPage() {
                 ${
                   focusedInput === "password"
                     ? "border-main-400 dark:border-main-500 ring-2 ring-main-400 dark:ring-main-500 ring-inset"
-                    : "border-app-border"
+                    : "border-app-border-strong"
                 }
               `}
             />
@@ -105,9 +105,9 @@ export function LoginPage() {
               tabIndex={-1}
             >
               {showPassword ? (
-                <EyeOff className="w-5.5 h-5.5 text-app-text-muted hover:text-main-400 dark:hover:text-main-500 transition-colors" />
+                <EyeOff className={`w-5.5 h-5.5 ${focusedInput === "password" ? "text-main-400 dark:text-main-500" : "text-app-text-muted"} hover:text-main-400 dark:hover:text-main-500 transition-colors`} />
               ) : (
-                <Eye className="w-5.5 h-5.5 text-app-text-muted hover:text-main-400 dark:hover:text-main-500 transition-colors" />
+                <Eye className={`w-5.5 h-5.5 ${focusedInput === "password" ? "text-main-400 dark:text-main-500" : "text-app-text-muted"} hover:text-main-400 dark:hover:text-main-500 transition-colors`} />
               )}
             </button>
           </div>

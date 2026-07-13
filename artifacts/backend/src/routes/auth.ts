@@ -7,6 +7,7 @@ import {
   deleteSessionByToken,
   findUserByEmail,
   resolveSession,
+  readSessionTokenFromRequest,
   SESSION_COOKIE,
   SESSION_DAYS,
   updateUserPassword,
@@ -57,7 +58,7 @@ router.post("/auth/register", async (req, res, next) => {
     const user = await createUser(email, password);
     const { token, expiresAt } = await createSession(user.id);
     res.cookie(SESSION_COOKIE, token, sessionCookieOptions(expiresAt));
-    res.status(201).json({ user });
+    res.status(201).json({ user, token });
   } catch (err) {
     next(err);
   }
@@ -84,6 +85,7 @@ router.post("/auth/login", async (req, res, next) => {
         role: row.role,
         createdAt: row.createdAt.toISOString(),
       },
+      token,
     });
   } catch (err) {
     next(err);
@@ -92,8 +94,8 @@ router.post("/auth/login", async (req, res, next) => {
 
 router.post("/auth/logout", async (req, res, next) => {
   try {
-    const token = req.cookies?.[SESSION_COOKIE];
-    if (typeof token === "string") {
+    const token = readSessionTokenFromRequest(req);
+    if (token) {
       await deleteSessionByToken(token);
     }
     res.clearCookie(SESSION_COOKIE, {
@@ -109,10 +111,8 @@ router.post("/auth/logout", async (req, res, next) => {
 
 router.get("/auth/me", async (req, res, next) => {
   try {
-    const token = req.cookies?.[SESSION_COOKIE];
-    const user = await resolveSession(
-      typeof token === "string" ? token : undefined,
-    );
+    const token = readSessionTokenFromRequest(req);
+    const user = await resolveSession(token);
     if (!user) {
       res.status(401).json({ error: "Unauthorized" });
       return;

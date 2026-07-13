@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import {
   resolveSession,
-  SESSION_COOKIE,
+  readSessionTokenFromRequest,
   type PublicUser,
 } from "../lib/auth";
 
@@ -13,18 +13,13 @@ declare global {
   }
 }
 
-function readSessionToken(req: Request): string | undefined {
-  const cookie = req.cookies?.[SESSION_COOKIE];
-  return typeof cookie === "string" ? cookie : undefined;
-}
-
 export async function optionalAuth(
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
   try {
-    const user = await resolveSession(readSessionToken(req));
+    const user = await resolveSession(readSessionTokenFromRequest(req));
     req.user = user ?? undefined;
     next();
   } catch (err) {
@@ -38,7 +33,7 @@ export async function requireAuth(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const user = await resolveSession(readSessionToken(req));
+    const user = await resolveSession(readSessionTokenFromRequest(req));
     if (!user) {
       res.status(401).json({ error: "Unauthorized" });
       return;

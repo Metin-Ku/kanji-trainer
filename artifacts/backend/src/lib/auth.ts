@@ -17,6 +17,20 @@ export const SESSION_COOKIE = "kt_session";
 export const SESSION_DAYS = 30;
 export const RESET_TOKEN_HOURS = 1;
 
+/** Cookie (desktop) or Authorization: Bearer (mobile cross-origin). */
+export function readSessionTokenFromRequest(req: {
+  cookies?: Record<string, unknown>;
+  headers?: { authorization?: string | string[] };
+}): string | undefined {
+  const auth = req.headers?.authorization;
+  if (typeof auth === "string" && auth.startsWith("Bearer ")) {
+    const token = auth.slice(7).trim();
+    if (token) return token;
+  }
+  const cookie = req.cookies?.[SESSION_COOKIE];
+  return typeof cookie === "string" ? cookie : undefined;
+}
+
 export type PublicUser = {
   id: number;
   email: string;
