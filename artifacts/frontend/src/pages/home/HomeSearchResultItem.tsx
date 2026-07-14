@@ -96,31 +96,9 @@ export function HomeSearchResultItem({
             </p>
           )}
 
-          {wordCategories.length > 0 && (
-            <div
-              className="flex flex-wrap gap-1.5 mt-1.5"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {wordCategories.map((cat) => (
-                <CategoryChip
-                  key={cat.id}
-                  label={cat.name}
-                  iconSvg={cat.iconSvg}
-                  active={activeCategoryId === cat.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (!isOpen) onToggle();
-                    setActiveCategoryId((prev) =>
-                      prev === cat.id ? null : cat.id,
-                    );
-                  }}
-                />
-              ))}
-            </div>
-          )}
         </div>
 
-        <div className="flex flex-row items-center gap-1.5 shrink-0 h-[68px]">
+        <div className="flex flex-row items-center gap-1.5 shrink-0">
           <div className="flex flex-row items-center gap-1.5">
             {word.jlptLevel && (
               <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-app-muted text-app-text-secondary">
@@ -211,6 +189,28 @@ export function HomeSearchResultItem({
 
       {(word.description || word.meaning || activeCategory) && (
         <div className={`word-detail ${isOpen ? "open" : ""}`}>
+             {wordCategories.length > 0 && isOpen && (
+            <div
+              className="flex flex-wrap gap-1.5 mt-1.5 px-5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {wordCategories.map((cat) => (
+                <CategoryChip
+                  key={cat.id}
+                  label={cat.name}
+                  iconSvg={cat.iconSvg}
+                  active={activeCategoryId === cat.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!isOpen) onToggle();
+                    setActiveCategoryId((prev) =>
+                      prev === cat.id ? null : cat.id,
+                    );
+                  }}
+                />
+              ))}
+            </div>
+          )}
           <div className="px-5 pb-4 space-y-2">
             <div className="flex items-center justify-between gap-2">
               <span />

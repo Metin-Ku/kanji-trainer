@@ -90,7 +90,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
+    <div className="min-h-dvh bg max-w-2xl mx-auto bg-app-bg flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
       <HomeHeader
         query={query}
         onQueryChange={setQuery}
