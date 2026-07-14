@@ -220,109 +220,124 @@ export function HomePage() {
                         <p className="text-base font-bold text-app-text leading-none">
                           {word.kanji}
                         </p>
+                
                         {word.pronunciation && (
                           <p className="text-xs text-app-text-secondary mt-0.5">
                             {word.pronunciation}
                           </p>
                         )}
+                
                         {word.meaning && (
-                          <p className="text-xs text-app-text-muted mt-0.5 truncate">
+                          <p className={`text-xs text-app-text-muted mt-0.5 xs:min-h-0 ${isOpen ? "" : "truncate"}`}>
                             {word.meaning}
                           </p>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {word.jlptLevel && (
-                          <span className="text-[11px] bg-app-muted text-app-text-secondary font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
-                            {word.jlptLevel}
-                          </span>
-                        )}
-                        <div className="flex flex-row gap-1">
-                          {(
-                            [
-                              {
-                                Icon: Languages,
-                                starred: word.starred,
-                                level: word.level,
-                              },
-                              {
-                                Icon: Waves,
-                                starred: word.pronStarred,
-                                level: word.pronLevel,
-                              },
-                              {
-                                Icon: BookOpen,
-                                starred: word.meaningStarred,
-                                level: word.meaningLevel,
-                              },
-                            ] as const
-                          ).map(({ Icon, starred, level }, i) => (
-                            <div
-                              key={i}
-                              className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-app-surface"
-                            >
-                              <Icon
-                                size={13}
-                                strokeWidth={2}
-                                className="text-app-text-secondary"
-                              />
-                              {starred ? (
-                                <div
-                                  className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold"
-                                  style={{
-                                    background: themeVars.star,
-                                    color: "rgb(255,255,255)",
-                                  }}
-                                >
-                                  ★
-                                </div>
-                              ) : (
-                                <div
-                                  className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white"
-                                  style={{ background: themeVars.level(level) }}
-                                >
-                                  {level}
-                                </div>
-                              )}
-                            </div>
-                          ))}
+                
+                      <div className="flex flex-row items-center gap-1.5 shrink-0">
+                        {/* Üst satır */}
+                        <div className="flex flex-row items-center gap-1.5">
+                          {word.jlptLevel && (
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-app-muted text-app-text-secondary">
+                              {word.jlptLevel}
+                            </span>
+                          )}
+                
+                          <div className="flex gap-1">
+                            {(
+                              [
+                                {
+                                  Icon: Languages,
+                                  starred: word.starred,
+                                  level: word.level,
+                                },
+                                {
+                                  Icon: Waves,
+                                  starred: word.pronStarred,
+                                  level: word.pronLevel,
+                                },
+                                {
+                                  Icon: BookOpen,
+                                  starred: word.meaningStarred,
+                                  level: word.meaningLevel,
+                                },
+                              ] as const
+                            ).map(({ Icon, starred, level }, i) => (
+                              <div
+                                key={i}
+                                className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-app-muted"
+                              >
+                                <Icon
+                                  size={13}
+                                  strokeWidth={2}
+                                  className="text-app-text-secondary"
+                                />
+                
+                                {starred ? (
+                                  <div
+                                    className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold"
+                                    style={{
+                                      background: themeVars.star,
+                                      color: "rgb(255,255,255)",
+                                    }}
+                                  >
+                                    ★
+                                  </div>
+                                ) : (
+                                  <div
+                                    className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                                    style={{ background: themeVars.level(level) }}
+                                  >
+                                    {level}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingWord(word);
-                            setShowForm(true);
-                          }}
-                          className="p-1.5 rounded-lg bg-app-muted active:opacity-60 transition-opacity"
-                          style={{ background: "bg-app-muted" }}
-                        >
-                          <Pencil
-                            size={13}
-                            strokeWidth={2}
-                            className="text-app-text-secondary"
-                          />
-                        </button>
-                        <button
-                          onClick={async (e) => {
-                            e.stopPropagation();
-                            if (
-                              await confirm(
-                                t("home.confirmDelete", { kanji: word.kanji }),
-                              )
-                            )
-                              deleteWord(word.id);
-                          }}
-                          className="p-1.5 rounded-lg bg-app-muted active:opacity-60 transition-opacity"
-                        >
-                          <Trash2
-                            size={13}
-                            strokeWidth={2}
-                            className="text-red-500"
-                          />
-                        </button>
+                
+                        {/* Alt satır (mobil) / Sağ (md+) */}
+                        <div className="flex justify-end gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingWord(word);
+                              setShowForm(true);
+                            }}
+                            className="p-1.5 rounded-lg bg-app-muted active:opacity-60 transition-opacity"
+                          >
+                            <Pencil
+                              size={13}
+                              strokeWidth={2}
+                              className="text-app-text-secondary"
+                            />
+                          </button>
+                
+                          <button
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (
+                                await confirm(
+                                  t("home.confirmDelete", {
+                                    kanji: word.kanji,
+                                  }),
+                                )
+                              ) {
+                                deleteWord(word.id);
+                              }
+                            }}
+                            className="p-1.5 rounded-lg bg-app-muted active:opacity-60 transition-opacity"
+                          >
+                            <Trash2
+                              size={13}
+                              strokeWidth={2}
+                              className="text-red-500"
+                            />
+                          </button>
+                        </div>
                       </div>
                     </div>
-
+                
                     {(word.description || word.meaning) && (
                       <div className={`word-detail ${isOpen ? "open" : ""}`}>
                         <div className="px-5 pb-4 space-y-2">
@@ -344,6 +359,7 @@ export function HomePage() {
                               />
                             )}
                           </div>
+                
                           {isRelatedOpen && word.meaning ? (
                             <RelatedWordsList word={word} allWords={words} />
                           ) : (
