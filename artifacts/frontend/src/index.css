@@ -142,7 +142,7 @@ html.theme-switching *::after {
   --app-border-strong: #323845;
   --app-text: #f3f4f6;
   --app-text-secondary: #9ca3af;
-  --app-text-muted: #6b7280;
+  --app-text-muted: oklch(60.4% .04 256.788);
   --app-accent: color-mix(in oklch, var(--main-500) 16%, #181b24);
   /* --app-vibrant: color-mix(in oklch, var(--main-500) 32%, #181b24); */
   /* --app-xxx-yyy: oklch(0.29 0.08 38.36); */

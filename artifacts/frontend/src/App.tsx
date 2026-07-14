@@ -42,7 +42,7 @@ function AuthGate({ children }: { children: ReactNode }) {
   if (loading) {
     return (
       <div className="min-h-dvh flex items-center justify-center bg-app-bg">
-        <LoadingSpinner size={36} className="text-app-text-muted" />
+        <LoadingSpinner size={36} className="text-main-500 dark:text-main-600" />
       </div>
     );
   }
