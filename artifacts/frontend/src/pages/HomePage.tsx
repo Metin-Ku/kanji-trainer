@@ -131,7 +131,7 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
       <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-5 shrink-0">
         <div className="flex items-center justify-between gap-3 mb-0.5">
           <p className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">

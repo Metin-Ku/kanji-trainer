@@ -225,7 +225,7 @@ function HeatmapGrid({
                   width: cellPx,
                   height: cellPx,
                   backgroundColor: cell.isFuture
-                    ? "var(--app-muted-alternative)"
+                    ? "var(--app-heatmap-alternative)"
                     : HEATMAP_LEVEL_COLORS[cell.level],
                   transform: `scale(${scale})`,
                   zIndex: isRing

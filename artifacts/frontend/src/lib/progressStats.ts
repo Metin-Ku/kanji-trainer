@@ -253,7 +253,7 @@ export const HEATMAP_LEVEL_COLORS = [
 
 /** @deprecated Use HEATMAP_LEVEL_COLORS for cell backgrounds */
 export const HEATMAP_LEVEL_CLASSES = [
-  "bg-app-muted",
+  "bg-app-heatmap",
   "bg-main-100 dark:bg-main-200",
   "bg-main-200 dark:bg-main-300",
   "bg-main-400 dark:bg-main-500",

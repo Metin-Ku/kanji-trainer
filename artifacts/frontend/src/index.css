@@ -91,8 +91,10 @@ html.theme-switching *::after {
   --icon-bg: linear-gradient(135deg, color-mix(in oklch, var(--main-400) 13%, transparent), color-mix(in oklch, var(--main-600) 8%, transparent));
 
   --app-bg: #f9fafb;
+  --app-heatmap-alternative: #f9fafb;
   --app-surface: #ffffff;
   --app-muted: #f3f4f6;
+  --app-heatmap: #f3f4f6;
   --app-muted-alternative: #eeeff2;
   --app-border: #f3f4f6;
   --app-border-strong: #e5e7eb;
@@ -102,7 +104,7 @@ html.theme-switching *::after {
   --app-accent: color-mix(in oklch, var(--main-500) 10%, #ffffff);
   --app-accent-banner: color-mix(in oklch, var(--main-500) 10%, #ffffff);
 
-  --heatmap-0: var(--app-muted);
+  --heatmap-0: var(--app-muted-alternative);
   --heatmap-1: var(--main-100);
   --heatmap-2: var(--main-200);
   --heatmap-3: var(--main-400);
@@ -125,6 +127,8 @@ html.theme-switching *::after {
   --app-surface: #181b24;
   --app-muted: #1f2430;
   --app-muted-alternative: #222835;
+  --app-heatmap: #1f2430;
+  --app-heatmap-alternative: hsl(223, 22%, 14%);
   --app-border: #252a36;
   --app-border-strong: #323845;
   --app-text: #f3f4f6;
@@ -148,7 +152,7 @@ html.theme-switching *::after {
     color-mix(in oklch, var(--main-600) 14%, transparent)
   );
 
-  --heatmap-0: var(--app-muted);
+  --heatmap-0: var(--app-muted-alternative);
   --heatmap-1: var(--main-200);
   --heatmap-2: var(--main-300);
   --heatmap-3: var(--main-500);
