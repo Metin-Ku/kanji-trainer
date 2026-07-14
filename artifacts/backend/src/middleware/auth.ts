@@ -1,7 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import {
-  resolveSession,
-  readSessionTokenFromRequest,
+  resolveSessionFromRequest,
   type PublicUser,
 } from "../lib/auth";
 
@@ -19,7 +18,7 @@ export async function optionalAuth(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const user = await resolveSession(readSessionTokenFromRequest(req));
+    const user = await resolveSessionFromRequest(req);
     req.user = user ?? undefined;
     next();
   } catch (err) {
@@ -33,7 +32,7 @@ export async function requireAuth(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const user = await resolveSession(readSessionTokenFromRequest(req));
+    const user = await resolveSessionFromRequest(req);
     if (!user) {
       res.status(401).json({ error: "Unauthorized" });
       return;

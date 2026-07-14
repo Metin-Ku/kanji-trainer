@@ -20,6 +20,21 @@ function authHeaders(): HeadersInit {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+function persistSessionToken(token: string | undefined): void {
+  if (token) setSessionToken(token);
+  else clearSessionToken();
+}
+
+async function refreshBearerToken(): Promise<void> {
+  const res = await fetch(apiUrl("/api/auth/refresh"), {
+    method: "POST",
+    credentials: "include",
+  });
+  if (!res.ok) return;
+  const data = (await res.json().catch(() => ({}))) as { token?: string };
+  persistSessionToken(data.token);
+}
+
 async function parseJson<T>(res: Response): Promise<T> {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -43,15 +58,26 @@ export async function demoLogin(): Promise<AuthUser | null> {
   });
   if (res.status === 404) return null;
   const data = await parseJson<{ user: AuthUser; token?: string }>(res);
-  if (data.token) setSessionToken(data.token);
+  persistSessionToken(data.token);
   return data.user;
 }
 
 export async function fetchMe(): Promise<AuthUser | null> {
-  const res = await fetch(apiUrl("/api/auth/me"), {
+  const hadStoredToken = !!getSessionToken();
+  let res = await fetch(apiUrl("/api/auth/me"), {
     credentials: "include",
     headers: authHeaders(),
   });
+
+  // Stale localStorage bearer can block a valid httpOnly cookie on the server.
+  if (res.status === 401 && hadStoredToken) {
+    clearSessionToken();
+    res = await fetch(apiUrl("/api/auth/me"), { credentials: "include" });
+    if (res.ok) {
+      await refreshBearerToken();
+    }
+  }
+
   if (res.status === 401) {
     clearSessionToken();
     return null;
@@ -68,7 +94,7 @@ export async function login(email: string, password: string): Promise<AuthUser> 
     body: JSON.stringify({ email, password }),
   });
   const data = await parseJson<{ user: AuthUser; token?: string }>(res);
-  if (data.token) setSessionToken(data.token);
+  persistSessionToken(data.token);
   return data.user;
 }
 
@@ -80,7 +106,7 @@ export async function register(email: string, password: string): Promise<AuthUse
     body: JSON.stringify({ email, password }),
   });
   const data = await parseJson<{ user: AuthUser; token?: string }>(res);
-  if (data.token) setSessionToken(data.token);
+  persistSessionToken(data.token);
   return data.user;
 }
 

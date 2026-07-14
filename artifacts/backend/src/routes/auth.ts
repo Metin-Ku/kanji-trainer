@@ -10,6 +10,7 @@ import {
   getDemoUserId,
   isDemoAutoLoginEnabled,
   resolveSession,
+  resolveSessionFromRequest,
   readSessionTokenFromRequest,
   SESSION_COOKIE,
   SESSION_DAYS,
@@ -131,8 +132,11 @@ router.post("/auth/login", async (req, res, next) => {
 
 router.post("/auth/logout", async (req, res, next) => {
   try {
-    const token = readSessionTokenFromRequest(req);
-    if (token) {
+    const bearer = readSessionTokenFromRequest(req);
+    const cookie = req.cookies?.[SESSION_COOKIE];
+    const cookieToken = typeof cookie === "string" ? cookie : undefined;
+    const tokens = new Set([bearer, cookieToken].filter(Boolean) as string[]);
+    for (const token of tokens) {
       await deleteSessionByToken(token);
     }
     res.clearCookie(SESSION_COOKIE, {
@@ -148,13 +152,29 @@ router.post("/auth/logout", async (req, res, next) => {
 
 router.get("/auth/me", async (req, res, next) => {
   try {
-    const token = readSessionTokenFromRequest(req);
-    const user = await resolveSession(token);
+    const user = await resolveSessionFromRequest(req);
     if (!user) {
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
     res.json({ user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** Issue a fresh bearer token when cookie session is valid (sync localStorage). */
+router.post("/auth/refresh", async (req, res, next) => {
+  try {
+    const user = await resolveSessionFromRequest(req);
+    if (!user) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+
+    const { token, expiresAt } = await createSession(user.id);
+    res.cookie(SESSION_COOKIE, token, sessionCookieOptions(expiresAt));
+    res.json({ user, token });
   } catch (err) {
     next(err);
   }

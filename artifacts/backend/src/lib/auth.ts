@@ -31,6 +31,42 @@ export function readSessionTokenFromRequest(req: {
   return typeof cookie === "string" ? cookie : undefined;
 }
 
+function readBearerToken(req: {
+  headers?: { authorization?: string | string[] };
+}): string | undefined {
+  const auth = req.headers?.authorization;
+  if (typeof auth === "string" && auth.startsWith("Bearer ")) {
+    const token = auth.slice(7).trim();
+    if (token) return token;
+  }
+  return undefined;
+}
+
+function readCookieToken(req: {
+  cookies?: Record<string, unknown>;
+}): string | undefined {
+  const cookie = req.cookies?.[SESSION_COOKIE];
+  return typeof cookie === "string" ? cookie : undefined;
+}
+
+/** Bearer first, then httpOnly cookie — stale localStorage token must not block a valid cookie. */
+export async function resolveSessionFromRequest(req: {
+  cookies?: Record<string, unknown>;
+  headers?: { authorization?: string | string[] };
+}): Promise<PublicUser | null> {
+  const bearer = readBearerToken(req);
+  const cookie = readCookieToken(req);
+
+  if (bearer) {
+    const user = await resolveSession(bearer);
+    if (user) return user;
+  }
+  if (cookie && cookie !== bearer) {
+    return resolveSession(cookie);
+  }
+  return null;
+}
+
 export type PublicUser = {
   id: number;
   email: string;
