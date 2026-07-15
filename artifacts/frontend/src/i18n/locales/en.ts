@@ -281,6 +281,13 @@ export const en = {
     descriptionTitle: "Description",
     categoriesBadge: "{count} categories",
     synonymsBadge: "{count}/{total} synonyms",
+    existingWord: "Existing",
+    existingResolveHint:
+      "Words already in your list: tap the circle to update or × to exclude.",
+    excludeWord: "Exclude from import",
+    updateWord: "Update existing word",
+    chooseActionRequired:
+      "Choose update (○) or remove (×) for highlighted words before continuing.",
   },
 
   settings: {

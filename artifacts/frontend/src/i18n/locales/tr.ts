@@ -283,6 +283,13 @@ export const tr: Messages = {
     descriptionTitle: "Açıklama",
     categoriesBadge: "{count} kategori",
     synonymsBadge: "{count}/{total} eş anlamlı",
+    existingWord: "Mevcut",
+    existingResolveHint:
+      "Listede zaten olan kelimeler: güncellemek için ○'ya, çıkarmak için ×'e basın.",
+    excludeWord: "İçe aktarmadan çıkar",
+    updateWord: "Mevcut kelimeyi güncelle",
+    chooseActionRequired:
+      "Devam etmeden önce vurgulanan kelimeler için ○ (güncelle) veya × (çıkar) seçin.",
   },
 
   settings: {

@@ -352,173 +352,149 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                     </p>
                   )} */}
                   <div className="max-h-36 overflow-y-auto space-y-1.5">
-                    {(() => {
-                      const existingWords = preview.filter((w) =>
-                        isExistingKanji(w.kanji, allWords),
-                      );
+                    {preview.map((w) => {
+                      const knownKanji = new Set([
+                        ...allWords.map((word) => word.kanji.normalize("NFC")),
+                        ...preview.map((word) => word.kanji.normalize("NFC")),
+                      ]);
+                      const existing = isExistingKanji(w.kanji, allWords);
+                      const shorten = resolveExisting;
+                      const markedUpdate = updateIds.has(w.id);
+                      const needsAction =
+                        resolveExisting && existing && highlightIds.has(w.id);
+                      const matchedCategories =
+                        w.categoryNames && w.categoryNames.length > 0
+                          ? matchCategoryNames(w.categoryNames, categories)
+                          : [];
+                      const matchedCategoryNames = matchedCategories
+                        .map(
+                          (id) =>
+                            categories.find((c) => c.id === id)?.name ?? "",
+                        )
+                        .filter(Boolean);
 
-                      const allUpdated =
-                        existingWords.length > 0 &&
-                        existingWords.every((w) => updateIds.has(w.id));
+                      return (
+                        <div
+                          key={w.id}
+                          className={`flex gap-2 text-xs items-center flex-wrap rounded-lg px-2 py-1 -mx-2 transition-colors`}
+                        >
+                          <span className="font-bold text-app-text w-16 shrink-0">
+                            {w.kanji}
+                          </span>
+                          <span className="text-app-text-secondary truncate flex-1 min-w-0">
+                            {w.pronunciation}
+                          </span>
+                          {/* {resolveExisting && existing && (
+                          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-200">
+                            {t("bulkImport.existingWord")}
+                          </span>
+                        )} */}
+                          {w.jlptLevel && (
+                            <span
+                              className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0"
+                              style={{
+                                background: "#f3f4f6",
+                                color: "#6b7280",
+                              }}
+                            >
+                              {w.jlptLevel}
+                            </span>
+                          )}
+                          {w.srsExamples && w.srsExamples.length > 0 && (
+                            <span className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0 bg-main-100 text-main-600">
+                              {t("common.srsBadge", {
+                                count: w.srsExamples.length,
+                              })}
+                            </span>
+                          )}
+                          {matchedCategoryNames.length > 0 && (
+                            <span
+                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-amber-100 text-amber-700 ${shorten ? "max-w-12 truncate" : "max-w-24"}`}
+                              title={matchedCategoryNames.join(", ")}
+                            >
+                              {t("bulkImport.categoriesBadge", {
+                                count: matchedCategoryNames.length,
+                              })}
+                            </span>
+                          )}
+                          {w.synonymKanji && w.synonymKanji.length > 0 && (
+                            <span
+                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-violet-100 text-violet-700 ${shorten ? "max-w-15 truncate" : "max-w-24"}`}
+                              title={w.synonymKanji.join(", ")}
+                            >
+                              {t("bulkImport.synonymsBadge", {
+                                count: w.synonymKanji.filter((k) =>
+                                  knownKanji.has(k.normalize("NFC")),
+                                ).length,
+                                total: w.synonymKanji.length,
+                              })}
+                            </span>
+                          )}
 
-                      return preview.map((w) => {
-                        const knownKanji = new Set([
-                          ...allWords.map((word) =>
-                            word.kanji.normalize("NFC"),
-                          ),
-                          ...preview.map((word) => word.kanji.normalize("NFC")),
-                        ]);
-
-                        const existing = isExistingKanji(w.kanji, allWords);
-                        const shorten = resolveExisting;
-                        const markedUpdate = updateIds.has(w.id);
-
-                        const needsAction =
-                          resolveExisting && existing && highlightIds.has(w.id);
-
-                        const matchedCategories =
-                          w.categoryNames && w.categoryNames.length > 0
-                            ? matchCategoryNames(w.categoryNames, categories)
-                            : [];
-
-                        const matchedCategoryNames = matchedCategories
-                          .map(
-                            (id) =>
-                              categories.find((c) => c.id === id)?.name ?? "",
-                          )
-                          .filter(Boolean);
-
-                        return (
                           <div
-                            key={w.id}
-                            className="flex gap-2 text-xs items-center flex-wrap rounded-lg px-2 py-1 -mx-2 transition-colors"
+                            className={`flex gap-1.5 rounded-full outline-2 outline-offset-2 transition-[outline-color] duration-300 ${needsAction ? "outline-red-400" : "outline-transparent"}`}
                           >
-                            <span className="font-bold text-app-text w-16 shrink-0">
-                              {w.kanji}
-                            </span>
-
-                            <span className="text-app-text-secondary truncate flex-1 min-w-0">
-                              {w.pronunciation}
-                            </span>
-
-                            {w.jlptLevel && (
-                              <span
-                                className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0"
-                                style={{
-                                  background: "#f3f4f6",
-                                  color: "#6b7280",
+                            {resolveExisting && existing && (
+                              <UpdateCircle
+                                selected={markedUpdate}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleUpdateSelection(w.id);
                                 }}
+                                ariaLabel={t("bulkImport.updateWord")}
+                              />
+                            )}
+                            {resolveExisting && existing && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removePreviewEntry(w.id);
+                                }}
+                                className="transition-colors shrink-0"
+                                aria-label={t("bulkImport.excludeWord")}
                               >
-                                {w.jlptLevel}
-                              </span>
+                                <X size={17} className="text-red-500" />
+                              </button>
                             )}
-
-                            {w.srsExamples && w.srsExamples.length > 0 && (
-                              <span className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0 bg-main-100 text-main-600">
-                                {t("common.srsBadge", {
-                                  count: w.srsExamples.length,
-                                })}
-                              </span>
-                            )}
-
-                            {matchedCategoryNames.length > 0 && (
-                              <span
-                                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-amber-100 text-amber-700 ${
-                                  shorten ? "max-w-12 truncate" : "max-w-24"
-                                }`}
-                                title={matchedCategoryNames.join(", ")}
-                              >
-                                {t("bulkImport.categoriesBadge", {
-                                  count: matchedCategoryNames.length,
-                                })}
-                              </span>
-                            )}
-
-                            {w.synonymKanji && w.synonymKanji.length > 0 && (
-                              <span
-                                className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-violet-100 text-violet-700 ${
-                                  shorten ? "max-w-15 truncate" : "max-w-24"
-                                }`}
-                                title={w.synonymKanji.join(", ")}
-                              >
-                                {t("bulkImport.synonymsBadge", {
-                                  count: w.synonymKanji.filter((k) =>
-                                    knownKanji.has(k.normalize("NFC")),
-                                  ).length,
-                                  total: w.synonymKanji.length,
-                                })}
-                              </span>
-                            )}
-
-                            <div
-                              className={`
-                                ${allUpdated ? "hidden" : markedUpdate ? "invisible" : ""}
-                                flex gap-1.5 rounded-full outline-2 outline-offset-2
-                                transition-[outline-color] duration-300
-                                ${needsAction ? "outline-red-400" : "outline-transparent"}
-                              `}
-                            >
-                              {resolveExisting && existing && (
-                                <UpdateCircle
-                                  selected={markedUpdate}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleUpdateSelection(w.id);
-                                  }}
-                                  ariaLabel={t("bulkImport.updateWord")}
-                                />
-                              )}
-
-                              {resolveExisting && existing && (
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    removePreviewEntry(w.id);
-                                  }}
-                                  className="transition-colors shrink-0"
-                                  aria-label={t("bulkImport.excludeWord")}
-                                >
-                                  <X size={17} className="text-red-500" />
-                                </button>
-                              )}
-                            </div>
-
-                            <div
-                              className={`${allUpdated ? "hidden" : markedUpdate ? "invisible" : ""} flex gap-1.5`}
-                            >
-                              {resolveExisting && !existing && (
-                                <button
-                                  type="button"
-                                  disabled={true}
-                                  className="transition-colors shrink-0"
-                                  aria-label={t("bulkImport.excludeWord")}
-                                >
-                                  <CircleX
-                                    size={17}
-                                    className="text-red-500 invisible"
-                                  />
-                                </button>
-                              )}
-
-                              {resolveExisting && !existing && (
-                                <button
-                                  type="button"
-                                  disabled={true}
-                                  className="transition-colors shrink-0"
-                                  aria-label={t("bulkImport.excludeWord")}
-                                >
-                                  <CircleX
-                                    size={17}
-                                    className="text-red-500 invisible"
-                                  />
-                                </button>
-                              )}
-                            </div>
                           </div>
-                        );
-                      });
-                    })()}
+                          {resolveExisting && !existing && (
+                            <button
+                              type="button"
+                              disabled={true}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removePreviewEntry(w.id);
+                              }}
+                              className="transition-colors shrink-0"
+                              aria-label={t("bulkImport.excludeWord")}
+                            >
+                              <CircleX
+                                size={17}
+                                className="text-red-500 invisible"
+                              />
+                            </button>
+                          )}
+                          {resolveExisting && !existing && (
+                            <button
+                              type="button"
+                              disabled={true}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removePreviewEntry(w.id);
+                              }}
+                              className="transition-colors shrink-0"
+                              aria-label={t("bulkImport.excludeWord")}
+                            >
+                              <CircleX
+                                size={17}
+                                className="text-red-500 invisible"
+                              />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                   {/* {resolveExisting && highlightIds.size > 0 && (
                     <p className="text-xs text-red-600 dark:text-red-400 mt-2">

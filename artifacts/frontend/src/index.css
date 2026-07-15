@@ -203,6 +203,15 @@ html.theme-switching *::after {
   opacity: 1;
 }
 
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* Overlay backdrop */
 .modal-backdrop {
   position: fixed;
