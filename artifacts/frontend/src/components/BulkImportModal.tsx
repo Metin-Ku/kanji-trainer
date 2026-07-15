@@ -424,7 +424,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                             {matchedCategoryNames.length > 0 && (
                               <span
                                 className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-amber-100 text-amber-700 ${
-                                  shorten ? "max-w-12 truncate" : "max-w-24"
+                                  shorten ? "max-w-10 truncate" : "max-w-24"
                                 }`}
                                 title={matchedCategoryNames.join(", ")}
                               >
@@ -437,7 +437,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                             {w.synonymKanji && w.synonymKanji.length > 0 && (
                               <span
                                 className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-violet-100 text-violet-700 ${
-                                  shorten ? "max-w-15 truncate" : "max-w-24"
+                                  shorten ? "max-w-12 truncate" : "max-w-24"
                                 }`}
                                 title={w.synonymKanji.join(", ")}
                               >
