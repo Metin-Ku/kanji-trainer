@@ -393,7 +393,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                             key={w.id}
                             className="flex gap-2 text-xs items-center flex-wrap rounded-lg px-2 py-1 -mx-2 transition-colors"
                           >
-                            <span className="font-bold text-app-text w-16 shrink-0">
+                            <span className="font-bold text-app-text w-12 shrink-0">
                               {w.kanji}
                             </span>
 
