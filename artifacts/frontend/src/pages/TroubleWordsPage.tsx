@@ -145,8 +145,7 @@ export function TroubleWordsPage() {
       return;
     }
 
-    if (deck === "example") warmMobileKeyboard();
-
+    // Keyboard warmed on pointerdown for example deck.
     setStarting(true);
     setDeckPickerOpen(false);
     try {
@@ -172,6 +171,7 @@ export function TroubleWordsPage() {
   function handleStudyClick() {
     if (items.length === 0) return;
     if (deckFilter !== "all") {
+      if (deckFilter === "example") warmMobileKeyboard();
       startStudy(deckFilter);
       return;
     }
@@ -247,6 +247,9 @@ export function TroubleWordsPage() {
         <button
           type="button"
           disabled={items.length === 0 || starting}
+          onPointerDown={() => {
+            if (deckFilter === "example") warmMobileKeyboard();
+          }}
           onClick={handleStudyClick}
           className="pointer-events-auto w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-main-500 text-white font-bold text-base shadow-lg disabled:opacity-50 active:scale-[0.98] transition-transform"
         >
@@ -282,6 +285,9 @@ export function TroubleWordsPage() {
                     key={deck}
                     type="button"
                     disabled={count === 0 || starting}
+                    onPointerDown={() => {
+                      if (deck === "example") warmMobileKeyboard();
+                    }}
                     onClick={() => startStudy(deck)}
                     className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-app-border disabled:opacity-40 active:bg-app-muted"
                   >

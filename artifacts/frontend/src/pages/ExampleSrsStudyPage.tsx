@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Dices, Eye, Pencil } from "lucide-react";
 import { SrsWordSlideUp } from "../components/SrsWordSlideUp";
@@ -129,39 +129,48 @@ export function ExampleSrsStudyPage() {
   }, [alignControlsAboveKeyboard, stopViewportListen]);
 
   /**
-   * Focus must stay in a user-gesture chain when possible.
-   * After deck start we steal focus from the warmed ghost input so the keyboard stays open.
+   * Steal warmed keyboard focus, or keep existing focus.
+   * Programmatic focus alone will NOT open the keyboard on iOS — we rely on
+   * warmMobileKeyboard() from the deck tap, then never letting focus escape.
    */
   const focusAnswerInput = useCallback(() => {
     const el = answerInputRef.current;
     if (!el) return false;
 
-    const ok = consumeWarmedKeyboard(el);
-    if (!ok) {
+    // Already editing — just ensure caret; don't disturb the keyboard.
+    if (document.activeElement === el) {
       try {
-        el.focus({ preventScroll: true });
+        const len = el.value.length;
+        el.setSelectionRange(len, len);
       } catch {
-        el.focus();
+        /* ignore */
       }
+      startViewportListen();
+      return true;
     }
+
+    const ok = consumeWarmedKeyboard(el);
     startViewportListen();
-    return document.activeElement === el;
+    return ok || document.activeElement === el;
   }, [startViewportListen]);
 
   useEffect(() => {
     return () => stopViewportListen();
   }, [stopViewportListen]);
 
-  useEffect(() => {
-    const html = document.documentElement;
-    const previousFontSize = html.style.fontSize;
+  // useEffect(() => {
+  //   const html = document.documentElement;
+  //   const previousFontSize = html.style.fontSize;
 
-    html.style.fontSize = "12px";
+  //   html.style.fontSize = "12.8px";
 
-    return () => {
-      html.style.fontSize = previousFontSize;
-    };
-  }, []);
+  //   return () => {
+  //     html.style.fontSize = previousFontSize;
+  //   };
+  // }, []);
+
+  // Keep answer input at ≥16px computed size so iOS shows keyboard/caret
+  // (page root sets html font-size to 12px, which would make rem-based text < 16px).
 
   useEffect(() => {
     setAnswer("");
@@ -169,21 +178,11 @@ export function ExampleSrsStudyPage() {
     setEmptyChecked(false);
     setSheetWord(null);
     setShowCardDetails(false);
+  }, [index]);
 
-    // Focus as soon as the new card's input is in the DOM (sync as possible).
-    // Delayed focus breaks the user-gesture chain and blocks the mobile keyboard.
-    let cancelled = false;
-    const tryFocus = () => {
-      if (cancelled) return;
-      if (!focusAnswerInput()) {
-        requestAnimationFrame(tryFocus);
-      }
-    };
-    requestAnimationFrame(tryFocus);
-
-    return () => {
-      cancelled = true;
-    };
+  useLayoutEffect(() => {
+    // Steal warmed keyboard before paint; if already focused, keep caret.
+    focusAnswerInput();
   }, [index, focusAnswerInput]);
 
   const advanceAfterReview = useCallback(() => {
@@ -448,7 +447,8 @@ export function ExampleSrsStudyPage() {
   const answerState: AnswerPhase = answerPhase;
 
   return (
-    <div className="min-h-[max(25rem,50vh)] max-w-2xl mx-auto bg-app-surface flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
+    // <div className="min-h-[max(25rem,50vh)] max-w-2xl mx-auto bg-app-surface flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
       <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
         <button
           onClick={() => navigate(backPath)}
@@ -547,11 +547,10 @@ export function ExampleSrsStudyPage() {
                   setFocused(false);
                   stopViewportListen();
                 }}
-                // Don't disable while reviewing — disabling dismisses the mobile keyboard.
-                readOnly={reviewing}
                 placeholder={settings.srsRomajiInput ? "答え" : ""}
+                style={{ fontSize: 16 }}
                 className={`
-                  w-full rounded-xl border bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text
+                  w-full rounded-xl border bg-app-muted px-4 py-3 font-bold text-center text-app-text
                   outline-none
                   transition-all duration-150
                   ${
@@ -574,8 +573,13 @@ export function ExampleSrsStudyPage() {
               <button
                 type="button"
                 // Keep input focused / keyboard open when tapping the button (mobile).
-                onPointerDown={(e) => e.preventDefault()}
-                onClick={handlePrimaryAction}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  focusAnswerInput();
+                }}
+                onClick={() => {
+                  void handlePrimaryAction();
+                }}
                 disabled={reviewing}
                 className="w-full py-3 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white disabled:opacity-50"
               >

@@ -54,9 +54,7 @@ export function SrsHubPage() {
   }, []);
 
   async function startDeck(deck: SrsDeckType) {
-    // Open keyboard during the tap (before await) so example study can steal focus.
-    if (deck === "example") warmMobileKeyboard();
-
+    // Keyboard is warmed on pointerdown for example deck (before this await).
     setStarting(deck);
     try {
       const items = await fetchSrsQueue(deck, {
@@ -180,6 +178,9 @@ export function SrsHubPage() {
             return (
               <button
                 key={deck}
+                onPointerDown={() => {
+                  if (deck === "example") warmMobileKeyboard();
+                }}
                 onClick={() => startDeck(deck)}
                 disabled={starting === deck || isLoading}
                 className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-4 active:scale-[0.99] transition-transform disabled:opacity-60"
