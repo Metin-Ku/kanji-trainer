@@ -294,7 +294,7 @@ export function StudyPage() {
 
   if (!word && !done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <p className="text-app-text-muted">{t("study.notFound")}</p>
         <button onClick={() => navigate(backPath)} className="mt-4 text-main-400 text-sm">{t("study.backToList")}</button>
       </div>
@@ -303,7 +303,7 @@ export function StudyPage() {
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center">
           <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted">
             <ArrowLeft size={18} />
@@ -356,7 +356,7 @@ export function StudyPage() {
     (mode === "okunuş" || mode === "anlam") && !!word.kanji && hasKanji(word.kanji);
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:border-l sm:border-r sm:border-app-border">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
       <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
         <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted">
           <ArrowLeft size={18} />

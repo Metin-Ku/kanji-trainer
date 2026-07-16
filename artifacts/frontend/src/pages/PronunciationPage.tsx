@@ -303,7 +303,7 @@ export function PronunciationPage() {
 
   return (
     <div className="min-h-dvh bg-app-surface">
-      <div className="max-w-2xl mx-auto pb-8 sm:border-l sm:border-r sm:border-app-border">
+      <div className="max-w-2xl mx-auto pb-8 sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <div
           ref={headerRef}
           className="sticky top-0 z-10 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 space-y-2"
@@ -466,7 +466,7 @@ export function PronunciationPage() {
       </div>
 
       {selectMode && (
-        <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-app-border fixed bottom-0 left-0 right-0 z-50 bg-app-surface border-t border-app-border-strong px-4 py-3 flex items-center gap-3">
+        <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border fixed bottom-0 left-0 right-0 z-50 bg-app-surface border-t border-app-border-strong px-4 py-3 flex items-center gap-3">
           <button
             onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))}
             className="text-xs text-app-text-secondary shrink-0"

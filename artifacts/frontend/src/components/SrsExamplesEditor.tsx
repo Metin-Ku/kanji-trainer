@@ -240,7 +240,7 @@ export function SrsExamplesEditor({
                 className="flex-1 text-left text-sm font-semibold text-app-text"
               >
                 {t("srs.editor.exampleN", { n: exIndex + 1 })}
-                {ex.sentence && (
+                {/* {ex.sentence && (
                   <span className="ml-2 font-normal text-app-text-muted truncate">
                     {renderClozeSentence(ex.sentence, ex.hiddenWord).slice(
                       0,
@@ -248,7 +248,7 @@ export function SrsExamplesEditor({
                     )}
                     …
                   </span>
-                )}
+                )} */}
                 {linkCount > 0 && (
                   <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-main-100 text-main-600">
                     {t("common.linkCount", { count: linkCount })}

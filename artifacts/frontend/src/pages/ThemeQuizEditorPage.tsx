@@ -60,7 +60,7 @@ export function ThemeQuizEditorPage() {
 
   return (
     <div className="min-h-dvh bg-app-bg pb-24">
-      <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-app-border">
+      <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <div className="sticky top-0 z-10 bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
           <button
             onClick={() => navigate(`/themes/${id}`)}

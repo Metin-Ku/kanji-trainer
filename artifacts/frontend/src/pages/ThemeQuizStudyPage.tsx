@@ -166,7 +166,7 @@ export function ThemeQuizStudyPage() {
 
   return (
     <div className="min-h-dvh bg-app-bg">
-      <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-app-border min-h-dvh flex flex-col">
+      <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border min-h-dvh flex flex-col">
         <div className="px-5 pt-4 pb-3 border-b border-app-border bg-app-surface">
           <button
             onClick={() => navigate(`/themes/${id}`)}

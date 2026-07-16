@@ -1,3 +1,5 @@
+import type { HiddenScript } from "../types";
+
 const HAN_RE = /\p{Script=Han}/u;
 const HIRAGANA_RE = /\p{Script=Hiragana}/u;
 const KATAKANA_RE = /\p{Script=Katakana}/u;
@@ -18,6 +20,21 @@ export function hasKatakana(str: string): boolean {
 
 export function hasLatin(str: string): boolean {
   return LATIN_RE.test(str);
+}
+
+/**
+ * Infer cloze script from surface form.
+ * Pure hiragana → hiragana, pure katakana → katakana, otherwise kanji (may include okurigana).
+ */
+export function inferHiddenScript(text: string): HiddenScript {
+  const t = text.trim();
+  if (!t) return "kanji";
+  if (hasKanji(t)) return "kanji";
+  const onlyHiragana = /^[\p{Script=Hiragana}\sー・]+$/u.test(t);
+  if (onlyHiragana) return "hiragana";
+  const onlyKatakana = /^[\p{Script=Katakana}\sー・]+$/u.test(t);
+  if (onlyKatakana) return "katakana";
+  return "kanji";
 }
 
 /**

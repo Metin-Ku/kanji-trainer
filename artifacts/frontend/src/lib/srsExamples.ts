@@ -1,5 +1,6 @@
 import type { SrsExample, SrsExampleHint, TargetChunk, HiddenScript, RubyPart } from "../types";
-import { kanaVariants, effectiveHiddenScript } from "./japaneseInput";
+import { kanaVariants } from "./japaneseInput";
+import { inferHiddenScript } from "./japaneseScript";
 
 export type { SrsExample, SrsExampleHint };
 
@@ -47,16 +48,28 @@ function rubyPartsToReading(parts: RubyPart[]): string {
 }
 
 function parseHiddenSpan(el: Element): TargetChunk {
-  const script = hiddenScriptFromEl(el);
-  const ruby = parseRubyParts(el);
-  const text = ruby.length > 0 ? rubyPartsToText(ruby) : (el.textContent?.trim() ?? "");
+  const classScript = hiddenScriptFromEl(el);
+  const rubyRaw = parseRubyParts(el);
+  const text =
+    rubyRaw.length > 0
+      ? rubyPartsToText(rubyRaw)
+      : (el.textContent?.trim() ?? "");
+  const script =
+    classScript !== "kanji" ? classScript : inferHiddenScript(text);
+  const ruby = usefulRuby(rubyRaw.length ? rubyRaw : undefined);
   const reading =
-    ruby.length > 0 ? rubyPartsToReading(ruby) : el.textContent?.trim() ?? "";
+    ruby && rubyRaw.length > 0
+      ? rubyPartsToReading(rubyRaw)
+      : script === "hiragana" || script === "katakana"
+        ? text
+        : rubyRaw.length > 0
+          ? rubyPartsToReading(rubyRaw)
+          : el.textContent?.trim() ?? "";
   return {
     type: "hidden",
     text,
-    reading,
-    ruby: ruby.length > 0 ? ruby : undefined,
+    ...(reading ? { reading } : {}),
+    ...(ruby ? { ruby } : {}),
     script,
   };
 }
@@ -130,12 +143,57 @@ function rebuildChunksAfterPrimary(
   return chunks;
 }
 
+/** Drop ruby that has no furigana readings (kana-only bases need no <ruby>). */
+export function usefulRuby(parts?: RubyPart[]): RubyPart[] | undefined {
+  if (!parts?.length) return undefined;
+  if (!parts.some((p) => p.reading)) return undefined;
+  return parts;
+}
+
+/** Build cloze targetChunks from sentence + hiddenWord when none exist yet. */
+export function buildTargetChunksFromCloze(ex: SrsExample): TargetChunk[] | undefined {
+  const sentence = ex.sentence.trim();
+  if (!sentence) return undefined;
+
+  const hiddenWord = ex.hiddenWord.trim();
+  if (!hiddenWord || !sentence.includes(hiddenWord)) {
+    return [{ type: "text", text: sentence }];
+  }
+
+  const script =
+    ex.hiddenScript ??
+    inferHiddenScript(hiddenWord);
+  const reading =
+    ex.hiddenReading?.trim() ||
+    (script === "hiragana" || script === "katakana" ? hiddenWord : undefined);
+
+  const hiddenStart = sentence.indexOf(hiddenWord);
+  const before = sentence.slice(0, hiddenStart);
+  const after = sentence.slice(hiddenStart + hiddenWord.length);
+
+  const chunks: TargetChunk[] = [];
+  if (before) chunks.push({ type: "text", text: before });
+  chunks.push({
+    type: "hidden",
+    text: hiddenWord,
+    script,
+    ...(reading ? { reading } : {}),
+    // Ruby for kanji is filled later by applyLinkedRubyToExample / kuromoji.
+  });
+  if (after) chunks.push({ type: "text", text: after });
+  return chunks;
+}
+
 /** Rebuild targetChunks from the edited sentence field, preserving ruby/hidden metadata. */
 export function syncTargetChunksFromSentence(
   ex: SrsExample,
 ): TargetChunk[] | undefined {
   const sentence = ex.sentence.trim();
-  if (!sentence || !ex.targetChunks?.length) return ex.targetChunks;
+  if (!sentence) return ex.targetChunks;
+
+  if (!ex.targetChunks?.length) {
+    return buildTargetChunksFromCloze({ ...ex, sentence });
+  }
 
   if (chunksMatchSentence(ex.targetChunks, sentence)) {
     return ex.targetChunks;
@@ -158,17 +216,25 @@ export function syncTargetChunksFromSentence(
   const hiddenStart = sentence.indexOf(hiddenWord);
   const before = sentence.slice(0, hiddenStart);
   const afterPrimary = sentence.slice(hiddenStart + hiddenWord.length);
+  const script =
+    primaryHidden?.script ??
+    ex.hiddenScript ??
+    inferHiddenScript(hiddenWord);
+  const reading =
+    primaryHidden?.reading ??
+    ex.hiddenReading ??
+    (script === "hiragana" || script === "katakana" ? hiddenWord : undefined);
+  const ruby = usefulRuby(primaryHidden?.ruby);
 
   const chunks: TargetChunk[] = [];
   if (before) chunks.push({ type: "text", text: before });
 
   chunks.push({
-    ...(primaryHidden ?? { type: "hidden" as const }),
     type: "hidden",
     text: hiddenWord,
-    reading: primaryHidden?.reading ?? ex.hiddenReading,
-    ruby: primaryHidden?.ruby,
-    script: primaryHidden?.script ?? ex.hiddenScript,
+    script,
+    ...(reading ? { reading } : {}),
+    ...(ruby ? { ruby } : {}),
   });
 
   chunks.push(...rebuildChunksAfterPrimary(afterPrimary, secondaryHidden));
@@ -178,13 +244,37 @@ export function syncTargetChunksFromSentence(
 /** Keep sentence, targetChunks, and linkedTokens aligned after manual edits. */
 export function syncExampleFromSentence(ex: SrsExample): SrsExample {
   const sentence = ex.sentence.trim();
-  const targetChunks = syncTargetChunksFromSentence({ ...ex, sentence });
-  if (!targetChunks) return { ...ex, sentence };
+  const hiddenWord = ex.hiddenWord.trim();
+  const inferredScript =
+    ex.hiddenScript ??
+    (hiddenWord ? inferHiddenScript(hiddenWord) : undefined);
+  const targetChunks = syncTargetChunksFromSentence({
+    ...ex,
+    sentence,
+    hiddenWord,
+    ...(inferredScript ? { hiddenScript: inferredScript } : {}),
+  });
+  if (!targetChunks) {
+    return {
+      ...ex,
+      sentence,
+      hiddenWord,
+      ...(inferredScript ? { hiddenScript: inferredScript } : {}),
+    };
+  }
 
+  const primary = targetChunks.find((c) => c.type === "hidden");
   return {
     ...ex,
     sentence: targetChunksToSentence(targetChunks).trim(),
+    hiddenWord,
     targetChunks,
+    ...(inferredScript || primary?.script
+      ? { hiddenScript: inferredScript ?? primary?.script }
+      : {}),
+    ...(primary?.reading || ex.hiddenReading
+      ? { hiddenReading: primary?.reading ?? ex.hiddenReading }
+      : {}),
   };
 }
 
@@ -439,13 +529,21 @@ export function parsePlainDescriptionToSrsExamples(
     const hints = lines.slice(1).map((l) => ({
       text: l.replace(/^-->\s*/, ""),
     }));
+    const hiddenWord =
+      defaultHiddenWord && sentence.includes(defaultHiddenWord)
+        ? defaultHiddenWord
+        : "";
+    const hiddenScript = hiddenWord
+      ? inferHiddenScript(hiddenWord)
+      : undefined;
     return {
       order: i,
       sentence,
-      hiddenWord:
-        defaultHiddenWord && sentence.includes(defaultHiddenWord)
-          ? defaultHiddenWord
-          : "",
+      hiddenWord,
+      ...(hiddenScript ? { hiddenScript } : {}),
+      ...(hiddenScript === "hiragana" || hiddenScript === "katakana"
+        ? { hiddenReading: hiddenWord }
+        : {}),
       hints,
     };
   });

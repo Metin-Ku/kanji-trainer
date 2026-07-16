@@ -287,29 +287,10 @@ export function ExampleSentenceDisplay({
   const hiddenWord = example.hiddenWord;
   const sentence = example.sentence;
 
-  if (answerState === "correct") {
-    return (
-      <p className={`text-2xl font-bold text-app-text leading-relaxed ${className}`}>
-        {wordLinksEnabled && linkedTokens?.length ? (
-          <LinkedTextSpan
-            text={sentence}
-            chunkOffset={0}
-            linkedTokens={linkedTokens}
-            wordsById={wordsById}
-            wordLinksEnabled
-            onWordTap={onWordTap}
-          />
-        ) : (
-          sentence
-        )}
-      </p>
-    );
-  }
-
   const before = hiddenWord ? sentence.split(hiddenWord)[0] ?? "" : sentence;
   const after = hiddenWord ? sentence.split(hiddenWord)[1] ?? "" : "";
   const beforeLen = before.length;
-  const afterOffset = beforeLen + hiddenWord.length;
+  const afterOffset = beforeLen + (hiddenWord?.length ?? 0);
 
   return (
     <p className={`text-2xl font-bold text-app-text leading-relaxed ${className}`}>
@@ -321,22 +302,28 @@ export function ExampleSentenceDisplay({
         wordLinksEnabled={wordLinksEnabled}
         onWordTap={onWordTap}
       />
-      <HiddenAnswerDisplay
-        expected={
-          answerState === "partial"
-            ? expectedForPartialFeedback(example, liveAnswer, headwordKanji)
-            : expected
-        }
-        input={liveAnswer}
-        liveInput={liveAnswer}
-        mode={
-          answerState === "partial"
-            ? "partial"
-            : answerState === "revealed"
-              ? "revealed"
-              : "live"
-        }
-      />
+      {hiddenWord ? (
+        <span className="inline-block mx-0.5 align-baseline">
+          <HiddenAnswerDisplay
+            expected={
+              answerState === "partial"
+                ? expectedForPartialFeedback(example, liveAnswer, headwordKanji)
+                : expected
+            }
+            input={liveAnswer}
+            liveInput={liveAnswer}
+            mode={
+              answerState === "correct"
+                ? "correct"
+                : answerState === "partial"
+                  ? "partial"
+                  : answerState === "revealed"
+                    ? "revealed"
+                    : "live"
+            }
+          />
+        </span>
+      ) : null}
       <LinkedTextSpan
         text={after}
         chunkOffset={afterOffset}

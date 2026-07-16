@@ -192,7 +192,7 @@ export function MeaningPage() {
 
   return (
     <div className="min-h-dvh bg-app-surface">
-      <div className="max-w-2xl mx-auto pb-8 sm:border-l sm:border-r sm:border-app-border">
+      <div className="max-w-2xl mx-auto pb-8 sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <div ref={headerRef} className="sticky top-0 z-10 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 space-y-2">
           <div className="flex items-center justify-between">
             <button onClick={() => navigate("/")} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors">
@@ -280,7 +280,7 @@ export function MeaningPage() {
       </div>
 
       {selectMode && (
-        <div className="max-w-2xl mx-auto sm:border-l sm:border-r sm:border-app-border fixed bottom-0 left-0 right-0 z-50 bg-app-surface border-t border-app-border-strong px-4 py-3 flex items-center gap-3">
+        <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border fixed bottom-0 left-0 right-0 z-50 bg-app-surface border-t border-app-border-strong px-4 py-3 flex items-center gap-3">
           <button onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))} className="text-xs text-app-text-secondary shrink-0">{t("common.selectAll")}</button>
           <span className="flex-1 text-center text-sm text-app-text-secondary font-medium">{selectedIds.size > 0 ? t("common.selectedCount", { count: selectedIds.size }) : t("common.selectRows")}</span>
           <button onClick={handleBulkDelete} disabled={selectedIds.size === 0} className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40 shrink-0" style={{ background: "rgb(239,68,68)" }}>

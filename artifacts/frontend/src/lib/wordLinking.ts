@@ -6,7 +6,9 @@ import {
   extractReading,
   primaryHiddenRangeInExample,
   syncExampleFromSentence,
+  usefulRuby,
 } from "./srsExamples";
+import { hasKanji, inferHiddenScript } from "./japaneseScript";
 
 // kuromoji ships without strict TS generics in this project
 type KuromojiTokenizer = kuromoji.Tokenizer<kuromoji.IpadicFeatures>;
@@ -251,16 +253,17 @@ function sliceRubyParts(
   return out;
 }
 
-/** Inject furigana into text chunks for linked vocabulary (persists in targetChunks). */
+/** Inject furigana into text chunks for linked vocabulary (persists in targetChunks).
+ * Also enriches the cloze (hidden) chunk: kanji gets ruby readings; kana-only drops empty ruby. */
 export async function applyLinkedRubyToExample(
   ex: SrsExample,
   words: Word[],
 ): Promise<SrsExample> {
-  if (!ex.targetChunks?.length || !ex.linkedTokens?.length) return ex;
+  if (!ex.targetChunks?.length) return ex;
 
   const tokenizer = await getKuromojiTokenizer();
   const wordsById = buildWordsById(words);
-  const tokens = linkedTokensForDisplay(ex) ?? ex.linkedTokens;
+  const tokens = linkedTokensForDisplay(ex) ?? ex.linkedTokens ?? [];
   let offset = 0;
   const newChunks: TargetChunk[] = [];
 
@@ -269,7 +272,7 @@ export async function applyLinkedRubyToExample(
     offset += chunk.text.length;
 
     if (chunk.type === "hidden") {
-      newChunks.push(chunk);
+      newChunks.push(enrichHiddenChunk(chunk, tokenizer));
       continue;
     }
 
@@ -306,15 +309,56 @@ export async function applyLinkedRubyToExample(
       parts.push({ base: text.slice(local) });
     }
 
-    const hasReading = parts.some((p) => p.reading);
+    const ruby = usefulRuby(parts);
     newChunks.push({
       type: "text",
       text: chunk.text,
-      ...(hasReading ? { ruby: parts } : {}),
+      ...(ruby ? { ruby } : {}),
     });
   }
 
-  return { ...ex, targetChunks: newChunks };
+  const primary = newChunks.find((c) => c.type === "hidden");
+  return {
+    ...ex,
+    targetChunks: newChunks,
+    ...(primary?.script ? { hiddenScript: primary.script } : {}),
+    ...(primary?.reading ? { hiddenReading: primary.reading } : {}),
+  };
+}
+
+function enrichHiddenChunk(
+  chunk: TargetChunk,
+  tokenizer: KuromojiTokenizer,
+): TargetChunk {
+  // Prefer surface-form detection so legacy "kanji" scripts on kana cloze get fixed.
+  const script = hasKanji(chunk.text)
+    ? "kanji"
+    : inferHiddenScript(chunk.text);
+  const isKana = script === "hiragana" || script === "katakana";
+
+  if (isKana) {
+    return {
+      type: "hidden",
+      text: chunk.text,
+      script,
+      reading: chunk.reading || chunk.text,
+    };
+  }
+
+  const existing = usefulRuby(chunk.ruby);
+  const parts = existing ?? buildRubyPartsForSurface(chunk.text, tokenizer);
+  const ruby = usefulRuby(parts);
+  const reading =
+    chunk.reading ||
+    (ruby ? ruby.map((p) => p.reading ?? p.base).join("") : undefined);
+
+  return {
+    type: "hidden",
+    text: chunk.text,
+    script: "kanji",
+    ...(reading ? { reading } : {}),
+    ...(ruby ? { ruby } : {}),
+  };
 }
 
 function hiddenRange(sentence: string, hiddenWord?: string): [number, number] | null {

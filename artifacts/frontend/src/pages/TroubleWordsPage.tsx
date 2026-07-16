@@ -180,7 +180,7 @@ export function TroubleWordsPage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:border-l sm:border-r sm:border-app-border">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
       <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
         <button
           onClick={() => navigate("/srs")}

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Dices, Pencil } from "lucide-react";
+import { ArrowLeft, Dices, Eye, Pencil } from "lucide-react";
 import { SrsWordSlideUp } from "../components/SrsWordSlideUp";
 import { ExampleSentenceDisplay } from "../components/ExampleSentenceDisplay";
 import { useLocation } from "wouter";
@@ -261,7 +261,7 @@ export function ExampleSrsStudyPage() {
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
           <button
             onClick={() => navigate(backPath)}
@@ -319,7 +319,7 @@ export function ExampleSrsStudyPage() {
   const answerState: AnswerPhase = answerPhase;
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col sm:border-l sm:border-r sm:border-app-border">
+    <div className="min-h-[max(25rem,50vh)] max-w-2xl mx-auto bg-app-surface flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
       <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
         <button
           onClick={() => navigate(backPath)}
@@ -336,7 +336,7 @@ export function ExampleSrsStudyPage() {
             onClick={() => setShowCardDetails(true)}
             className="p-2 rounded-lg bg-app-muted text-app-text-secondary"
           >
-            <Pencil size={14} />
+            <Eye size={14} />
           </button>
           <span className="text-sm text-app-text-muted font-medium tabular-nums">
             {t("common.cardProgress", {
@@ -419,7 +419,7 @@ export function ExampleSrsStudyPage() {
                         ? "border-red-600 ring-2 ring-red-600 ring-inset ring-offset-0"
                         : answerPhase === "correct"
                           ? "border-green-500 ring-2 ring-green-500 ring-inset ring-offset-0"
-                          : "border-main-400 ring-2 ring-main-400 ring-inset ring-offset-0"
+                          : "border-main-300 ring-2 ring-main-300 ring-inset ring-offset-0"
                       : "border-app-border-strong"
                   }
                 `}

@@ -59,7 +59,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {pending && (
         <div
           ref={backdropRef}
-          className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+          className="fixed inset-0 z-999 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
           onClick={handleBackdropClick}
         >
           <div

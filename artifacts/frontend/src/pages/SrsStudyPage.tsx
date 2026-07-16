@@ -440,7 +440,7 @@ function SrsStudyPageInner({
 
   if (!item && !done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <p className="text-app-text-muted">{t("srs.study.cardNotFound")}</p>
         <button
           onClick={() => navigate(backPath)}
@@ -454,7 +454,7 @@ function SrsStudyPageInner({
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:border-l sm:border-r sm:border-app-border">
+      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center">
           <button
             onClick={() => navigate(backPath)}
@@ -518,7 +518,7 @@ function SrsStudyPageInner({
   const liveWord = words.find((w) => w.id === word.id) ?? queueWordToWord(item);
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:border-l sm:border-r sm:border-app-border">
+    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
       <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
         <button
           onClick={() => navigate(backPath)}

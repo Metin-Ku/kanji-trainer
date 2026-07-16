@@ -92,7 +92,7 @@ export function CategoryDetailPage() {
 
   return (
     <div className="min-h-dvh bg-app-surface">
-      <div className="max-w-2xl mx-auto pb-8 sm:border-l sm:border-r sm:border-app-border">
+      <div className="max-w-2xl mx-auto pb-8 sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
         <WordListPanel
           layout="page"
           pageTitle={category.name}

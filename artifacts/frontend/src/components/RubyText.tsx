@@ -32,7 +32,12 @@ export function RubyParts({
   return (
     <>
       {parts.map((p, i) => (
-        <RubyInline key={i} base={p.base} reading={p.reading} className={className} />
+        <RubyInline
+          key={i}
+          base={p.base}
+          reading={p.reading}
+          className={className}
+        />
       ))}
     </>
   );
@@ -51,23 +56,33 @@ export function HiddenAnswerDisplay({
   liveInput?: string;
   ruby?: TargetChunk["ruby"];
 }) {
+  
   if (mode === "live") {
     const text = liveInput ?? "";
-    if (!text) {
-      return <span className="text-black">＿＿</span>;
-    }
-    return <span className="text-black">{text}</span>;
-  }
 
-  if (mode === "correct") {
-    if (ruby?.length) {
+    if (!text) {
+      // return <span className="text-black">＿＿</span>;
       return (
-        <span className="text-green-500 font-bold">
-          <RubyParts parts={ruby} />
+        <span className="relative mx-[0.1em] inline-block shrink-0 wrap-anywhere select-text before:absolute before:right-0 before:top-10 before:left-0 before:w-full before:bg-current min-w-[2.5em] before:h-0.5 before:content-['']">
+          <span className="text-black invisible">xxx</span>
         </span>
       );
     }
-    return <span className="text-green-500 font-bold">{expected}</span>;
+    return (
+      // <span className="text-black">{text}</span>
+      <span className="relative mx-[0.1em] inline-block shrink-0 wrap-anywhere select-text before:absolute before:right-0 before:top-10 before:left-0 before:w-full before:bg-current min-w-[2.5em] before:h-0.5 before:content-['']">
+        <span className="text-black">{text}</span>
+      </span>
+    );
+  }
+
+  if (mode === "correct") {
+    // Green highlight is independent of <ruby>; ruby only adds furigana when present.
+    return (
+      <span className="text-green-500 font-bold">
+        {ruby?.length ? <RubyParts parts={ruby} /> : expected}
+      </span>
+    );
   }
 
   if (mode === "revealed") {
