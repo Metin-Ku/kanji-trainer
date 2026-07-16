@@ -18,6 +18,9 @@ import { useTranslation } from "../i18n/I18nProvider";
 import { localDateKey } from "../lib/dailyGoal";
 import { useStudyActivity } from "../hooks/useStudyActivity";
 import { useStudySwipeKeys } from "../lib/studyKeyboard";
+import {
+  consumeWarmedKeyboard,
+} from "../lib/mobileKeyboard";
 
 type AnswerPhase = "typing" | "correct" | "partial" | "revealed";
 
@@ -54,53 +57,100 @@ export function ExampleSrsStudyPage() {
   const indexRef = useRef(index);
   const itemsRef = useRef(items);
   const answerInputRef = useRef<HTMLInputElement>(null);
+  const answerControlsRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const viewportListenCleanupRef = useRef<(() => void) | null>(null);
   indexRef.current = index;
   itemsRef.current = items;
 
-  const focusAnswerInput = useCallback(() => {
-    const el = answerInputRef.current;
-    if (!el || el.disabled) return;
-
-    el.focus({ preventScroll: true });
-
-    const scrollToInput = () => {
-      el.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-        inline: "nearest",
-      });
-    };
-
-    // Immediate pass (desktop / already-open keyboard)
-    requestAnimationFrame(scrollToInput);
-
-    // Mobile: keyboard open shifts visualViewport — re-center once it settles
+  /** Pin input+button so the button's bottom sits just above the keyboard. */
+  const alignControlsAboveKeyboard = useCallback(() => {
+    const controls = answerControlsRef.current;
+    const scrollArea = scrollAreaRef.current;
     const vv = window.visualViewport;
-    if (!vv) return;
+    if (!controls || !scrollArea) return;
 
-    let settled: ReturnType<typeof setTimeout> | undefined;
-    const onViewportChange = () => {
-      clearTimeout(settled);
-      settled = setTimeout(() => {
-        if (document.activeElement === el) scrollToInput();
-        vv.removeEventListener("resize", onViewportChange);
-        vv.removeEventListener("scroll", onViewportChange);
-      }, 120);
-    };
+    const gap = 12;
+    const keyboardInset = vv
+      ? Math.max(0, window.innerHeight - (vv.height + vv.offsetTop))
+      : 0;
 
-    vv.addEventListener("resize", onViewportChange);
-    vv.addEventListener("scroll", onViewportChange);
-    // Safety cleanup if keyboard never fires
-    setTimeout(() => {
-      vv.removeEventListener("resize", onViewportChange);
-      vv.removeEventListener("scroll", onViewportChange);
-    }, 800);
+    // Leave room below the controls so we can scroll them above the keyboard.
+    const pad = Math.max(32, keyboardInset + gap);
+    if (scrollArea.style.paddingBottom !== `${pad}px`) {
+      scrollArea.style.paddingBottom = `${pad}px`;
+    }
+
+    const rect = controls.getBoundingClientRect();
+    const visibleBottom = vv
+      ? vv.offsetTop + vv.height
+      : window.innerHeight;
+    const overflow = rect.bottom - visibleBottom + gap;
+    if (Math.abs(overflow) < 2) return;
+
+    scrollArea.scrollTop += overflow;
   }, []);
 
-  /** Refocus after a button tap (blur settles first on mobile). */
-  const focusAnswerInputAfterAction = useCallback(() => {
-    window.setTimeout(() => focusAnswerInput(), 16);
-  }, [focusAnswerInput]);
+  const stopViewportListen = useCallback(() => {
+    viewportListenCleanupRef.current?.();
+    viewportListenCleanupRef.current = null;
+    const scrollArea = scrollAreaRef.current;
+    if (scrollArea) scrollArea.style.paddingBottom = "";
+  }, []);
+
+  const startViewportListen = useCallback(() => {
+    stopViewportListen();
+    const vv = window.visualViewport;
+
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
+    let settleTimer2: ReturnType<typeof setTimeout> | undefined;
+    const onChange = () => {
+      clearTimeout(settleTimer);
+      clearTimeout(settleTimer2);
+      requestAnimationFrame(alignControlsAboveKeyboard);
+      settleTimer = setTimeout(alignControlsAboveKeyboard, 80);
+      settleTimer2 = setTimeout(alignControlsAboveKeyboard, 220);
+    };
+
+    if (vv) {
+      vv.addEventListener("resize", onChange);
+      vv.addEventListener("scroll", onChange);
+    }
+    window.addEventListener("resize", onChange);
+    onChange();
+
+    viewportListenCleanupRef.current = () => {
+      clearTimeout(settleTimer);
+      clearTimeout(settleTimer2);
+      vv?.removeEventListener("resize", onChange);
+      vv?.removeEventListener("scroll", onChange);
+      window.removeEventListener("resize", onChange);
+    };
+  }, [alignControlsAboveKeyboard, stopViewportListen]);
+
+  /**
+   * Focus must stay in a user-gesture chain when possible.
+   * After deck start we steal focus from the warmed ghost input so the keyboard stays open.
+   */
+  const focusAnswerInput = useCallback(() => {
+    const el = answerInputRef.current;
+    if (!el) return false;
+
+    const ok = consumeWarmedKeyboard(el);
+    if (!ok) {
+      try {
+        el.focus({ preventScroll: true });
+      } catch {
+        el.focus();
+      }
+    }
+    startViewportListen();
+    return document.activeElement === el;
+  }, [startViewportListen]);
+
+  useEffect(() => {
+    return () => stopViewportListen();
+  }, [stopViewportListen]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -119,9 +169,21 @@ export function ExampleSrsStudyPage() {
     setEmptyChecked(false);
     setSheetWord(null);
     setShowCardDetails(false);
-    // Next card / first mount: focus answer field
-    const t = window.setTimeout(() => focusAnswerInput(), 50);
-    return () => clearTimeout(t);
+
+    // Focus as soon as the new card's input is in the DOM (sync as possible).
+    // Delayed focus breaks the user-gesture chain and blocks the mobile keyboard.
+    let cancelled = false;
+    const tryFocus = () => {
+      if (cancelled) return;
+      if (!focusAnswerInput()) {
+        requestAnimationFrame(tryFocus);
+      }
+    };
+    requestAnimationFrame(tryFocus);
+
+    return () => {
+      cancelled = true;
+    };
   }, [index, focusAnswerInput]);
 
   const advanceAfterReview = useCallback(() => {
@@ -171,7 +233,7 @@ export function ExampleSrsStudyPage() {
         advanceAfterReview();
       } catch {
         /* keep feedback visible */
-        focusAnswerInputAfterAction();
+        focusAnswerInput();
       }
       return;
     }
@@ -182,7 +244,7 @@ export function ExampleSrsStudyPage() {
         advanceAfterReview();
       } catch {
         /* keep feedback visible */
-        focusAnswerInputAfterAction();
+        focusAnswerInput();
       }
       return;
     }
@@ -190,11 +252,11 @@ export function ExampleSrsStudyPage() {
     if (!answer.trim()) {
       if (!emptyChecked) {
         setEmptyChecked(true);
-        focusAnswerInputAfterAction();
+        focusAnswerInput();
         return;
       }
       setAnswerPhase("revealed");
-      focusAnswerInputAfterAction();
+      focusAnswerInput();
       return;
     }
 
@@ -208,7 +270,7 @@ export function ExampleSrsStudyPage() {
       ex.hiddenScript,
     );
     setAnswerPhase(correct ? "correct" : "partial");
-    focusAnswerInputAfterAction();
+    focusAnswerInput();
   }
 
   const handlePrimaryActionRef = useRef(handlePrimaryAction);
@@ -219,7 +281,7 @@ export function ExampleSrsStudyPage() {
     if (answerPhase === "typing") {
       setEmptyChecked(false);
       setAnswerPhase("revealed");
-      focusAnswerInputAfterAction();
+      focusAnswerInput();
       return;
     }
     if (answerPhase === "partial" || answerPhase === "revealed") {
@@ -228,10 +290,10 @@ export function ExampleSrsStudyPage() {
         advanceAfterReview();
       } catch {
         /* keep feedback visible */
-        focusAnswerInputAfterAction();
+        focusAnswerInput();
       }
     }
-  }, [advanceAfterReview, answerPhase, done, focusAnswerInputAfterAction]);
+  }, [advanceAfterReview, answerPhase, done, focusAnswerInput]);
 
   useStudySwipeKeys({
     enabled: !done && !!items[index] && !sheetWord && !showCardDetails,
@@ -414,7 +476,10 @@ export function ExampleSrsStudyPage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col px-6 py-6 gap-6 overflow-y-auto pb-8">
+      <div
+        ref={scrollAreaRef}
+        className="flex-1 flex flex-col px-6 py-6 gap-6 overflow-y-auto pb-8"
+      >
         {currentEx ? (
           <>
             <div className="rounded-2xl bg-app-muted border border-app-border px-5 py-6 text-center">
@@ -463,18 +528,27 @@ export function ExampleSrsStudyPage() {
               ))}
             </div>
 
-            <div className="space-y-3 mt-auto">
+            <div ref={answerControlsRef} className="space-y-3 mt-auto">
               <input
                 ref={answerInputRef}
                 type="text"
+                inputMode="text"
+                enterKeyHint="done"
                 value={answer}
                 onChange={(e) => handleAnswerChange(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handlePrimaryAction();
                 }}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                disabled={reviewing}
+                onFocus={() => {
+                  setFocused(true);
+                  startViewportListen();
+                }}
+                onBlur={() => {
+                  setFocused(false);
+                  stopViewportListen();
+                }}
+                // Don't disable while reviewing — disabling dismisses the mobile keyboard.
+                readOnly={reviewing}
                 placeholder={settings.srsRomajiInput ? "答え" : ""}
                 className={`
                   w-full rounded-xl border bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text
@@ -491,23 +565,16 @@ export function ExampleSrsStudyPage() {
                   }
                 `}
                 autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck={false}
                 autoFocus
               />
 
-              {/* {answerPhase === "correct" && (
-                <div className="rounded-xl bg-emerald-50 border border-emerald-100 px-4 py-3 text-sm text-emerald-700 text-center font-semibold">
-                  Doğru!
-                </div>
-              )}
-
-              {answerPhase === "revealed" && (
-                <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-700 text-center font-semibold">
-                  Yanlış
-                </div>
-              )} */}
-
               <button
                 type="button"
+                // Keep input focused / keyboard open when tapping the button (mobile).
+                onPointerDown={(e) => e.preventDefault()}
                 onClick={handlePrimaryAction}
                 disabled={reviewing}
                 className="w-full py-3 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white disabled:opacity-50"

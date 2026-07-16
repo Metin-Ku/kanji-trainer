@@ -19,6 +19,7 @@ import {
 } from "../hooks/useTroubleWords";
 import { startSrsSession } from "../store/srsStore";
 import type { SrsDeckType } from "../types/srs";
+import { warmMobileKeyboard } from "../lib/mobileKeyboard";
 
 const DECK_FILTERS: TroubleDeckFilter[] = [
   "all",
@@ -143,6 +144,8 @@ export function TroubleWordsPage() {
       alert(t("troubleWords.noCardsForDeck"));
       return;
     }
+
+    if (deck === "example") warmMobileKeyboard();
 
     setStarting(true);
     setDeckPickerOpen(false);

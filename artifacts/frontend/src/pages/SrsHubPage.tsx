@@ -14,6 +14,7 @@ import { DailyGoalCard } from "../components/DailyGoalCard";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useTroubleWordCount } from "../hooks/useTroubleWords";
 import { getSrsListPrefs, saveSrsListPrefs } from "../lib/listPreferences";
+import { warmMobileKeyboard } from "../lib/mobileKeyboard";
 
 const DECK_ICONS: Record<SrsDeckType, typeof Languages> = {
   word: Languages,
@@ -53,6 +54,9 @@ export function SrsHubPage() {
   }, []);
 
   async function startDeck(deck: SrsDeckType) {
+    // Open keyboard during the tap (before await) so example study can steal focus.
+    if (deck === "example") warmMobileKeyboard();
+
     setStarting(deck);
     try {
       const items = await fetchSrsQueue(deck, {
