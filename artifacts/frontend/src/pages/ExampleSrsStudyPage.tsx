@@ -53,8 +53,54 @@ export function ExampleSrsStudyPage() {
   const reviewingRef = useRef(false);
   const indexRef = useRef(index);
   const itemsRef = useRef(items);
+  const answerInputRef = useRef<HTMLInputElement>(null);
   indexRef.current = index;
   itemsRef.current = items;
+
+  const focusAnswerInput = useCallback(() => {
+    const el = answerInputRef.current;
+    if (!el || el.disabled) return;
+
+    el.focus({ preventScroll: true });
+
+    const scrollToInput = () => {
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "nearest",
+      });
+    };
+
+    // Immediate pass (desktop / already-open keyboard)
+    requestAnimationFrame(scrollToInput);
+
+    // Mobile: keyboard open shifts visualViewport — re-center once it settles
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    let settled: ReturnType<typeof setTimeout> | undefined;
+    const onViewportChange = () => {
+      clearTimeout(settled);
+      settled = setTimeout(() => {
+        if (document.activeElement === el) scrollToInput();
+        vv.removeEventListener("resize", onViewportChange);
+        vv.removeEventListener("scroll", onViewportChange);
+      }, 120);
+    };
+
+    vv.addEventListener("resize", onViewportChange);
+    vv.addEventListener("scroll", onViewportChange);
+    // Safety cleanup if keyboard never fires
+    setTimeout(() => {
+      vv.removeEventListener("resize", onViewportChange);
+      vv.removeEventListener("scroll", onViewportChange);
+    }, 800);
+  }, []);
+
+  /** Refocus after a button tap (blur settles first on mobile). */
+  const focusAnswerInputAfterAction = useCallback(() => {
+    window.setTimeout(() => focusAnswerInput(), 16);
+  }, [focusAnswerInput]);
 
   useEffect(() => {
     const html = document.documentElement;
@@ -73,7 +119,10 @@ export function ExampleSrsStudyPage() {
     setEmptyChecked(false);
     setSheetWord(null);
     setShowCardDetails(false);
-  }, [index]);
+    // Next card / first mount: focus answer field
+    const t = window.setTimeout(() => focusAnswerInput(), 50);
+    return () => clearTimeout(t);
+  }, [index, focusAnswerInput]);
 
   const advanceAfterReview = useCallback(() => {
     const nextIndex = indexRef.current + 1;
@@ -122,6 +171,7 @@ export function ExampleSrsStudyPage() {
         advanceAfterReview();
       } catch {
         /* keep feedback visible */
+        focusAnswerInputAfterAction();
       }
       return;
     }
@@ -132,6 +182,7 @@ export function ExampleSrsStudyPage() {
         advanceAfterReview();
       } catch {
         /* keep feedback visible */
+        focusAnswerInputAfterAction();
       }
       return;
     }
@@ -139,9 +190,11 @@ export function ExampleSrsStudyPage() {
     if (!answer.trim()) {
       if (!emptyChecked) {
         setEmptyChecked(true);
+        focusAnswerInputAfterAction();
         return;
       }
       setAnswerPhase("revealed");
+      focusAnswerInputAfterAction();
       return;
     }
 
@@ -155,6 +208,7 @@ export function ExampleSrsStudyPage() {
       ex.hiddenScript,
     );
     setAnswerPhase(correct ? "correct" : "partial");
+    focusAnswerInputAfterAction();
   }
 
   const handlePrimaryActionRef = useRef(handlePrimaryAction);
@@ -165,6 +219,7 @@ export function ExampleSrsStudyPage() {
     if (answerPhase === "typing") {
       setEmptyChecked(false);
       setAnswerPhase("revealed");
+      focusAnswerInputAfterAction();
       return;
     }
     if (answerPhase === "partial" || answerPhase === "revealed") {
@@ -173,9 +228,10 @@ export function ExampleSrsStudyPage() {
         advanceAfterReview();
       } catch {
         /* keep feedback visible */
+        focusAnswerInputAfterAction();
       }
     }
-  }, [advanceAfterReview, answerPhase, done]);
+  }, [advanceAfterReview, answerPhase, done, focusAnswerInputAfterAction]);
 
   useStudySwipeKeys({
     enabled: !done && !!items[index] && !sheetWord && !showCardDetails,
@@ -409,6 +465,7 @@ export function ExampleSrsStudyPage() {
 
             <div className="space-y-3 mt-auto">
               <input
+                ref={answerInputRef}
                 type="text"
                 value={answer}
                 onChange={(e) => handleAnswerChange(e.target.value)}
@@ -419,7 +476,6 @@ export function ExampleSrsStudyPage() {
                 onBlur={() => setFocused(false)}
                 disabled={reviewing}
                 placeholder={settings.srsRomajiInput ? "答え" : ""}
-                // className={`w-full rounded-xl border border-app-border-strong bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 disabled:opacity-60 ${answerPhase === "revealed" ? "border-red-600" : ""} ${answerPhase === "correct" ? "border-green-500" : ""}`}
                 className={`
                   w-full rounded-xl border bg-app-muted px-4 py-3 text-xl font-bold text-center text-app-text
                   outline-none
