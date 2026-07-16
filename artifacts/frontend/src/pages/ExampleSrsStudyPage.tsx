@@ -57,6 +57,17 @@ export function ExampleSrsStudyPage() {
   itemsRef.current = items;
 
   useEffect(() => {
+    const html = document.documentElement;
+    const previousFontSize = html.style.fontSize;
+
+    html.style.fontSize = "12px";
+
+    return () => {
+      html.style.fontSize = previousFontSize;
+    };
+  }, []);
+
+  useEffect(() => {
     setAnswer("");
     setAnswerPhase("typing");
     setEmptyChecked(false);
