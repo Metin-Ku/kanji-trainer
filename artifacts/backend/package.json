@@ -15,6 +15,7 @@
     "argon2": "^0.43.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "cron": "^4.4.0",
     "drizzle-orm": "catalog:",
     "express": "^5.2.1",
     "nodemailer": "^7.0.5",
@@ -25,8 +26,8 @@
   "devDependencies": {
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
-    "@types/nodemailer": "^6.4.17",
     "@types/node": "catalog:",
+    "@types/nodemailer": "^6.4.17",
     "esbuild": "0.27.3",
     "esbuild-plugin-pino": "^2.3.3",
     "pino-pretty": "^13.1.3",
