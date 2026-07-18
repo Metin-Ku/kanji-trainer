@@ -17,7 +17,7 @@ type WordPickerModalProps = {
 function SelectionCircle({ checked }: { checked: boolean }) {
   return (
     <div
-      className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors border-app-border-strong ${
+      className={`border-app-border-strong flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
         checked ? "border-main-500 bg-main-500" : "transparent"
       }`}
     >
@@ -67,31 +67,31 @@ export function WordPickerModal({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-[110] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+      className="fixed inset-0 z-[110] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-app-surface w-full sm:max-w-lg max-h-[85dvh] rounded-t-2xl sm:rounded-2xl border border-app-border flex flex-col shadow-xl">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-app-border shrink-0">
-          <h2 className="text-sm font-bold text-app-text">
+      <div className="bg-app-surface border-app-border flex max-h-[85dvh] w-full flex-col rounded-t-2xl border shadow-xl sm:max-w-lg sm:rounded-2xl">
+        <div className="border-app-border flex shrink-0 items-center justify-between border-b px-4 py-3">
+          <h2 className="text-app-text text-sm font-bold">
             {title ?? t("themes.pickWords")}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted"
+            className="hover:bg-app-muted text-app-text-muted rounded-full p-1.5"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="px-4 py-3 border-b border-app-border shrink-0">
+        <div className="border-app-border shrink-0 border-b px-4 py-3">
           <SearchBar value={query} onChange={setQuery} />
-          <p className="text-xs text-app-text-muted mt-2">
+          <p className="text-app-text-muted mt-2 text-xs">
             {t("themes.selectedWordCount", { count: selectedIds.size })}
           </p>
         </div>
 
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="min-h-0 flex-1 overflow-y-auto">
           {displayed.map((word) => {
             const checked = selectedIds.has(word.id);
             return (
@@ -99,12 +99,14 @@ export function WordPickerModal({
                 key={word.id}
                 type="button"
                 onClick={() => toggle(word.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 border-b border-app-border text-left hover:bg-app-muted/50 transition-colors"
+                className="border-app-border hover:bg-app-muted/50 flex w-full items-center gap-3 border-b px-4 py-3 text-left transition-colors"
               >
                 <SelectionCircle checked={checked} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-bold text-app-text truncate">{word.kanji}</p>
-                  <p className="text-xs text-app-text-muted truncate">
+                  <p className="text-app-text truncate font-bold">
+                    {word.kanji}
+                  </p>
+                  <p className="text-app-text-muted truncate text-xs">
                     {word.pronunciation || word.meaning || t("common.emDash")}
                   </p>
                 </div>
@@ -113,18 +115,18 @@ export function WordPickerModal({
           })}
         </div>
 
-        <div className="px-4 py-3 border-t border-app-border shrink-0 flex gap-2">
+        <div className="border-app-border flex shrink-0 gap-2 border-t px-4 py-3">
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-app-border-strong text-sm font-semibold text-app-text-secondary"
+            className="border-app-border-strong text-app-text-secondary flex-1 rounded-xl border py-2.5 text-sm font-semibold"
           >
             {t("common.cancel")}
           </button>
           <button
             type="button"
             onClick={() => (onConfirm ? onConfirm() : onClose())}
-            className="flex-1 py-2.5 rounded-xl bg-main-500 text-white text-sm font-semibold"
+            className="bg-main-500 flex-1 rounded-xl py-2.5 text-sm font-semibold text-white"
           >
             {t("common.add")}
           </button>

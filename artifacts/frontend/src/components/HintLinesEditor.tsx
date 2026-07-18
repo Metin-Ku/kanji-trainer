@@ -19,9 +19,7 @@ export function HintLinesEditor({
   const hintRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
   function patchHint(index: number, patch: Partial<SrsExampleHint>) {
-    onChange(
-      hints.map((h, i) => (i === index ? { ...h, ...patch } : h)),
-    );
+    onChange(hints.map((h, i) => (i === index ? { ...h, ...patch } : h)));
   }
 
   function addHint() {
@@ -55,7 +53,7 @@ export function HintLinesEditor({
 
   return (
     <div className="space-y-2">
-      <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
+      <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
         {label ?? t("srs.editor.hintLines")}
       </p>
       {hints.map((hint, hintIndex) => (
@@ -69,12 +67,12 @@ export function HintLinesEditor({
               value={hint.text}
               onChange={(e) => patchHint(hintIndex, { text: e.target.value })}
               placeholder={t("srs.editor.placeholders.hint")}
-              className="flex-1 rounded-lg border border-app-border-strong bg-app-surface px-3 py-1.5 text-sm text-app-text focus:outline-none focus:ring-2 focus:ring-main-300"
+              className="border-app-border-strong bg-app-surface text-app-text focus:ring-main-300 flex-1 rounded-lg border px-3 py-1.5 text-sm focus:ring-2 focus:outline-none"
             />
             <button
               type="button"
               onClick={() => addHighlight(hintIndex)}
-              className="shrink-0 p-2 rounded-lg border border-app-border-strong bg-app-surface text-app-text-secondary hover:text-main-500 dark:hover:text-main-600 hover:border-main-300 dark:hover:border-main-400"
+              className="border-app-border-strong bg-app-surface text-app-text-secondary hover:text-main-500 dark:hover:text-main-600 hover:border-main-300 dark:hover:border-main-400 shrink-0 rounded-lg border p-2"
               title={t("srs.editor.highlightSelection")}
             >
               <Highlighter size={14} />
@@ -83,7 +81,7 @@ export function HintLinesEditor({
               <button
                 type="button"
                 onClick={() => removeHint(hintIndex)}
-                className="shrink-0 p-2 rounded-lg border border-app-border-strong bg-app-surface text-app-text-muted hover:text-red-500"
+                className="border-app-border-strong bg-app-surface text-app-text-muted shrink-0 rounded-lg border p-2 hover:text-red-500"
               >
                 <Trash2 size={14} />
               </button>
@@ -96,7 +94,7 @@ export function HintLinesEditor({
                   key={h}
                   type="button"
                   onClick={() => removeHighlight(hintIndex, h)}
-                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-main-100 text-main-600 dark:bg-main-900 dark:text-main-300"
+                  className="bg-main-100 text-main-600 dark:bg-main-900 dark:text-main-300 rounded-full px-2 py-0.5 text-[10px] font-semibold"
                 >
                   {h} ×
                 </button>
@@ -104,12 +102,12 @@ export function HintLinesEditor({
             </div>
           )}
           {hint.text && (
-            <p className="text-xs text-app-text-secondary pl-0.5">
+            <p className="text-app-text-secondary pl-0.5 text-xs">
               {renderHintParts(hint.text, hint.highlights).map((p, i) =>
                 p.highlight ? (
                   <span
                     key={i}
-                    className="font-semibold text-main-600 bg-main-100 dark:bg-main-900 px-0.5 rounded"
+                    className="text-main-600 bg-main-100 dark:bg-main-900 rounded px-0.5 font-semibold"
                   >
                     {p.text}
                   </span>
@@ -124,7 +122,7 @@ export function HintLinesEditor({
       <button
         type="button"
         onClick={addHint}
-        className="text-xs font-semibold text-app-text-muted hover:text-main-500 dark:hover:text-main-600"
+        className="text-app-text-muted hover:text-main-500 dark:hover:text-main-600 text-xs font-semibold"
       >
         {t("srs.editor.addLine")}
       </button>
@@ -144,14 +142,14 @@ export function HintLinesDisplay({
   if (lines.length === 0) return null;
 
   return (
-    <div className="mt-4 space-y-2 rounded-xl bg-main-50 dark:bg-main-950 border border-main-100 dark:border-main-900 px-4 py-3">
+    <div className="bg-main-50 dark:bg-main-950 border-main-100 dark:border-main-900 mt-4 space-y-2 rounded-xl border px-4 py-3">
       {lines.map((hint, hi) => (
-        <p key={hi} className="text-sm text-app-text-secondary leading-relaxed">
+        <p key={hi} className="text-app-text-secondary text-sm leading-relaxed">
           {renderHintParts(hint.text, hint.highlights).map((p, i) =>
             p.highlight ? (
               <span
                 key={i}
-                className="font-semibold text-main-600 bg-main-100 dark:bg-main-900 px-0.5 rounded"
+                className="text-main-600 bg-main-100 dark:bg-main-900 rounded px-0.5 font-semibold"
               >
                 {p.text}
               </span>

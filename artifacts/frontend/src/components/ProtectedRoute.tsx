@@ -24,8 +24,11 @@ export function ProtectedRoute({
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-app-bg">
-        <LoadingSpinner size={36} className="text-main-500 dark:text-main-600" />
+      <div className="bg-app-bg flex min-h-dvh items-center justify-center">
+        <LoadingSpinner
+          size={36}
+          className="text-main-500 dark:text-main-600"
+        />
       </div>
     );
   }

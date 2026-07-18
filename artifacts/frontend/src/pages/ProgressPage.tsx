@@ -20,8 +20,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="bg-app-surface rounded-2xl border border-app-border p-4 min-w-0 overflow-hidden">
-      <h2 className="text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-4">
+    <section className="bg-app-surface border-app-border min-w-0 overflow-hidden rounded-2xl border p-4">
+      <h2 className="text-app-text-muted mb-4 text-xs font-semibold tracking-wider uppercase">
         {title}
       </h2>
       {children}
@@ -37,33 +37,35 @@ export function ProgressPage() {
   const { activityByDate, isLoading: activityLoading } = useStudyHistory();
 
   const currentYear = new Date().getFullYear();
-  
+
   const minYear = user ? membershipYear(user.createdAt) : currentYear;
   const years = useMemo(
     () => yearRange(minYear, currentYear),
     [minYear, currentYear],
   );
   const [heatmapYear, setHeatmapYear] = useState(currentYear);
-  
+
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
+    <div className="bg-app-bg sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+      <div className="bg-app-surface border-app-border shrink-0 border-b px-5 pt-4 pb-4">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
+          className="text-app-text-muted hover:text-app-text-secondary -ml-1 flex items-center gap-1.5 p-1 transition-colors"
         >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+          <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
             {t("nav.progress")}
           </span>
         </button>
-        <h1 className="text-xl font-bold text-app-text mt-2">
+        <h1 className="text-app-text mt-2 text-xl font-bold">
           {t("progress.title")}
         </h1>
-        <p className="text-sm text-app-text-secondary mt-1">{t("progress.subtitle")}</p>
+        <p className="text-app-text-secondary mt-1 text-sm">
+          {t("progress.subtitle")}
+        </p>
       </div>
 
-      <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto overflow-x-hidden pb-8 min-w-0">
+      <div className="min-w-0 flex-1 space-y-4 overflow-x-hidden overflow-y-auto px-5 py-4 pb-8">
         {isLoading ? (
           <LoadingPlaceholder padding="lg" />
         ) : (

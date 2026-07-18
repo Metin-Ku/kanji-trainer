@@ -16,14 +16,15 @@ import { themeVars } from "../theme";
 import { useWords } from "../hooks/useWords";
 import { ExampleSrsStudyPage } from "./ExampleSrsStudyPage";
 import { useTranslation } from "../i18n/I18nProvider";
-import {
-  intervalCountsAsDailyLearn,
-  localDateKey,
-} from "../lib/dailyGoal";
+import { intervalCountsAsDailyLearn, localDateKey } from "../lib/dailyGoal";
 import { useStudyActivity } from "../hooks/useStudyActivity";
 import { useStudySwipeKeys } from "../lib/studyKeyboard";
 
-function getPrimary(item: SrsQueueItem, deck: SrsDeckType, emDash: string): string {
+function getPrimary(
+  item: SrsQueueItem,
+  deck: SrsDeckType,
+  emDash: string,
+): string {
   const { word } = item;
   if (deck === "pronunciation") return word.pronunciation || emDash;
   if (deck === "meaning") return word.meaning || emDash;
@@ -409,10 +410,12 @@ function SrsStudyPageInner({
     setDone(false);
   }
 
-  function handleSave(data: WordUpdate & {
-    relatedWordIds: number[];
-    categoryIds: number[];
-  }) {
+  function handleSave(
+    data: WordUpdate & {
+      relatedWordIds: number[];
+      categoryIds: number[];
+    },
+  ) {
     const current = items[index];
     if (current) {
       updateWord(current.word.id, data);
@@ -440,11 +443,11 @@ function SrsStudyPageInner({
 
   if (!item && !done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
+      <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col items-center justify-center sm:box-content sm:border-r-2 sm:border-l-2">
         <p className="text-app-text-muted">{t("srs.study.cardNotFound")}</p>
         <button
           onClick={() => navigate(backPath)}
-          className="mt-4 text-main-400 text-sm"
+          className="text-main-400 mt-4 text-sm"
         >
           {t("common.goBack")}
         </button>
@@ -454,35 +457,37 @@ function SrsStudyPageInner({
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-        <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center">
+      <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+        <div className="bg-app-surface border-app-border sticky top-0 z-20 flex items-center border-b px-5 pt-4 pb-4">
           <button
             onClick={() => navigate(backPath)}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
+            className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
           >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+            <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
               {title}
             </span>
           </button>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-8 text-center">
           <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
+            className="flex h-16 w-16 items-center justify-center rounded-full text-3xl"
             style={{ background: themeVars.star }}
           >
             ★
           </div>
           <div>
-            <p className="text-2xl font-bold text-app-text mb-1">{t("common.completed")}</p>
-            <p className="text-sm text-app-text-muted">
+            <p className="text-app-text mb-1 text-2xl font-bold">
+              {t("common.completed")}
+            </p>
+            <p className="text-app-text-muted text-sm">
               {t("srs.study.sessionComplete")}
             </p>
           </div>
-          <div className="flex flex-col gap-3 w-full max-w-xs">
+          <div className="flex w-full max-w-xs flex-col gap-3">
             <button
               onClick={handleRestart}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-app-text-secondary text-sm"
+              className="text-app-text-secondary flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold"
               style={{ background: themeVars.level(1) }}
             >
               <Dices size={16} strokeWidth={2} />
@@ -490,7 +495,7 @@ function SrsStudyPageInner({
             </button>
             <button
               onClick={() => navigate(backPath)}
-              className="w-full py-3 rounded-2xl font-semibold text-sm border border-app-border-strong text-app-text-secondary"
+              className="border-app-border-strong text-app-text-secondary w-full rounded-2xl border py-3 text-sm font-semibold"
             >
               {t("srs.study.backToDecks")}
             </button>
@@ -518,25 +523,28 @@ function SrsStudyPageInner({
   const liveWord = words.find((w) => w.id === word.id) ?? queueWordToWord(item);
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-      <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
+    <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col select-none sm:box-content sm:border-r-2 sm:border-l-2">
+      <div className="bg-app-surface border-app-border sticky top-0 z-20 flex shrink-0 items-center justify-between border-b px-5 pt-4 pb-4">
         <button
           onClick={() => navigate(backPath)}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
+          className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
         >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+          <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
             {title}
           </span>
         </button>
-        <span className="text-sm text-app-text-muted font-medium tabular-nums">
-          {t("common.cardProgress", { current: index + 1, total: items.length })}
+        <span className="text-app-text-muted text-sm font-medium tabular-nums">
+          {t("common.cardProgress", {
+            current: index + 1,
+            total: items.length,
+          })}
         </span>
       </div>
 
       <div
         ref={mainRef}
-        className="flex-1 relative overflow-hidden"
+        className="relative flex-1 overflow-hidden"
         style={{ touchAction: "none", paddingBottom: ratingBarHeight }}
       >
         <div
@@ -550,24 +558,24 @@ function SrsStudyPageInner({
               pointerEvents: "auto",
               willChange: isAnimating ? "transform" : "auto",
             }}
-            className="flex flex-col items-center gap-5 px-8 w-full max-w-sm"
+            className="flex w-full max-w-sm flex-col items-center gap-5 px-8"
           >
             <p
               ref={wordRef}
-              className="font-bold text-app-text text-center leading-tight"
+              className="text-app-text text-center leading-tight font-bold"
               style={{ fontSize: deck === "meaning" ? "1.4rem" : "3rem" }}
             >
               {getPrimary(item, deck, t("common.emDash"))}
             </p>
 
-            <div className="flex items-center gap-2 flex-wrap justify-center">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {word.date && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-app-muted text-app-text-secondary">
+                <span className="bg-app-muted text-app-text-secondary rounded-full px-2.5 py-1 text-xs font-medium">
                   {formatStudyDate(word.date)}
                 </span>
               )}
               {word.jlptLevel && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-app-muted text-app-text-secondary">
+                <span className="bg-app-muted text-app-text-secondary rounded-full px-2.5 py-1 text-xs font-semibold">
                   {word.jlptLevel}
                 </span>
               )}
@@ -589,7 +597,7 @@ function SrsStudyPageInner({
 
       {/* SRS-only: fixed above rating bar so it is not covered and taps do not hit mainRef */}
       <div
-        className="fixed left-0 right-0 z-20 max-w-2xl mx-auto bg-app-surface border-t border-app-border rounded-t-2xl shadow-xl sm:border-l sm:border-r pointer-events-auto"
+        className="bg-app-surface border-app-border pointer-events-auto fixed right-0 left-0 z-20 mx-auto max-w-2xl rounded-t-2xl border-t shadow-xl sm:border-r sm:border-l"
         style={{
           bottom: ratingBarHeight,
           transform: showDetails ? "translateY(0)" : "translateY(100%)",
@@ -600,14 +608,16 @@ function SrsStudyPageInner({
         }}
       >
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-app-border-strong" />
+          <div className="bg-app-border-strong h-1 w-10 rounded-full" />
         </div>
-        <div className={`px-6 pb-4 pt-2 relative ${showRelated && liveWord.meaning ? "" : "pr-24"}`}>
+        <div
+          className={`relative px-6 pt-2 pb-4 ${showRelated && liveWord.meaning ? "" : "pr-24"}`}
+        >
           <div className="absolute top-2 right-6 flex flex-row items-center gap-2">
             <button
               type="button"
               onClick={() => setShowEdit(true)}
-              className="flex items-center justify-center px-3 py-1.5 w-10 h-8 rounded-lg bg-app-muted text-app-text-secondary"
+              className="bg-app-muted text-app-text-secondary flex h-8 w-10 items-center justify-center rounded-lg px-3 py-1.5"
             >
               <Pencil size={13} />
             </button>
@@ -630,36 +640,38 @@ function SrsStudyPageInner({
             <div className="space-y-4">
               {deck !== "word" && word.kanji && (
                 <div>
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
+                  <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
                     {t("study.detailLabels.word")}
                   </p>
-                  <p className="text-3xl font-bold text-app-text">{word.kanji}</p>
+                  <p className="text-app-text text-3xl font-bold">
+                    {word.kanji}
+                  </p>
                 </div>
               )}
               {deck !== "pronunciation" && word.pronunciation && (
                 <div>
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
+                  <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
                     {t("study.detailLabels.pronunciation")}
                   </p>
-                  <p className="text-lg font-medium text-app-text">
+                  <p className="text-app-text text-lg font-medium">
                     {word.pronunciation}
                   </p>
                 </div>
               )}
               {deck !== "meaning" && word.meaning && (
                 <div>
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
+                  <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
                     {t("study.detailLabels.meaning")}
                   </p>
-                  <p className="text-base text-app-text">{word.meaning}</p>
+                  <p className="text-app-text text-base">{word.meaning}</p>
                 </div>
               )}
               {word.description && (
-                <div className="pt-3 border-t border-app-border">
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
+                <div className="border-app-border border-t pt-3">
+                  <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
                     {t("study.detailLabels.description")}
                   </p>
-                  <p className="whitespace-pre-wrap text-sm text-app-text-secondary leading-relaxed">
+                  <p className="text-app-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
                     {word.description}
                   </p>
                 </div>
@@ -671,7 +683,7 @@ function SrsStudyPageInner({
 
       <div
         ref={ratingBarRef}
-        className="fixed bottom-0 left-0 right-0 z-30 bg-app-surface border-t border-app-border px-3 py-3 max-w-2xl mx-auto sm:border-l sm:border-r"
+        className="bg-app-surface border-app-border fixed right-0 bottom-0 left-0 z-30 mx-auto max-w-2xl border-t px-3 py-3 sm:border-r sm:border-l"
       >
         <div className="grid grid-cols-4 gap-2">
           {RATING_KEYS.map(({ rating, labelKey, key, className }) => (
@@ -679,11 +691,11 @@ function SrsStudyPageInner({
               key={rating}
               onClick={() => handleReviewClick(rating)}
               disabled={reviewing}
-              className={`flex flex-col items-center justify-center py-2.5 rounded-xl text-app-text-secondary text-xs font-semibold transition-opacity disabled:opacity-50 ${className}`}
+              className={`text-app-text-secondary flex flex-col items-center justify-center rounded-xl py-2.5 text-xs font-semibold transition-opacity disabled:opacity-50 ${className}`}
             >
               <span>{t(`srs.study.ratings.${labelKey}`)}</span>
               {intervals && (
-                <span className="text-[10px] font-normal opacity-90 mt-0.5">
+                <span className="mt-0.5 text-[10px] font-normal opacity-90">
                   {intervals[key]}
                 </span>
               )}

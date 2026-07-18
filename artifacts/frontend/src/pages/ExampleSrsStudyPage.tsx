@@ -1,4 +1,10 @@
-import { useState, useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Dices, Eye, Pencil } from "lucide-react";
 import { SrsWordSlideUp } from "../components/SrsWordSlideUp";
@@ -18,9 +24,7 @@ import { useTranslation } from "../i18n/I18nProvider";
 import { localDateKey } from "../lib/dailyGoal";
 import { useStudyActivity } from "../hooks/useStudyActivity";
 import { useStudySwipeKeys } from "../lib/studyKeyboard";
-import {
-  consumeWarmedKeyboard,
-} from "../lib/mobileKeyboard";
+import { consumeWarmedKeyboard } from "../lib/mobileKeyboard";
 
 type AnswerPhase = "typing" | "correct" | "partial" | "revealed";
 
@@ -82,9 +86,7 @@ export function ExampleSrsStudyPage() {
     }
 
     const rect = controls.getBoundingClientRect();
-    const visibleBottom = vv
-      ? vv.offsetTop + vv.height
-      : window.innerHeight;
+    const visibleBottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
     const overflow = rect.bottom - visibleBottom + gap;
     if (Math.abs(overflow) < 2) return;
 
@@ -375,11 +377,11 @@ export function ExampleSrsStudyPage() {
 
   if (!item && !done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface">
+      <div className="bg-app-surface mx-auto flex min-h-dvh max-w-2xl flex-col items-center justify-center">
         <p className="text-app-text-muted">{t("srs.study.cardNotFound")}</p>
         <button
           onClick={() => navigate(backPath)}
-          className="mt-4 text-main-400 text-sm"
+          className="text-main-400 mt-4 text-sm"
         >
           {t("common.goBack")}
         </button>
@@ -389,44 +391,44 @@ export function ExampleSrsStudyPage() {
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-        <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
+      <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+        <div className="bg-app-surface border-app-border sticky top-0 z-20 border-b px-5 pt-4 pb-4">
           <button
             onClick={() => navigate(backPath)}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
+            className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
           >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+            <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
               {title}
             </span>
           </button>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-8 text-center">
           <div
-            className="w-16 h-16 rounded-full flex items-center justify-center text-3xl"
+            className="flex h-16 w-16 items-center justify-center rounded-full text-3xl"
             style={{ background: themeVars.star }}
           >
             ★
           </div>
           <div>
-            <p className="text-2xl font-bold text-app-text mb-1">
+            <p className="text-app-text mb-1 text-2xl font-bold">
               {t("common.completed")}
             </p>
-            <p className="text-sm text-app-text-muted">
+            <p className="text-app-text-muted text-sm">
               {t("srs.study.examplesComplete")}
             </p>
           </div>
-          <div className="flex flex-col gap-3 w-full max-w-xs">
+          <div className="flex w-full max-w-xs flex-col gap-3">
             <button
               onClick={handleRestart}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-app-text-secondary text-sm"
+              className="text-app-text-secondary flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold"
               style={{ background: themeVars.level(1) }}
             >
               <Dices size={16} /> {t("srs.study.restart")}
             </button>
             <button
               onClick={() => navigate(backPath)}
-              className="w-full py-3 rounded-2xl font-semibold text-sm border border-app-border-strong text-app-text-secondary"
+              className="border-app-border-strong text-app-text-secondary w-full rounded-2xl border py-3 text-sm font-semibold"
             >
               {t("srs.study.backToDecks")}
             </button>
@@ -448,14 +450,14 @@ export function ExampleSrsStudyPage() {
 
   return (
     // <div className="min-h-[max(25rem,50vh)] max-w-2xl mx-auto bg-app-surface flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-      <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
+    <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+      <div className="bg-app-surface border-app-border sticky top-0 z-20 flex shrink-0 items-center justify-between border-b px-5 pt-4 pb-4">
         <button
           onClick={() => navigate(backPath)}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
+          className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
         >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+          <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
             {title}
           </span>
         </button>
@@ -463,11 +465,11 @@ export function ExampleSrsStudyPage() {
           <button
             type="button"
             onClick={() => setShowCardDetails(true)}
-            className="p-2 rounded-lg bg-app-muted text-app-text-secondary"
+            className="bg-app-muted text-app-text-secondary rounded-lg p-2"
           >
             <Eye size={14} />
           </button>
-          <span className="text-sm text-app-text-muted font-medium tabular-nums">
+          <span className="text-app-text-muted text-sm font-medium tabular-nums">
             {t("common.cardProgress", {
               current: index + 1,
               total: items.length,
@@ -478,11 +480,11 @@ export function ExampleSrsStudyPage() {
 
       <div
         ref={scrollAreaRef}
-        className="flex-1 flex flex-col px-6 py-6 gap-6 overflow-y-auto pb-8"
+        className="flex flex-1 flex-col gap-6 overflow-y-auto px-6 py-6 pb-8"
       >
         {currentEx ? (
           <>
-            <div className="rounded-2xl bg-app-muted border border-app-border px-5 py-6 text-center">
+            <div className="bg-app-muted border-app-border rounded-2xl border px-5 py-6 text-center">
               <ExampleSentenceDisplay
                 example={currentEx}
                 headwordKanji={liveWord.kanji}
@@ -497,7 +499,7 @@ export function ExampleSrsStudyPage() {
                 onWordTap={setSheetWord}
               />
               {examples.length > 1 && (
-                <p className="text-xs text-app-text-muted mt-3">
+                <p className="text-app-text-muted mt-3 text-xs">
                   {t("common.exampleProgress", {
                     current: (cursor % examples.length) + 1,
                     total: examples.length,
@@ -510,13 +512,13 @@ export function ExampleSrsStudyPage() {
               {currentEx.hints.map((hint, i) => (
                 <p
                   key={i}
-                  className="text-base text-app-text-secondary leading-relaxed"
+                  className="text-app-text-secondary text-base leading-relaxed"
                 >
                   {renderHintParts(hint.text, hint.highlights).map((p, j) =>
                     p.highlight ? (
                       <span
                         key={j}
-                        className="font-semibold text-main-600 bg-main-100 dark:bg-main-900 px-0.5 rounded"
+                        className="text-main-600 bg-main-100 dark:bg-main-900 rounded px-0.5 font-semibold"
                       >
                         {p.text}
                       </span>
@@ -528,7 +530,7 @@ export function ExampleSrsStudyPage() {
               ))}
             </div>
 
-            <div ref={answerControlsRef} className="space-y-3 mt-auto">
+            <div ref={answerControlsRef} className="relative mt-auto space-y-3">
               <input
                 ref={answerInputRef}
                 type="text"
@@ -549,26 +551,44 @@ export function ExampleSrsStudyPage() {
                 }}
                 placeholder={settings.srsRomajiInput ? "答え" : ""}
                 style={{ fontSize: 16 }}
-                className={`
-                  w-full rounded-xl border bg-app-muted px-4 py-3 font-bold text-center text-app-text
-                  outline-none
-                  transition-all duration-150
-                  ${
-                    focused
-                      ? answerPhase === "revealed"
-                        ? "border-red-600 ring-2 ring-red-600 ring-inset ring-offset-0"
-                        : answerPhase === "correct"
-                          ? "border-green-500 ring-2 ring-green-500 ring-inset ring-offset-0"
-                          : "border-main-300 ring-2 ring-main-300 ring-inset ring-offset-0"
-                      : "border-app-border-strong"
-                  }
-                `}
+                className={`bg-app-muted text-app-text w-full rounded-xl border px-4 py-3 text-center font-bold transition-all duration-150 outline-none ${
+                  focused
+                    ? answerPhase === "revealed"
+                      ? "border-red-600 ring-2 ring-red-600 ring-offset-0 ring-inset"
+                      : answerPhase === "correct"
+                        ? "border-green-500 ring-2 ring-green-500 ring-offset-0 ring-inset"
+                        : "border-main-300 ring-main-300 ring-2 ring-offset-0 ring-inset"
+                    : "border-app-border-strong"
+                } `}
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"
                 spellCheck={false}
                 autoFocus
               />
+
+              <button
+                type="button"
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  focusAnswerInput();
+                }}
+                onClick={() => {
+                  const newValue = answer + "ー";
+                  handleAnswerChange(newValue);
+
+                  requestAnimationFrame(() => {
+                    answerInputRef.current?.focus();
+                    answerInputRef.current?.setSelectionRange(
+                      newValue.length,
+                      newValue.length,
+                    );
+                  });
+                }}
+                className="text-app-text-muted absolute top-0 right-0 px-6 py-3.5 font-bold"
+              >
+                ー
+              </button>
 
               <button
                 type="button"
@@ -581,7 +601,7 @@ export function ExampleSrsStudyPage() {
                   void handlePrimaryAction();
                 }}
                 disabled={reviewing}
-                className="w-full py-3 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white disabled:opacity-50"
+                className="bg-main-500 hover:bg-main-600 w-full rounded-xl py-3 font-bold text-white disabled:opacity-50"
               >
                 {answerPhase === "typing"
                   ? t("common.check")
@@ -590,7 +610,7 @@ export function ExampleSrsStudyPage() {
             </div>
           </>
         ) : (
-          <p className="text-center text-app-text-muted">
+          <p className="text-app-text-muted text-center">
             {t("srs.example.noExample")}
           </p>
         )}

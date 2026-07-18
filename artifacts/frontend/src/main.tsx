@@ -35,5 +35,5 @@ createRoot(document.getElementById("root")!).render(
         </ConfirmProvider>
       </AuthProvider>
     </I18nProvider>
-  </QueryClientProvider>
+  </QueryClientProvider>,
 );

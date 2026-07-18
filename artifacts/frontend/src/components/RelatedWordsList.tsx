@@ -49,7 +49,9 @@ export function RelatedWordsList({ word, allWords }: Props) {
 
   const manualIds = word.relatedWordIds ?? [];
   const manualWords = allWords.filter((w) => manualIds.includes(w.id));
-  const autoWords = getRelatedWords(word, allWords).filter((w) => !manualIds.includes(w.id));
+  const autoWords = getRelatedWords(word, allWords).filter(
+    (w) => !manualIds.includes(w.id),
+  );
   const allRelated = [...manualWords, ...autoWords];
 
   function toggle(id: number) {
@@ -62,8 +64,8 @@ export function RelatedWordsList({ word, allWords }: Props) {
 
   if (allRelated.length === 0) {
     return (
-      <div className="border border-app-border rounded-lg bg-app-surface px-4 py-3">
-        <p className="text-xs text-app-text-muted text-center">
+      <div className="border-app-border bg-app-surface rounded-lg border px-4 py-3">
+        <p className="text-app-text-muted text-center text-xs">
           {t("common.relatedWordsNotFound")}
         </p>
       </div>
@@ -74,7 +76,7 @@ export function RelatedWordsList({ word, allWords }: Props) {
 
   return (
     <div
-      className="border border-app-border rounded-lg bg-app-surface overflow-y-auto"
+      className="border-app-border bg-app-surface overflow-y-auto rounded-lg border"
       style={{ maxHeight: 280 }}
       onClick={(e) => e.stopPropagation()}
     >
@@ -82,56 +84,79 @@ export function RelatedWordsList({ word, allWords }: Props) {
         const isOpen = openIds.has(w.id);
         const isManual = manualSet.has(w.id);
         return (
-          <div key={w.id} className="border-b border-app-border last:border-b-0">
+          <div
+            key={w.id}
+            className="border-app-border border-b last:border-b-0"
+          >
             <div
-              className="flex items-center gap-3 px-4 py-2.5 cursor-pointer select-none"
+              className="flex cursor-pointer items-center gap-3 px-4 py-2.5 select-none"
               onClick={() => toggle(w.id)}
             >
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5 leading-none">
-                  <p className="text-sm font-bold text-app-text">{w.kanji}</p>
+                  <p className="text-app-text text-sm font-bold">{w.kanji}</p>
                   {isManual && (
-                    <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-main-100 text-main-600">
+                    <span className="bg-main-100 text-main-600 rounded px-1 py-0.5 text-[9px] font-bold">
                       {t("common.manualLinkBadge")}
                     </span>
                   )}
                 </div>
                 {w.pronunciation && (
-                  <p className="text-xs text-app-text-secondary mt-0.5">{w.pronunciation}</p>
+                  <p className="text-app-text-secondary mt-0.5 text-xs">
+                    {w.pronunciation}
+                  </p>
                 )}
                 {w.meaning && (
-                  <p className="text-xs text-app-text-muted mt-0.5 truncate">{w.meaning}</p>
+                  <p className="text-app-text-muted mt-0.5 truncate text-xs">
+                    {w.meaning}
+                  </p>
                 )}
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex shrink-0 items-center gap-1">
                 {w.jlptLevel && (
-                  <span className="text-[10px] bg-app-muted text-app-text-secondary font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
+                  <span className="bg-app-muted text-app-text-secondary shrink-0 rounded-md px-1.5 py-[3px] text-[10px] leading-none font-semibold">
                     {w.jlptLevel}
                   </span>
                 )}
                 <div className="flex flex-row gap-0.5">
                   {(
                     [
-                      { Icon: Languages, starred: w.starred,        level: w.level        },
-                      { Icon: Waves,     starred: w.pronStarred,    level: w.pronLevel    },
-                      { Icon: BookOpen,  starred: w.meaningStarred, level: w.meaningLevel },
+                      { Icon: Languages, starred: w.starred, level: w.level },
+                      {
+                        Icon: Waves,
+                        starred: w.pronStarred,
+                        level: w.pronLevel,
+                      },
+                      {
+                        Icon: BookOpen,
+                        starred: w.meaningStarred,
+                        level: w.meaningLevel,
+                      },
                     ] as const
                   ).map(({ Icon, starred, level }, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-app-muted"
+                      className="bg-app-muted flex items-center gap-0.5 rounded-full px-1 py-0.5"
                     >
-                      <Icon size={10} strokeWidth={2} className="text-app-text-secondary" />
+                      <Icon
+                        size={10}
+                        strokeWidth={2}
+                        className="text-app-text-secondary"
+                      />
                       {starred ? (
                         <div
-                          className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold"
+                          className="flex h-3 w-3 items-center justify-center rounded-full text-[7px] font-bold"
                           style={{ background: themeVars.star, color: "white" }}
-                        >★</div>
+                        >
+                          ★
+                        </div>
                       ) : (
                         <div
-                          className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold text-white"
+                          className="flex h-3 w-3 items-center justify-center rounded-full text-[7px] font-bold text-white"
                           style={{ background: themeVars.level(level) }}
-                        >{level}</div>
+                        >
+                          {level}
+                        </div>
                       )}
                     </div>
                   ))}
@@ -139,11 +164,13 @@ export function RelatedWordsList({ word, allWords }: Props) {
               </div>
             </div>
             {isOpen && (
-              <div className="px-4 pb-3 pt-0">
+              <div className="px-4 pt-0 pb-3">
                 {w.description ? (
-                  <p className="whitespace-pre-wrap text-xs text-app-text-secondary leading-relaxed">{w.description}</p>
+                  <p className="text-app-text-secondary text-xs leading-relaxed whitespace-pre-wrap">
+                    {w.description}
+                  </p>
                 ) : (
-                  <p className="text-xs text-app-text-muted italic">
+                  <p className="text-app-text-muted text-xs italic">
                     {t("common.noDescription")}
                   </p>
                 )}
@@ -156,14 +183,22 @@ export function RelatedWordsList({ word, allWords }: Props) {
   );
 }
 
-export function RelatedWordsButton({ active, onClick, slideUp }: { active: boolean; onClick: (e: React.MouseEvent) => void; slideUp?: boolean }) {
+export function RelatedWordsButton({
+  active,
+  onClick,
+  slideUp,
+}: {
+  active: boolean;
+  onClick: (e: React.MouseEvent) => void;
+  slideUp?: boolean;
+}) {
   const { t } = useTranslation();
   return (
     <button
       type="button"
       onClick={onClick}
       onMouseDown={slideUp ? (e) => e.stopPropagation() : undefined}
-      className={`shrink-0 px-2 py-0.5 rounded-md text-xs font-bold transition-colors ${slideUp ? "h-8" : ""} ${
+      className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-bold transition-colors ${slideUp ? "h-8" : ""} ${
         active ? "bg-red-400 text-white" : "bg-main-100 text-main-400"
       }`}
       title={t("a11y.relatedWords")}

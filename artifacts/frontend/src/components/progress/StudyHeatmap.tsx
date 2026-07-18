@@ -216,9 +216,9 @@ function HeatmapGrid({
                   date: formatTooltipDate(cell.date, dateLocale),
                   count: cell.count,
                 })}
-                className={`rounded-sm shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                className={`shrink-0 rounded-sm transition-transform duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
                   isRing
-                    ? "ring-2 ring-main-500 ring-offset-1 ring-offset-app-bg z-[300]"
+                    ? "ring-main-500 ring-offset-app-bg z-[300] ring-2 ring-offset-1"
                     : ""
                 }`}
                 style={{
@@ -311,11 +311,11 @@ function TouchLoupe({
 
   return createPortal(
     <div
-      className="fixed z-[9999] pointer-events-none rounded-full overflow-hidden border-2 border-app-border-strong bg-app-surface shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
+      className="border-app-border-strong bg-app-surface pointer-events-none fixed z-[9999] overflow-hidden rounded-full border-2 shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
       style={loupeStyle}
       aria-hidden
     >
-      <div className="absolute inset-0 bg-app-surface" />
+      <div className="bg-app-surface absolute inset-0" />
       <div className="absolute" style={contentStyle}>
         <HeatmapGrid {...gridProps} dockFocus={null} />
       </div>
@@ -373,10 +373,7 @@ export function StudyHeatmap({
   }, [activityByDate, resolvedRange]);
 
   const columns = useMemo(() => chunkIntoWeeks(cells), [cells]);
-  const anchorWeekCol = useMemo(
-    () => findAnchorWeekColumn(columns),
-    [columns],
-  );
+  const anchorWeekCol = useMemo(() => findAnchorWeekColumn(columns), [columns]);
   const cellByDate = useMemo(
     () => new Map(cells.map((c) => [c.date, c])),
     [cells],
@@ -617,9 +614,9 @@ export function StudyHeatmap({
   );
 
   return (
-    <div className={`min-w-0 w-full max-w-full ${className}`.trim()}>
+    <div className={`w-full max-w-full min-w-0 ${className}`.trim()}>
       <div
-        className={`min-h-[1.25rem] text-app-text-secondary tabular-nums flex items-center justify-between ${
+        className={`text-app-text-secondary flex min-h-[1.25rem] items-center justify-between tabular-nums ${
           compact ? "text-[10px]" : "text-xs"
         }`}
       >
@@ -688,10 +685,10 @@ export function StudyHeatmap({
       )}
 
       {!compact && (
-        <div className="flex items-center gap-1.5 mt-3 text-[10px] text-app-text-muted">
+        <div className="text-app-text-muted mt-3 flex items-center gap-1.5 text-[10px]">
           <span>{t("progress.heatmap.less")}</span>
           {HEATMAP_LEVEL_CLASSES.map((cls, i) => (
-            <div key={i} className={`w-3 h-3 rounded-sm ${cls}`} />
+            <div key={i} className={`h-3 w-3 rounded-sm ${cls}`} />
           ))}
           <span>{t("progress.heatmap.more")}</span>
         </div>

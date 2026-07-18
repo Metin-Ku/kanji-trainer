@@ -7,20 +7,25 @@ type Props = {
   onChange: (year: number) => void;
 };
 
-export function HeatmapYearSelect({ years, value, currentYear, onChange }: Props) {
+export function HeatmapYearSelect({
+  years,
+  value,
+  currentYear,
+  onChange,
+}: Props) {
   const { t } = useTranslation();
   const isCurrentYear = value === currentYear;
 
   return (
-    <div className="flex items-center justify-end relative sm:bottom-2 bottom-1">
-      <label className="flex items-center gap-2 text-[13px] sm:text-sm text-app-text-muted">
+    <div className="relative bottom-1 flex items-center justify-end sm:bottom-2">
+      <label className="text-app-text-muted flex items-center gap-2 text-[13px] sm:text-sm">
         {/* <span className="font-semibold uppercase tracking-wider">
           {t("progress.heatmap.year")}
         </span> */}
         <select
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className={`rounded-md border sm:px-2 px-1.5 sm:py-1.5 py-1 font-semibold focus:outline-none focus:ring-2 focus:ring-main-400/40 ${
+          className={`focus:ring-main-400/40 rounded-md border px-1.5 py-1 font-semibold focus:ring-2 focus:outline-none sm:px-2 sm:py-1.5 ${
             isCurrentYear
               ? "border-main-400 bg-main-50 text-main-600 dark:bg-main-950 dark:text-main-600"
               : "border-app-border bg-app-surface text-app-text"

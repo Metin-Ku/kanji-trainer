@@ -104,6 +104,7 @@ export const tr: Messages = {
 
   words: {
     title: "Kelimeler",
+    allTitle: "Tüm kelimeler",
     loadError: "Kelimeler yüklenemedi.",
     empty: "Henüz kelime eklenmedi",
     sort: {
@@ -117,6 +118,13 @@ export const tr: Messages = {
       multiCriteria: "{count} kriter uygulandı (ilk seçilen önce)",
     },
     studyTitle: "Kelimeler",
+    showingCount: "{visible} / {total}",
+    filters: {
+      pageSize: "Yükle",
+      jlpt: "JLPT",
+      jlptLevels: "{levels}",
+      jlptCount: "{count} seviye",
+    },
   },
 
   learned: {
@@ -496,6 +504,10 @@ export const tr: Messages = {
     namePlaceholder: "ör. Ev・Çamaşır・Temizlik",
     selectPlaceholder: "Kategori ara…",
     selectNotFound: '"{query}" ile eşleşen kategori yok',
+    searchPlaceholder: "Kategori ara…",
+    addWords: "Kelime ekle",
+    noSrsCards: "Bu kategoride çalışılacak SRS kartı yok.",
+    srsSessionTitle: "{category} · {deck}",
   },
 
   themeQuiz: {

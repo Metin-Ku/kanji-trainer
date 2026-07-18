@@ -79,14 +79,14 @@ export function WordCard({
 
   return (
     <>
-      <div ref={cardRef} className="border-b border-app-border last:border-b-0">
+      <div ref={cardRef} className="border-app-border border-b last:border-b-0">
         <div
-          className="flex items-center gap-2.5 px-4 py-3 select-none cursor-pointer"
+          className="flex cursor-pointer items-center gap-2.5 px-4 py-3 select-none"
           onClick={handleRowClick}
         >
           {selectMode ? (
             <div
-              className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors border-app-border-strong ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
+              className={`border-app-border-strong flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
             >
               {isSelected && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -101,7 +101,7 @@ export function WordCard({
               )}
             </div>
           ) : (
-            <span className="self-end mb-[1px] text-app-text-muted font-medium text-sm w-5 text-right shrink-0 tabular-nums">
+            <span className="text-app-text-muted mb-[1px] w-5 shrink-0 self-end text-right text-sm font-medium tabular-nums">
               {index}
             </span>
           )}
@@ -119,7 +119,7 @@ export function WordCard({
 
           <span
             className={[
-              "text-lg font-bold leading-none shrink-0",
+              "shrink-0 text-lg leading-none font-bold",
               kanjiClickable
                 ? "text-app-text active:text-main-500 dark:active:text-main-600 transition-colors"
                 : "text-app-text",
@@ -138,9 +138,7 @@ export function WordCard({
           </span>
 
           {word.jlptLevel && !selectMode && (
-            <span
-              className="text-[10px] bg-app-muted text-app-text-secondary font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0"
-            >
+            <span className="bg-app-muted text-app-text-secondary shrink-0 rounded-md px-1.5 py-[3px] text-[10px] leading-none font-semibold">
               {word.jlptLevel}
             </span>
           )}
@@ -149,18 +147,18 @@ export function WordCard({
 
           {!selectMode && (
             <div
-              className="flex gap-0.5 shrink-0"
+              className="flex shrink-0 gap-0.5"
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="p-1.5 rounded-lg text-app-text-muted hover:text-blue-400 transition-colors"
+                className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-blue-400"
                 onClick={() => onEdit(word)}
                 aria-label={t("a11y.edit")}
               >
                 <Pencil size={14} />
               </button>
               <button
-                className="p-1.5 rounded-lg text-app-text-muted hover:text-red-400 transition-colors"
+                className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-red-400"
                 onClick={() => onDelete(word.id)}
                 aria-label={t("common.delete")}
               >
@@ -172,9 +170,9 @@ export function WordCard({
 
         {!selectMode && (
           <div className={`word-detail ${isOpen ? "open" : ""}`}>
-            <div className="px-5 pb-4 space-y-2">
+            <div className="space-y-2 px-5 pb-4">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-xs text-app-text-muted font-medium">
+                <p className="text-app-text-muted text-xs font-medium">
                   {showRelated ? "" : formatCardDate(word.date)}
                 </p>
                 {word.meaning && allWords && (
@@ -193,16 +191,16 @@ export function WordCard({
               ) : (
                 <>
                   {word.pronunciation && (
-                    <p className="text-sm text-app-text-secondary">
-                      <span className="font-medium text-app-text-muted text-xs uppercase tracking-wide mr-2">
+                    <p className="text-app-text-secondary text-sm">
+                      <span className="text-app-text-muted mr-2 text-xs font-medium tracking-wide uppercase">
                         {t("common.pronunciation")}
                       </span>
                       {word.pronunciation}
                     </p>
                   )}
                   {word.meaning && (
-                    <p className="text-sm text-app-text-secondary">
-                      <span className="font-medium text-app-text-muted text-xs uppercase tracking-wide mr-2">
+                    <p className="text-app-text-secondary text-sm">
+                      <span className="text-app-text-muted mr-2 text-xs font-medium tracking-wide uppercase">
                         {t("common.meaning")}
                       </span>
                       {word.meaning}
@@ -234,8 +232,8 @@ export function WordCard({
                     />
                   ) : (
                     word.description && (
-                      <div className="pt-1 border-t border-app-border">
-                        <div className="whitespace-pre-wrap text-[15px] text-app-text leading-relaxed font-[inherit]">
+                      <div className="border-app-border border-t pt-1">
+                        <div className="text-app-text font-[inherit] text-[15px] leading-relaxed whitespace-pre-wrap">
                           {word.description}
                         </div>
                       </div>
@@ -245,7 +243,7 @@ export function WordCard({
                     !word.meaning &&
                     !word.description &&
                     wordCategories.length === 0 && (
-                      <span className="text-app-text-muted italic text-sm">
+                      <span className="text-app-text-muted text-sm italic">
                         {t("common.noDescription")}
                       </span>
                     )}

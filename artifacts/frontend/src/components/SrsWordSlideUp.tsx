@@ -11,7 +11,9 @@ interface Props {
   word: Word;
   allWords: Word[];
   onClose: () => void;
-  onSave?: (data: WordUpdate & { relatedWordIds: number[]; categoryIds: number[] }) => void;
+  onSave?: (
+    data: WordUpdate & { relatedWordIds: number[]; categoryIds: number[] },
+  ) => void;
   bottom?: number;
 }
 
@@ -55,7 +57,7 @@ export function SrsWordSlideUp({
         aria-hidden
       />
       <div
-        className="fixed left-0 right-0 z-40 max-w-2xl mx-auto bg-app-surface border-t border-app-border rounded-t-2xl shadow-xl sm:border-l sm:border-r pointer-events-auto"
+        className="bg-app-surface border-app-border pointer-events-auto fixed right-0 left-0 z-40 mx-auto max-w-2xl rounded-t-2xl border-t shadow-xl sm:border-r sm:border-l"
         style={{
           bottom,
           maxHeight: "55vh",
@@ -65,17 +67,17 @@ export function SrsWordSlideUp({
         }}
       >
         <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-app-border-strong" />
+          <div className="bg-app-border-strong h-1 w-10 rounded-full" />
         </div>
         <div
-          className={`px-6 pb-4 pt-2 relative ${showRelated && word.meaning ? "" : "pr-24"}`}
+          className={`relative px-6 pt-2 pb-4 ${showRelated && word.meaning ? "" : "pr-24"}`}
         >
           <div className="absolute top-2 right-5 flex flex-row items-center gap-2">
             {onSave && (
               <button
                 type="button"
                 onClick={() => setShowEdit(true)}
-                className="flex items-center justify-center px-3 py-1.5 w-10 h-8 rounded-lg bg-app-muted text-app-text-secondary"
+                className="bg-app-muted text-app-text-secondary flex h-8 w-10 items-center justify-center rounded-lg px-3 py-1.5"
               >
                 <Pencil size={13} />
               </button>
@@ -100,36 +102,38 @@ export function SrsWordSlideUp({
             <div className="space-y-4">
               {word.kanji && (
                 <div>
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
+                  <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
                     {t("common.word")}
                   </p>
-                  <p className="text-3xl font-bold text-app-text">{word.kanji}</p>
+                  <p className="text-app-text text-3xl font-bold">
+                    {word.kanji}
+                  </p>
                 </div>
               )}
               {word.pronunciation && (
                 <div>
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
+                  <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
                     {t("common.pronunciation")}
                   </p>
-                  <p className="text-lg font-medium text-app-text">
+                  <p className="text-app-text text-lg font-medium">
                     {word.pronunciation}
                   </p>
                 </div>
               )}
               {word.meaning && (
                 <div>
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
+                  <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
                     {t("common.meaning")}
                   </p>
-                  <p className="text-base text-app-text">{word.meaning}</p>
+                  <p className="text-app-text text-base">{word.meaning}</p>
                 </div>
               )}
               {word.description && (
-                <div className="pt-3 border-t border-app-border">
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">
+                <div className="border-app-border border-t pt-3">
+                  <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
                     {t("common.description")}
                   </p>
-                  <p className="whitespace-pre-wrap text-sm text-app-text-secondary leading-relaxed">
+                  <p className="text-app-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
                     {word.description}
                   </p>
                 </div>

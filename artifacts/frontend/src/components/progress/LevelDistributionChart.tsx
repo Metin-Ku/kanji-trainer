@@ -1,10 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "../../i18n/I18nProvider";
 import { themeVars } from "../../theme";
-import {
-  getLevelDistribution,
-  type LevelMode,
-} from "../../lib/progressStats";
+import { getLevelDistribution, type LevelMode } from "../../lib/progressStats";
 import type { Word } from "../../types";
 
 const MODES: LevelMode[] = ["word", "pron", "meaning"];
@@ -41,13 +38,13 @@ export function LevelDistributionChart({ words }: LevelDistributionChartProps) {
 
   return (
     <div>
-      <div className="flex gap-2 mb-4">
+      <div className="mb-4 flex gap-2">
         {MODES.map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
               mode === m
                 ? "bg-main-700 text-white"
                 : "bg-app-muted text-app-text-secondary"
@@ -61,10 +58,10 @@ export function LevelDistributionChart({ words }: LevelDistributionChartProps) {
       <div className="space-y-2.5">
         {buckets.map((b) => (
           <div key={b.key} className="flex items-center gap-3">
-            <span className="w-6 text-xs font-bold text-app-text-secondary text-center shrink-0">
+            <span className="text-app-text-secondary w-6 shrink-0 text-center text-xs font-bold">
               {b.label}
             </span>
-            <div className="flex-1 h-2.5 rounded-full bg-app-muted overflow-hidden">
+            <div className="bg-app-muted h-2.5 flex-1 overflow-hidden rounded-full">
               <div
                 className="h-full rounded-full transition-[width] duration-300"
                 style={{
@@ -74,7 +71,7 @@ export function LevelDistributionChart({ words }: LevelDistributionChartProps) {
                 }}
               />
             </div>
-            <span className="w-8 text-xs tabular-nums text-app-text-secondary text-right shrink-0">
+            <span className="text-app-text-secondary w-8 shrink-0 text-right text-xs tabular-nums">
               {b.count}
             </span>
           </div>

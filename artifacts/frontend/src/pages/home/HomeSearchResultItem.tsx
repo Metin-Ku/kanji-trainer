@@ -1,11 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  BookOpen,
-  Languages,
-  Waves,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { BookOpen, Languages, Waves, Pencil, Trash2 } from "lucide-react";
 import {
   RelatedWordsList,
   RelatedWordsButton,
@@ -62,46 +56,43 @@ export function HomeSearchResultItem({
       ? categories.find((c) => c.id === activeCategoryId)
       : undefined;
 
-  const categoryWords =
-    activeCategory
-      ? allWords.filter(
-          (w) =>
-            w.id !== word.id &&
-            (w.categoryIds ?? []).includes(activeCategory.id),
-        )
-      : [];
+  const categoryWords = activeCategory
+    ? allWords.filter(
+        (w) =>
+          w.id !== word.id && (w.categoryIds ?? []).includes(activeCategory.id),
+      )
+    : [];
 
   return (
-    <div className="border-b border-app-border last:border-b-0">
+    <div className="border-app-border border-b last:border-b-0">
       <div
-        className={`flex items-start gap-3 px-5 pt-3 ${isOpen ? "pb-0" : "pb-3"} select-none cursor-pointer`}
+        className={`flex items-start gap-3 px-5 pt-3 ${isOpen ? "pb-0" : "pb-3"} cursor-pointer select-none`}
         onClick={() => hasDetail && onToggle()}
       >
-        <div className="flex-1 min-w-0">
-          <p className="text-base font-bold text-app-text leading-none">
+        <div className="min-w-0 flex-1">
+          <p className="text-app-text text-base leading-none font-bold">
             {word.kanji}
           </p>
 
           {word.pronunciation && (
-            <p className="text-xs text-app-text-secondary mt-0.5">
+            <p className="text-app-text-secondary mt-0.5 text-xs">
               {word.pronunciation}
             </p>
           )}
 
           {word.meaning && (
             <p
-              className={`text-xs text-app-text-muted mt-0.5 ${isOpen ? "" : "truncate"}`}
+              className={`text-app-text-muted mt-0.5 text-xs ${isOpen ? "" : "truncate"}`}
             >
               {word.meaning}
             </p>
           )}
-
         </div>
 
-        <div className="flex flex-row items-center gap-1.5 shrink-0">
+        <div className="flex shrink-0 flex-row items-center gap-1.5">
           <div className="flex flex-row items-center gap-1.5">
             {word.jlptLevel && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold bg-app-muted text-app-text-secondary">
+              <span className="bg-app-muted text-app-text-secondary inline-flex items-center rounded-full px-2 py-1 text-[11px] font-semibold">
                 {word.jlptLevel}
               </span>
             )}
@@ -128,7 +119,7 @@ export function HomeSearchResultItem({
               ).map(({ Icon, starred, level }, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-app-muted"
+                  className="bg-app-muted flex items-center gap-1.5 rounded-full px-2 py-1"
                 >
                   <Icon
                     size={13}
@@ -138,7 +129,7 @@ export function HomeSearchResultItem({
 
                   {starred ? (
                     <div
-                      className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold"
+                      className="flex h-[18px] w-[18px] items-center justify-center rounded-full text-[10px] font-bold"
                       style={{
                         background: themeVars.star,
                         color: "rgb(255,255,255)",
@@ -148,7 +139,7 @@ export function HomeSearchResultItem({
                     </div>
                   ) : (
                     <div
-                      className="w-[18px] h-[18px] rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                      className="flex h-[18px] w-[18px] items-center justify-center rounded-full text-[10px] font-bold text-white"
                       style={{ background: themeVars.level(level) }}
                     >
                       {level}
@@ -165,7 +156,7 @@ export function HomeSearchResultItem({
                 e.stopPropagation();
                 onEdit(word);
               }}
-              className="p-1.5 rounded-lg bg-app-muted active:opacity-60 transition-opacity"
+              className="bg-app-muted rounded-lg p-1.5 transition-opacity active:opacity-60"
             >
               <Pencil
                 size={13}
@@ -179,7 +170,7 @@ export function HomeSearchResultItem({
                 e.stopPropagation();
                 onDelete(word.id);
               }}
-              className="p-1.5 rounded-lg bg-app-muted active:opacity-60 transition-opacity"
+              className="bg-app-muted rounded-lg p-1.5 transition-opacity active:opacity-60"
             >
               <Trash2 size={13} strokeWidth={2} className="text-red-500" />
             </button>
@@ -189,9 +180,9 @@ export function HomeSearchResultItem({
 
       {(word.description || word.meaning || activeCategory) && (
         <div className={`word-detail ${isOpen ? "open" : ""}`}>
-             {wordCategories.length > 0 && isOpen && (
+          {wordCategories.length > 0 && isOpen && (
             <div
-              className="flex flex-wrap gap-1.5 mt-1.5 px-5"
+              className="mt-1.5 flex flex-wrap gap-1.5 px-5"
               onClick={(e) => e.stopPropagation()}
             >
               {wordCategories.map((cat) => (
@@ -211,7 +202,7 @@ export function HomeSearchResultItem({
               ))}
             </div>
           )}
-          <div className="px-5 pb-4 space-y-2">
+          <div className="space-y-2 px-5 pb-4">
             <div className="flex items-center justify-between gap-2">
               <span />
               {word.meaning && !activeCategory && (
@@ -234,7 +225,7 @@ export function HomeSearchResultItem({
               <RelatedWordsList word={word} allWords={allWords} />
             ) : (
               word.description && (
-                <div className="whitespace-pre-wrap text-[14px] text-app-text leading-relaxed font-[inherit]">
+                <div className="text-app-text font-[inherit] text-[14px] leading-relaxed whitespace-pre-wrap">
                   {word.description}
                 </div>
               )

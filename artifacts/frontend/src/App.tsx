@@ -28,7 +28,12 @@ import { RegisterPage } from "@/pages/RegisterPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
 
-const PUBLIC_PREFIXES = ["/login", "/register", "/forgot-password", "/reset-password"];
+const PUBLIC_PREFIXES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+];
 
 function isPublicPath(path: string) {
   return PUBLIC_PREFIXES.some((p) => path === p || path.startsWith(`${p}?`));
@@ -41,8 +46,11 @@ function AuthGate({ children }: { children: ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-dvh flex items-center justify-center bg-app-bg">
-        <LoadingSpinner size={36} className="text-main-500 dark:text-main-600" />
+      <div className="bg-app-bg flex min-h-dvh items-center justify-center">
+        <LoadingSpinner
+          size={36}
+          className="text-main-500 dark:text-main-600"
+        />
       </div>
     );
   }

@@ -176,11 +176,11 @@ export const HorizontalScroll = forwardRef<
   const trackEnabled = showTrack === true || (showTrack === "auto" && coarse);
 
   return (
-    <div className="min-w-0 w-full max-w-full">
+    <div className="w-full max-w-full min-w-0">
       <div
         ref={setRefs}
         className={cn(
-          "app-scroll-x w-full min-w-0 max-w-full overscroll-x-contain",
+          "app-scroll-x w-full max-w-full min-w-0 overscroll-x-contain",
           isTouchable ? "" : "touch-none",
           className,
         )}
@@ -192,7 +192,7 @@ export const HorizontalScroll = forwardRef<
         <div
           ref={trackRef}
           className={cn(
-            "mt-1.5 pb-2 touch-none select-none",
+            "mt-1.5 touch-none pb-2 select-none",
             isTouchable ? "pt-2" : "pt-5",
             interactiveTrack && "cursor-pointer",
           )}
@@ -204,9 +204,9 @@ export const HorizontalScroll = forwardRef<
           onPointerUp={handleTrackPointerUp}
           onPointerCancel={handleTrackPointerUp}
         >
-          <div className="relative h-1.5 rounded-full bg-app-muted">
+          <div className="bg-app-muted relative h-1.5 rounded-full">
             <div
-              className="absolute top-0 h-full rounded-full bg-app-border-strong"
+              className="bg-app-border-strong absolute top-0 h-full rounded-full"
               style={{
                 width: `${track.width}%`,
                 left: `${track.left}%`,

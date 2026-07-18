@@ -26,14 +26,17 @@ export function WordAddFab({ onNewWord, onBulkImport }: Props) {
   }, [fabOpen]);
 
   return (
-    <div ref={fabRef} className="fixed right-[max(1rem,calc((100vw-42rem)/2+1.2rem))] z-40" style={{ bottom: 32 }}>
+    <div
+      ref={fabRef}
+      className="fixed right-[max(1rem,calc((100vw-42rem)/2+1.2rem))] z-40"
+      style={{ bottom: 32 }}
+    >
       <div
-        className={`flex items-center rounded-full w-[52px] transition-[height] duration-140 ease-in-out overflow-hidden 
-            shadow-main-600 bg-linear-to-b 160deg from-main-400 to-main-600 flex-col-reverse ${fabOpen ? "h-[158px]" : "h-[52px]"}`}
+        className={`shadow-main-600 160deg from-main-400 to-main-600 flex w-[52px] flex-col-reverse items-center overflow-hidden rounded-full bg-linear-to-b transition-[height] duration-140 ease-in-out ${fabOpen ? "h-[158px]" : "h-[52px]"}`}
       >
         <button
           onClick={() => setFabOpen((v) => !v)}
-          className="flex items-center justify-center active:opacity-70 transition-opacity"
+          className="flex items-center justify-center transition-opacity active:opacity-70"
           style={{ width: 52, height: 52, flexShrink: 0 }}
         >
           <div
@@ -58,7 +61,7 @@ export function WordAddFab({ onNewWord, onBulkImport }: Props) {
             setFabOpen(false);
             onNewWord();
           }}
-          className="flex items-center justify-center active:opacity-70 transition-opacity"
+          className="flex items-center justify-center transition-opacity active:opacity-70"
           style={{ width: 52, height: 52, flexShrink: 0 }}
         >
           <Plus size={22} strokeWidth={2.5} className="text-white" />
@@ -76,7 +79,7 @@ export function WordAddFab({ onNewWord, onBulkImport }: Props) {
             setFabOpen(false);
             onBulkImport();
           }}
-          className="flex items-center justify-center active:opacity-70 transition-opacity"
+          className="flex items-center justify-center transition-opacity active:opacity-70"
           style={{ width: 52, height: 52, flexShrink: 0 }}
         >
           <Copy size={19} strokeWidth={2} className="text-white" />

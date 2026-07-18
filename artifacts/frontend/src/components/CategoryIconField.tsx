@@ -6,5 +6,7 @@ interface Props {
 }
 
 export function CategoryIconField({ value, onChange }: Props) {
-  return <SvgIconField value={value} onChange={onChange} namespace="categories" />;
+  return (
+    <SvgIconField value={value} onChange={onChange} namespace="categories" />
+  );
 }

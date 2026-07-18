@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { ArrowLeft, Check, Palette, BookOpen, Database, Download, Link2, Languages, LogOut, User } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Palette,
+  BookOpen,
+  Database,
+  Download,
+  Link2,
+  Languages,
+  LogOut,
+  User,
+} from "lucide-react";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useLocation } from "wouter";
 import {
@@ -46,22 +57,24 @@ function Toggle({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <label className="flex items-start justify-between gap-4 rounded-xl border border-app-border-strong bg-app-surface p-4 cursor-pointer hover:border-app-border-strong">
+    <label className="border-app-border-strong bg-app-surface hover:border-app-border-strong flex cursor-pointer items-start justify-between gap-4 rounded-xl border p-4">
       <div>
-        <p className="text-sm font-semibold text-app-text">{label}</p>
-        <p className="text-xs text-app-text-secondary mt-1 leading-relaxed">{description}</p>
+        <p className="text-app-text text-sm font-semibold">{label}</p>
+        <p className="text-app-text-secondary mt-1 text-xs leading-relaxed">
+          {description}
+        </p>
       </div>
       <button
         type="button"
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors ${
+        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
           checked ? "bg-main-500" : "bg-app-border-strong"
         }`}
       >
         <span
-          className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-app-surface shadow transition-transform ${
+          className={`bg-app-surface absolute top-0.5 left-0.5 h-5 w-5 rounded-full shadow transition-transform ${
             checked ? "translate-x-5" : "translate-x-0"
           }`}
         />
@@ -161,27 +174,27 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
+    <div className="bg-app-bg sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+      <div className="bg-app-surface border-app-border shrink-0 border-b px-5 pt-4 pb-4">
         <button
           onClick={() => navigate("/")}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
+          className="text-app-text-muted hover:text-app-text-secondary -ml-1 flex items-center gap-1.5 p-1 transition-colors"
         >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+          <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
             {t("settings.title")}
           </span>
         </button>
       </div>
 
-      <div className="flex-1 flex min-h-0">
-        <aside className="w-44 shrink-0 bg-app-surface border-r border-app-border p-3">
-          <p className="text-[10px] font-semibold text-app-text-muted uppercase tracking-wider px-2 mb-2">
+      <div className="flex min-h-0 flex-1">
+        <aside className="bg-app-surface border-app-border w-44 shrink-0 border-r p-3">
+          <p className="text-app-text-muted mb-2 px-2 text-[10px] font-semibold tracking-wider uppercase">
             {t("settings.sections")}
           </p>
           <button
             onClick={() => setSection("styling")}
-            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
               section === "styling"
                 ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
@@ -192,7 +205,7 @@ export function SettingsPage() {
           </button>
           <button
             onClick={() => setSection("srs")}
-            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
+            className={`mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
               section === "srs"
                 ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
@@ -203,7 +216,7 @@ export function SettingsPage() {
           </button>
           <button
             onClick={() => setSection("database")}
-            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
+            className={`mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
               section === "database"
                 ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
@@ -214,7 +227,7 @@ export function SettingsPage() {
           </button>
           <button
             onClick={() => setSection("language")}
-            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
+            className={`mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
               section === "language"
                 ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
@@ -225,7 +238,7 @@ export function SettingsPage() {
           </button>
           <button
             onClick={() => setSection("account")}
-            className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors mt-1 ${
+            className={`mt-1 flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors ${
               section === "account"
                 ? "bg-main-50 dark:bg-main-950 text-main-500 dark:text-main-600"
                 : "text-app-text-secondary hover:bg-app-muted"
@@ -239,12 +252,14 @@ export function SettingsPage() {
         <main className="flex-1 overflow-y-auto px-5 py-4">
           {section === "styling" && (
             <div className="max-w-2xl">
-              <h2 className="text-lg font-bold text-app-text mb-1">{t("settings.styling.title")}</h2>
-              <p className="text-sm text-app-text-secondary mb-5">
+              <h2 className="text-app-text mb-1 text-lg font-bold">
+                {t("settings.styling.title")}
+              </h2>
+              <p className="text-app-text-secondary mb-5 text-sm">
                 {t("settings.styling.description")}
               </p>
 
-              <div className="max-w-lg mb-5">
+              <div className="mb-5 max-w-lg">
                 <Toggle
                   label={t("settings.styling.darkMode.label")}
                   description={t("settings.styling.darkMode.description")}
@@ -257,7 +272,7 @@ export function SettingsPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {PALETTE_NAMES.map((name) => {
                   const colors = getPalette(name);
                   const selected = palette === name;
@@ -265,28 +280,28 @@ export function SettingsPage() {
                     <button
                       key={name}
                       onClick={() => selectPalette(name)}
-                      className={`text-left rounded-xl border p-3 transition-all active:scale-[0.99] ${
+                      className={`rounded-xl border p-3 text-left transition-all active:scale-[0.99] ${
                         selected
-                          ? "border-main-400 ring-2 ring-main-500/25 bg-app-surface"
+                          ? "border-main-400 ring-main-500/25 bg-app-surface ring-2"
                           : "border-app-border-strong bg-app-surface hover:border-app-border-strong"
                       }`}
                     >
-                      <div className="flex items-center justify-between mb-2.5">
-                        <span className="text-sm font-semibold text-app-text capitalize">
+                      <div className="mb-2.5 flex items-center justify-between">
+                        <span className="text-app-text text-sm font-semibold capitalize">
                           {name}
                         </span>
                         {selected && (
-                          <span className="flex items-center gap-1 text-xs font-medium text-main-500 dark:text-main-600">
+                          <span className="text-main-500 dark:text-main-600 flex items-center gap-1 text-xs font-medium">
                             <Check size={14} strokeWidth={2.5} />
                             {t("settings.styling.selected")}
                           </span>
                         )}
                       </div>
-                      <div className="flex rounded-lg overflow-hidden h-6">
+                      <div className="flex h-6 overflow-hidden rounded-lg">
                         {SHADES.map((shade) => (
                           <div
                             key={shade}
-                            className="flex-1 min-w-0"
+                            className="min-w-0 flex-1"
                             style={{ background: colors[shade] }}
                             title={`${name}-${shade}`}
                           />
@@ -301,8 +316,10 @@ export function SettingsPage() {
 
           {section === "srs" && (
             <div className="max-w-lg space-y-3">
-              <h2 className="text-lg font-bold text-app-text mb-1">{t("settings.srs.title")}</h2>
-              <p className="text-sm text-app-text-secondary mb-5">
+              <h2 className="text-app-text mb-1 text-lg font-bold">
+                {t("settings.srs.title")}
+              </h2>
+              <p className="text-app-text-secondary mb-5 text-sm">
                 {t("settings.srs.description")}
               </p>
 
@@ -320,21 +337,23 @@ export function SettingsPage() {
                 onChange={(v) => patchSettings({ srsRomajiInput: v })}
               />
 
-              <div className="rounded-xl border border-app-border-strong bg-app-surface p-4 space-y-4">
+              <div className="border-app-border-strong bg-app-surface space-y-4 rounded-xl border p-4">
                 <div>
-                  <p className="text-sm font-semibold text-app-text">
+                  <p className="text-app-text text-sm font-semibold">
                     {t("settings.srs.dailyGoal.label")}
                   </p>
-                  <p className="text-xs text-app-text-secondary mt-1 leading-relaxed">
+                  <p className="text-app-text-secondary mt-1 text-xs leading-relaxed">
                     {t("settings.srs.dailyGoal.description")}
                   </p>
-                  <p className="text-xs text-app-text-muted mt-1 leading-relaxed">
+                  <p className="text-app-text-muted mt-1 text-xs leading-relaxed">
                     {t("dailyGoal.settingsHint")}
                   </p>
                 </div>
 
                 {DAILY_GOAL_DECK_IDS.map((deckId) => {
-                  const deckProgress = dailyDeckProgress.find((d) => d.deck === deckId);
+                  const deckProgress = dailyDeckProgress.find(
+                    (d) => d.deck === deckId,
+                  );
                   const target = deckProgress?.target ?? 0;
                   const deckName = srsDeckLabel(t, deckId).title;
                   // const deckName =
@@ -345,19 +364,21 @@ export function SettingsPage() {
                   return (
                     <div
                       key={deckId}
-                      className="rounded-lg border border-app-border bg-app-muted/80 p-3 space-y-2"
+                      className="border-app-border bg-app-muted/80 space-y-2 rounded-lg border p-3"
                     >
-                      <p className="text-sm font-semibold text-app-text">{deckName}</p>
+                      <p className="text-app-text text-sm font-semibold">
+                        {deckName}
+                      </p>
                       <div className="flex flex-wrap gap-2">
                         {DAILY_TARGET_PRESETS.map((preset) => (
                           <button
                             key={preset}
                             type="button"
                             onClick={() => setDeckTarget(deckId, preset)}
-                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                            className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                               target === preset
                                 ? "bg-main-500 text-white"
-                                : "bg-app-surface text-app-text-secondary hover:bg-app-muted border border-app-border-strong"
+                                : "bg-app-surface text-app-text-secondary hover:bg-app-muted border-app-border-strong border"
                             }`}
                           >
                             {preset}
@@ -366,10 +387,10 @@ export function SettingsPage() {
                         <button
                           type="button"
                           onClick={() => setDeckTarget(deckId, 0)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                          className={`rounded-lg px-2.5 py-1 text-xs font-semibold transition-colors ${
                             target === 0
                               ? "bg-gray-600 text-white"
-                              : "bg-app-surface text-app-text-secondary hover:bg-app-muted border border-app-border-strong"
+                              : "bg-app-surface text-app-text-secondary hover:bg-app-muted border-app-border-strong border"
                           }`}
                         >
                           {t("dailyGoal.off")}
@@ -384,8 +405,10 @@ export function SettingsPage() {
                           const n = Number(e.target.value);
                           if (!Number.isNaN(n)) setDeckTarget(deckId, n);
                         }}
-                        className="w-full rounded-xl border border-app-border-strong bg-app-surface px-3 py-2 text-sm text-app-text"
-                        aria-label={t("dailyGoal.settingsTargetDeck", { deck: deckName })}
+                        className="border-app-border-strong bg-app-surface text-app-text w-full rounded-xl border px-3 py-2 text-sm"
+                        aria-label={t("dailyGoal.settingsTargetDeck", {
+                          deck: deckName,
+                        })}
                       />
                     </div>
                   );
@@ -397,20 +420,20 @@ export function SettingsPage() {
           {section === "database" && (
             <div className="max-w-lg space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-app-text mb-1">
+                <h2 className="text-app-text mb-1 text-lg font-bold">
                   {t("settings.database.title")}
                 </h2>
-                <p className="text-sm text-app-text-secondary mb-5">
+                <p className="text-app-text-secondary mb-5 text-sm">
                   {t("settings.database.description")}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-app-border-strong bg-app-surface p-4 space-y-3">
+              <div className="border-app-border-strong bg-app-surface space-y-3 rounded-xl border p-4">
                 <div>
-                  <p className="text-sm font-semibold text-app-text">
+                  <p className="text-app-text text-sm font-semibold">
                     {t("settings.database.backup.title")}
                   </p>
-                  <p className="text-xs text-app-text-secondary mt-1 leading-relaxed">
+                  <p className="text-app-text-secondary mt-1 text-xs leading-relaxed">
                     {t("settings.database.backup.description")}
                   </p>
                 </div>
@@ -418,7 +441,7 @@ export function SettingsPage() {
                   type="button"
                   onClick={downloadBackup}
                   disabled={backupBusy}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-main-500 text-white text-sm font-semibold hover:bg-main-600 disabled:opacity-50"
+                  className="bg-main-500 hover:bg-main-600 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {backupBusy ? (
                     <LoadingSpinner size={16} className="text-white" />
@@ -429,12 +452,12 @@ export function SettingsPage() {
                 </button>
               </div>
 
-              <div className="rounded-xl border border-app-border-strong bg-app-surface p-4 space-y-3">
+              <div className="border-app-border-strong bg-app-surface space-y-3 rounded-xl border p-4">
                 <div>
-                  <p className="text-sm font-semibold text-app-text">
+                  <p className="text-app-text text-sm font-semibold">
                     {t("settings.database.relink.title")}
                   </p>
-                  <p className="text-xs text-app-text-secondary mt-1 leading-relaxed">
+                  <p className="text-app-text-secondary mt-1 text-xs leading-relaxed">
                     {t("settings.database.relink.description")}
                   </p>
                 </div>
@@ -442,17 +465,20 @@ export function SettingsPage() {
                   type="button"
                   onClick={relinkAllExamples}
                   disabled={relinkBusy || words.length === 0}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-app-border-strong bg-app-surface text-app-text text-sm font-semibold hover:border-main-300 hover:text-main-600 disabled:opacity-50"
+                  className="border-app-border-strong bg-app-surface text-app-text hover:border-main-300 hover:text-main-600 inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold disabled:opacity-50"
                 >
                   {relinkBusy ? (
-                    <LoadingSpinner size={16} className="text-main-500 dark:text-main-600" />
+                    <LoadingSpinner
+                      size={16}
+                      className="text-main-500 dark:text-main-600"
+                    />
                   ) : (
                     <Link2 size={16} />
                   )}
                   {t("settings.database.relink.button")}
                 </button>
                 {relinkProgress && (
-                  <p className="text-xs text-app-text-secondary tabular-nums">
+                  <p className="text-app-text-secondary text-xs tabular-nums">
                     {t("settings.database.relink.progress", {
                       done: relinkProgress.done,
                       total: relinkProgress.total,
@@ -462,17 +488,19 @@ export function SettingsPage() {
               </div>
 
               {statusMessage && (
-                <p className="text-sm text-main-600 font-medium">{statusMessage}</p>
+                <p className="text-main-600 text-sm font-medium">
+                  {statusMessage}
+                </p>
               )}
             </div>
           )}
 
           {section === "language" && (
             <div className="max-w-lg">
-              <h2 className="text-lg font-bold text-app-text mb-1">
+              <h2 className="text-app-text mb-1 text-lg font-bold">
                 {t("settings.language.title")}
               </h2>
-              <p className="text-sm text-app-text-secondary mb-5">
+              <p className="text-app-text-secondary mb-5 text-sm">
                 {t("settings.language.description")}
               </p>
 
@@ -489,12 +517,12 @@ export function SettingsPage() {
                       }}
                       className={`rounded-xl border p-4 transition-all active:scale-[0.99] ${
                         selected
-                          ? "border-main-400 ring-2 ring-main-500/25 bg-app-surface"
+                          ? "border-main-400 ring-main-500/25 bg-app-surface ring-2"
                           : "border-app-border-strong bg-app-surface hover:border-app-border-strong"
                       }`}
                     >
                       <div className="sm:text-left">
-                        <span className="text-sm font-semibold text-app-text">
+                        <span className="text-app-text text-sm font-semibold">
                           {t(labelKey)}
                         </span>
                         {/* {selected && (
@@ -514,26 +542,26 @@ export function SettingsPage() {
           {section === "account" && user && (
             <div className="max-w-lg space-y-4">
               <div>
-                <h2 className="text-lg font-bold text-app-text mb-1">
+                <h2 className="text-app-text mb-1 text-lg font-bold">
                   {t("settings.account.title")}
                 </h2>
-                <p className="text-sm text-app-text-secondary mb-5">
+                <p className="text-app-text-secondary mb-5 text-sm">
                   {t("settings.account.description")}
                 </p>
               </div>
 
-              <div className="rounded-xl border border-app-border-strong bg-app-surface p-4 space-y-3">
+              <div className="border-app-border-strong bg-app-surface space-y-3 rounded-xl border p-4">
                 <div>
-                  <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wider">
+                  <p className="text-app-text-muted text-xs font-semibold tracking-wider uppercase">
                     {t("settings.account.email")}
                   </p>
-                  <p className="text-sm text-app-text mt-1">{user.email}</p>
+                  <p className="text-app-text mt-1 text-sm">{user.email}</p>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wider">
+                  <p className="text-app-text-muted text-xs font-semibold tracking-wider uppercase">
                     {t("settings.account.role")}
                   </p>
-                  <p className="text-sm text-app-text mt-1">
+                  <p className="text-app-text mt-1 text-sm">
                     {user.role === "admin"
                       ? t("auth.roleAdmin")
                       : user.role === "moderator"
@@ -549,7 +577,7 @@ export function SettingsPage() {
                   await logout();
                   navigate("/login");
                 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-app-border-strong bg-app-surface text-app-text text-sm font-semibold hover:border-red-300 hover:text-red-600"
+                className="border-app-border-strong bg-app-surface text-app-text inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold hover:border-red-300 hover:text-red-600"
               >
                 <LogOut size={16} />
                 {t("settings.account.logout")}

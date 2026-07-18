@@ -110,10 +110,10 @@ export const HorizontalScroll = forwardRef<
   const handleTrackPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
       if (!interactiveTrack) return;
-  
+
       e.preventDefault();
       e.stopPropagation();
-  
+
       trackDragRef.current = true;
       e.currentTarget.setPointerCapture(e.pointerId);
     },
@@ -167,30 +167,30 @@ export const HorizontalScroll = forwardRef<
   const trackEnabled = showTrack === true || (showTrack === "auto" && coarse);
 
   return (
-    <div className="min-w-0 w-full max-w-full">
+    <div className="w-full max-w-full min-w-0">
       <div
         ref={setRefs}
         className={cn(
-          "app-scroll-x w-full min-w-0 max-w-full overscroll-x-contain touch-none",
+          "app-scroll-x w-full max-w-full min-w-0 touch-none overscroll-x-contain",
           className,
         )}
         {...props}
       >
         {children}
       </div>
-  
+
       {trackEnabled && track.visible && (
         <div
           ref={trackRef}
-          className="mt-1.5 py-2 touch-none select-none"
+          className="mt-1.5 touch-none py-2 select-none"
           aria-hidden={!interactiveTrack}
           role={interactiveTrack ? "scrollbar" : undefined}
           aria-orientation={interactiveTrack ? "horizontal" : undefined}
         >
-          <div className="relative h-1.5 rounded-full bg-app-muted">
+          <div className="bg-app-muted relative h-1.5 rounded-full">
             <div
               className={cn(
-                "absolute top-0 h-full rounded-full bg-app-border-strong",
+                "bg-app-border-strong absolute top-0 h-full rounded-full",
                 interactiveTrack && "cursor-pointer",
               )}
               style={{

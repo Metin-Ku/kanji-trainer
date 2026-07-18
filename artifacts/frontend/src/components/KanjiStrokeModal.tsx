@@ -229,7 +229,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-app-surface shadow-2xl overflow-hidden"
+        className="bg-app-surface overflow-hidden shadow-2xl"
         style={
           variant === "sheet"
             ? {
@@ -244,14 +244,14 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <p className="text-[11px] font-semibold text-app-text-muted uppercase tracking-widest">
+          <p className="text-app-text-muted text-[11px] font-semibold tracking-widest uppercase">
             {t("kanjiStroke.title")}
           </p>
           <div className="flex items-center gap-0.5">
             {svgContent && !loading && (
               <button
                 onClick={runAnimation}
-                className="p-1.5 rounded-lg hover:bg-app-muted text-app-text-muted transition-colors"
+                className="hover:bg-app-muted text-app-text-muted rounded-lg p-1.5 transition-colors"
                 title={t("a11y.replayAnimation")}
               >
                 <RefreshCw size={13} />
@@ -259,7 +259,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
             )}
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-app-muted text-app-text-muted transition-colors"
+              className="hover:bg-app-muted text-app-text-muted rounded-lg p-1.5 transition-colors"
             >
               <X size={16} />
             </button>
@@ -272,7 +272,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
             <button
               onClick={() => setCharIndex((i) => Math.max(0, i - 1))}
               disabled={charIndex === 0}
-              className="p-1 text-app-text-muted hover:text-app-text-secondary disabled:opacity-30 transition-colors"
+              className="text-app-text-muted hover:text-app-text-secondary p-1 transition-colors disabled:opacity-30"
             >
               <ChevronLeft size={16} />
             </button>
@@ -280,7 +280,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
               <button
                 key={i}
                 onClick={() => setCharIndex(i)}
-                className="w-11 h-11 rounded-xl text-xl font-bold flex items-center justify-center transition-all"
+                className="flex h-11 w-11 items-center justify-center rounded-xl text-xl font-bold transition-all"
                 style={
                   i === charIndex
                     ? {
@@ -299,7 +299,7 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
                 setCharIndex((i) => Math.min(chars.length - 1, i + 1))
               }
               disabled={charIndex === chars.length - 1}
-              className="p-1 text-app-text-muted hover:text-app-text-secondary disabled:opacity-30 transition-colors"
+              className="text-app-text-muted hover:text-app-text-secondary p-1 transition-colors disabled:opacity-30"
             >
               <ChevronRight size={16} />
             </button>
@@ -308,8 +308,8 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
 
         {/* Single char big display */}
         {chars.length === 1 && (
-          <div className="text-center pb-1">
-            <span className="text-5xl font-bold text-app-text">
+          <div className="pb-1 text-center">
+            <span className="text-app-text text-5xl font-bold">
               {currentChar}
             </span>
           </div>
@@ -317,14 +317,20 @@ export function KanjiStrokeModal({ kanji, onClose, variant = "modal" }: Props) {
 
         {/* SVG area */}
         <div
-          className="mx-4 mb-4 rounded-xl flex items-center justify-center"
+          className="mx-4 mb-4 flex items-center justify-center rounded-xl"
           style={{ height: 248, background: "#f9f9f9" }}
         >
-          {loading && <LoadingSpinner size={32} className="text-app-text-muted" />}
+          {loading && (
+            <LoadingSpinner size={32} className="text-app-text-muted" />
+          )}
           {error && (
-            <div className="text-center px-6">
-              <p className="text-3xl text-app-border-strong mb-2">{currentChar}</p>
-              <p className="text-xs text-app-text-muted">{t("kanjiStroke.svgNotFound")}</p>
+            <div className="px-6 text-center">
+              <p className="text-app-border-strong mb-2 text-3xl">
+                {currentChar}
+              </p>
+              <p className="text-app-text-muted text-xs">
+                {t("kanjiStroke.svgNotFound")}
+              </p>
             </div>
           )}
           {svgContent && !loading && (

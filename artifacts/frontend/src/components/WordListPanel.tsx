@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   ArrowLeft,
   ArrowUpDown,
@@ -16,14 +16,12 @@ import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import type { Word, WordUpdate } from "../types";
+import { JLPT_LEVELS } from "../types/srs";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
 import { pageTitleLabelClass } from "../lib/japaneseScript";
 import { useConfirm } from "../components/ConfirmProvider";
-import {
-  getWordsListPrefs,
-  saveWordsListPrefs,
-} from "../lib/listPreferences";
+import { getWordsListPrefs, saveWordsListPrefs } from "../lib/listPreferences";
 
 export type SortMode =
   | "level-asc"
@@ -36,6 +34,7 @@ export type SortMode =
 type SortGroup = "level" | "date" | "jlpt" | "kanji";
 
 const JLPT_RANK: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
+const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
 function jlptRank(w: Word): number {
   return w.jlptLevel ? (JLPT_RANK[w.jlptLevel] ?? 99) : 99;
 }
@@ -174,7 +173,12 @@ export function WordListPanel({
   ];
 
   const prefsScope = studyReturnPath;
-  const defaultPrefs = { query: "", sorts: ["level-asc"] as SortMode[] };
+  const defaultPrefs = {
+    query: "",
+    sorts: ["level-asc"] as SortMode[],
+    pageSize: 50,
+    jlptLevels: [] as string[],
+  };
   const savedPrefs = getWordsListPrefs(prefsScope, defaultPrefs);
 
   const [showForm, setShowForm] = useState(false);
@@ -185,19 +189,32 @@ export function WordListPanel({
   );
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [query, setQuery] = useState(savedPrefs.query);
+  const [pageSize, setPageSize] = useState(savedPrefs.pageSize ?? 50);
+  const [selectedJlpt, setSelectedJlpt] = useState<Set<string>>(
+    () => new Set(savedPrefs.jlptLevels ?? []),
+  );
+  const [visibleCount, setVisibleCount] = useState(savedPrefs.pageSize ?? 50);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
   const headerRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
     saveWordsListPrefs(prefsScope, {
       query,
       sorts: [...activeSorts],
+      pageSize,
+      jlptLevels: [...selectedJlpt],
     });
-  }, [prefsScope, query, activeSorts]);
+  }, [prefsScope, query, activeSorts, pageSize, selectedJlpt]);
+
+  useEffect(() => {
+    if (layout !== "page") return;
+    setVisibleCount(pageSize);
+  }, [layout, pageSize, query, activeSorts, selectedJlpt, words]);
 
   useEffect(() => {
     if (!showSortMenu) return;
@@ -215,6 +232,39 @@ export function WordListPanel({
       document.removeEventListener("touchstart", handler);
     };
   }, [showSortMenu]);
+
+  const sorted = useMemo(
+    () => sortWords(words, activeSorts),
+    [words, activeSorts],
+  );
+  const searched = useMemo(() => filterWords(sorted, query), [sorted, query]);
+  const filtered = useMemo(() => {
+    if (layout !== "page" || selectedJlpt.size === 0) return searched;
+    return searched.filter((w) => w.jlptLevel && selectedJlpt.has(w.jlptLevel));
+  }, [searched, layout, selectedJlpt]);
+  const visibleWords = useMemo(
+    () => (layout === "page" ? filtered.slice(0, visibleCount) : filtered),
+    [filtered, layout, visibleCount],
+  );
+  const hasMore = layout === "page" && visibleCount < filtered.length;
+  const activeSortCount = activeSorts.size;
+  const selectedJlptCount = selectedJlpt.size;
+
+  useEffect(() => {
+    if (layout !== "page" || !hasMore) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((prev) => prev + pageSize);
+        }
+      },
+      { rootMargin: "240px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [layout, hasMore, pageSize, visibleWords.length, filtered.length]);
 
   const handleScroll = useCallback(() => {
     if (!headerRef.current || selectMode) return;
@@ -238,6 +288,15 @@ export function WordListPanel({
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, [handleScroll]);
+
+  function toggleJlpt(level: string) {
+    setSelectedJlpt((prev) => {
+      const next = new Set(prev);
+      if (next.has(level)) next.delete(level);
+      else next.add(level);
+      return next;
+    });
+  }
 
   function exitSelectMode() {
     setSelectMode(false);
@@ -277,35 +336,37 @@ export function WordListPanel({
     });
   }
 
-  const sorted = sortWords(words, activeSorts);
-  const displayed = filterWords(sorted, query);
-  const activeSortCount = activeSorts.size;
-  const diceInHeader = layout === "page" && showDice;
-
   const diceButton = showDice ? (
     <button
       onClick={() => {
-        if (displayed.length === 0) return;
-        startStudy(displayed, "kelime", studyTitle, studyReturnPath);
+        if (filtered.length === 0) return;
+        startStudy(filtered, "kelime", studyTitle, studyReturnPath);
         navigate("/study");
       }}
-      disabled={displayed.length === 0}
-      className="p-1.5 rounded-lg text-app-text-muted hover:bg-app-muted transition-colors disabled:opacity-30 shrink-0"
+      disabled={filtered.length === 0}
+      className="text-app-text-muted hover:bg-app-muted shrink-0 rounded-lg p-1.5 transition-colors disabled:opacity-30"
     >
       <Dices size={17} strokeWidth={2} />
     </button>
   ) : null;
 
+  const diceInHeader = layout === "page" && showDice;
+
   const toolbarRow = (
     <div className="flex items-center gap-2">
-      <p className="text-sm text-app-text-muted shrink-0 min-w-[1.25rem] flex items-center justify-center">
+      <p className="text-app-text-muted flex min-w-[1.25rem] shrink-0 items-center justify-center text-sm tabular-nums">
         {isLoading ? (
           <LoadingSpinner size={18} />
+        ) : layout === "page" ? (
+          t("words.showingCount", {
+            visible: Math.min(visibleCount, filtered.length),
+            total: filtered.length,
+          })
         ) : (
-          t("common.wordCount", { count: displayed.length })
+          t("common.wordCount", { count: filtered.length })
         )}
       </p>
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <SearchBar value={query} onChange={setQuery} />
       </div>
 
@@ -313,7 +374,7 @@ export function WordListPanel({
       <div className="relative shrink-0" ref={sortMenuRef}>
         <button
           onClick={() => setShowSortMenu((v) => !v)}
-          className={`flex items-center gap-1 px-2 py-1.5 rounded-lg transition-colors ${activeSortCount > 0 ? "text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900" : "text-app-text-muted hover:text-app-text-secondary hover:bg-app-muted"}`}
+          className={`flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${activeSortCount > 0 ? "text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900" : "text-app-text-muted hover:text-app-text-secondary hover:bg-app-muted"}`}
         >
           <ArrowUpDown size={14} strokeWidth={2} />
           <span className="text-xs font-medium">
@@ -323,14 +384,105 @@ export function WordListPanel({
           </span>
         </button>
         {showSortMenu && (
-          <div className="absolute right-0 top-full mt-1.5 z-50 bg-app-surface rounded-xl shadow-xl border border-app-border overflow-hidden w-56">
+          <div className="bg-app-surface border-app-border absolute top-full right-0 z-50 mt-1.5 max-h-[min(70dvh,28rem)] w-56 overflow-y-auto rounded-xl border shadow-xl">
+            {layout === "page" && (
+              <>
+                <div className="border-app-border mx-3 my-1.5 border-t" />
+                <div className="px-3 pt-2.5 pb-1">
+                  <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
+                    {t("words.filters.pageSize")}
+                  </p>
+                </div>
+                <div className="px-3 pb-2">
+                  <select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    className="border-app-border-strong bg-app-muted text-app-text w-full rounded-lg border px-3 py-2 text-sm"
+                  >
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="border-app-border mx-3 my-1.5 border-t" />
+                <div className="px-3 pt-2.5 pb-1">
+                  <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
+                    {t("words.filters.jlpt")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedJlpt(new Set())}
+                  className="hover:bg-app-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
+                >
+                  {selectedJlptCount === 0 ? (
+                    <CheckSquare
+                      size={15}
+                      className="text-main-400 shrink-0"
+                      strokeWidth={2}
+                    />
+                  ) : (
+                    <Square
+                      size={15}
+                      className="text-app-text-muted shrink-0"
+                      strokeWidth={2}
+                    />
+                  )}
+                  <span
+                    className={
+                      selectedJlptCount === 0
+                        ? "text-app-text font-medium"
+                        : "text-app-text-secondary"
+                    }
+                  >
+                    {t("common.all")}
+                  </span>
+                </button>
+                {JLPT_LEVELS.map((level) => {
+                  const active = selectedJlpt.has(level);
+                  return (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() => toggleJlpt(level)}
+                      className="hover:bg-app-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
+                    >
+                      {active ? (
+                        <CheckSquare
+                          size={15}
+                          className="text-main-400 shrink-0"
+                          strokeWidth={2}
+                        />
+                      ) : (
+                        <Square
+                          size={15}
+                          className="text-app-text-muted shrink-0"
+                          strokeWidth={2}
+                        />
+                      )}
+                      <span
+                        className={
+                          active
+                            ? "text-app-text font-medium"
+                            : "text-app-text-secondary"
+                        }
+                      >
+                        {level}
+                      </span>
+                    </button>
+                  );
+                })}
+              </>
+            )}
             {groups.map((group, gi) => (
               <div key={group.key}>
                 {gi > 0 && (
-                  <div className="mx-3 my-1.5 border-t border-app-border" />
+                  <div className="border-app-border mx-3 my-1.5 border-t" />
                 )}
                 <div className="px-3 pt-2.5 pb-1">
-                  <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
+                  <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
                     {group.label}
                   </p>
                 </div>
@@ -346,7 +498,7 @@ export function WordListPanel({
                             toggleSort(p, opt.value, sortOptions),
                           )
                         }
-                        className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-app-muted transition-colors"
+                        className="hover:bg-app-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
                       >
                         {active ? (
                           <CheckSquare
@@ -376,8 +528,8 @@ export function WordListPanel({
               </div>
             ))}
             {activeSortCount > 1 && (
-              <div className="mx-3 mb-2.5 mt-1.5 px-2.5 py-1.5 bg-main-50 dark:bg-main-950 rounded-lg">
-                <p className="text-[11px] text-main-400 font-medium">
+              <div className="bg-main-50 dark:bg-main-950 mx-3 mt-1.5 mb-2.5 rounded-lg px-2.5 py-1.5">
+                <p className="text-main-400 text-[11px] font-medium">
                   {t("words.sort.multiCriteria", { count: activeSortCount })}
                 </p>
               </div>
@@ -388,7 +540,7 @@ export function WordListPanel({
       </div>
       <button
         onClick={() => (selectMode ? exitSelectMode() : setSelectMode(true))}
-        className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50 dark:bg-main-950" : "text-app-text-muted hover:bg-app-muted"}`}
+        className={`shrink-0 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors ${selectMode ? "text-main-400 bg-main-50 dark:bg-main-950" : "text-app-text-muted hover:bg-app-muted"}`}
       >
         {selectMode ? t("common.cancel") : t("common.select")}
       </button>
@@ -401,7 +553,7 @@ export function WordListPanel({
         ref={headerRef}
         className={
           layout === "page"
-            ? "sticky top-0 z-10 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 space-y-2"
+            ? "bg-app-surface border-app-border sticky top-0 z-10 space-y-2 border-b px-5 pt-4 pb-4"
             : "space-y-2"
         }
       >
@@ -409,7 +561,7 @@ export function WordListPanel({
           <div className="flex items-center justify-between">
             <button
               onClick={onBack}
-              className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors min-w-0"
+              className="text-app-text-muted hover:text-app-text-secondary -ml-1 flex min-w-0 items-center gap-1.5 p-1 transition-colors"
             >
               <ArrowLeft size={18} className="shrink-0" />
               {pageTitle && (
@@ -419,10 +571,10 @@ export function WordListPanel({
                 </span>
               )}
             </button>
-            <div className="flex items-center gap-2 ml-auto mr-2">
+            <div className="xs:gap-2 mr-2 ml-auto flex items-center gap-1">
               {toolbarExtra}
             </div>
-            <span className="text-sm text-app-text-muted p-1.5 font-medium tabular-nums invisible">
+            <span className="text-app-text-muted invisible p-1.5 text-sm font-medium tabular-nums">
               5
             </span>
             {diceButton}
@@ -432,7 +584,7 @@ export function WordListPanel({
       </div>
 
       {isError && (
-        <div className="mx-4 mt-4 p-4 bg-red-50 border border-red-100 rounded-xl text-sm text-red-400 text-center">
+        <div className="mx-4 mt-4 rounded-xl border border-red-100 bg-red-50 p-4 text-center text-sm text-red-400">
           {t("words.loadError")}
         </div>
       )}
@@ -440,18 +592,18 @@ export function WordListPanel({
       <div>
         {isLoading ? (
           <LoadingPlaceholder padding="lg" />
-        ) : displayed.length === 0 && !isError ? (
-          <div className="flex flex-col items-center justify-center py-24 px-8 text-center">
+        ) : filtered.length === 0 && !isError ? (
+          <div className="flex flex-col items-center justify-center px-8 py-24 text-center">
             {query ? (
               <>
-                <p className="text-4xl text-app-border-strong mb-3">?</p>
+                <p className="text-app-border-strong mb-3 text-4xl">?</p>
                 <p className="text-app-text-muted text-sm">
                   {t("common.noResultsForQuery", { query })}
                 </p>
               </>
             ) : (
               <>
-                <div className="text-6xl mb-4 text-app-border-strong">漢</div>
+                <div className="text-app-border-strong mb-4 text-6xl">漢</div>
                 <p className="text-app-text-muted font-medium">
                   {emptyMessage ?? t("words.empty")}
                 </p>
@@ -460,7 +612,7 @@ export function WordListPanel({
           </div>
         ) : (
           <div className="bg-app-surface overflow-hidden">
-            {displayed.map((word, i) => (
+            {visibleWords.map((word, i) => (
               <WordCard
                 key={word.id}
                 word={word}
@@ -495,19 +647,28 @@ export function WordListPanel({
                 allWords={allWords}
               />
             ))}
+            {hasMore && (
+              <div
+                ref={loadMoreRef}
+                className="flex justify-center py-8"
+                aria-hidden
+              >
+                <LoadingSpinner size={22} />
+              </div>
+            )}
           </div>
         )}
       </div>
 
       {selectMode && (
-        <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border fixed bottom-0 left-0 right-0 z-50 bg-app-surface border-t border-app-border-strong px-4 py-3 flex items-center gap-3">
+        <div className="sm:border-app-border bg-app-surface border-app-border-strong fixed right-0 bottom-0 left-0 z-50 mx-auto flex max-w-2xl items-center gap-3 border-t px-4 py-3 sm:box-content sm:border-r-2 sm:border-l-2">
           <button
-            onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))}
-            className="text-xs text-app-text-secondary hover:text-app-text transition-colors shrink-0"
+            onClick={() => setSelectedIds(new Set(filtered.map((w) => w.id)))}
+            className="text-app-text-secondary hover:text-app-text shrink-0 text-xs transition-colors"
           >
             {t("common.selectAll")}
           </button>
-          <span className="flex-1 text-center text-sm text-app-text-secondary font-medium">
+          <span className="text-app-text-secondary flex-1 text-center text-sm font-medium">
             {selectedIds.size > 0
               ? t("common.selectedCount", { count: selectedIds.size })
               : t("common.selectRows")}
@@ -515,7 +676,7 @@ export function WordListPanel({
           <button
             onClick={handleBulkAction}
             disabled={selectedIds.size === 0}
-            className="flex items-center gap-1.5 px-3 bg-[rgb(239,68,68)] py-2 rounded-xl text-sm font-semibold text-white transition-opacity disabled:opacity-40 shrink-0"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl bg-[rgb(239,68,68)] px-3 py-2 text-sm font-semibold text-white transition-opacity disabled:opacity-40"
           >
             <Trash2 size={14} />
             {bulkMode === "remove"

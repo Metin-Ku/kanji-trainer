@@ -32,7 +32,7 @@ export function HomeSearchResults({
 
   if (isLoading) {
     return (
-      <div className="flex-1 overflow-y-auto bg-app-surface">
+      <div className="bg-app-surface flex-1 overflow-y-auto">
         <LoadingPlaceholder />
       </div>
     );
@@ -40,9 +40,9 @@ export function HomeSearchResults({
 
   if (results.length === 0) {
     return (
-      <div className="flex-1 overflow-y-auto bg-app-surface">
-        <div className="flex flex-col items-center justify-center py-20 text-center px-8">
-          <p className="text-4xl text-app-border-strong mb-3">?</p>
+      <div className="bg-app-surface flex-1 overflow-y-auto">
+        <div className="flex flex-col items-center justify-center px-8 py-20 text-center">
+          <p className="text-app-border-strong mb-3 text-4xl">?</p>
           <p className="text-app-text-muted text-sm">
             {t("common.noResultsForQuery", { query })}
           </p>
@@ -52,8 +52,8 @@ export function HomeSearchResults({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto bg-app-surface">
-      <p className="px-5 pt-3 pb-1 text-xs text-app-text-muted font-medium">
+    <div className="bg-app-surface flex-1 overflow-y-auto">
+      <p className="text-app-text-muted px-5 pt-3 pb-1 text-xs font-medium">
         {t("common.resultCount", { count: results.length })}
       </p>
       {results.map((word) => (

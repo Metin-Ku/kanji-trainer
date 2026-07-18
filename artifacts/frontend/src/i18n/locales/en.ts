@@ -102,6 +102,7 @@ export const en = {
 
   words: {
     title: "Words",
+    allTitle: "All words",
     loadError: "Failed to load words.",
     empty: "No words added yet",
     sort: {
@@ -115,6 +116,13 @@ export const en = {
       multiCriteria: "{count} criteria applied (first selected first)",
     },
     studyTitle: "Words",
+    showingCount: "{visible} / {total}",
+    filters: {
+      pageSize: "Load",
+      jlpt: "JLPT",
+      jlptLevels: "{levels}",
+      jlptCount: "{count} levels",
+    },
   },
 
   learned: {
@@ -494,6 +502,10 @@ export const en = {
     namePlaceholder: "e.g. Home & Cleaning",
     selectPlaceholder: "Search categories…",
     selectNotFound: 'No category matching "{query}"',
+    searchPlaceholder: "Search categories…",
+    addWords: "Add words",
+    noSrsCards: "No due SRS cards for this category.",
+    srsSessionTitle: "{category} · {deck}",
   },
 
   themeQuiz: {

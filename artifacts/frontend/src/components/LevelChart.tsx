@@ -16,7 +16,12 @@ function getLevelColor(bar: number, level: number): string {
   return themeVars.level(bar);
 }
 
-export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar }: Props) {
+export function LevelChart({
+  level,
+  onChangeLevel,
+  starred = false,
+  onToggleStar,
+}: Props) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -41,8 +46,11 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
   return (
     <div className="relative" ref={ref}>
       <button
-        onClick={(e) => { e.stopPropagation(); setOpen((v) => !v); }}
-        className="flex items-end gap-[1px] h-[17px]"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => !v);
+        }}
+        className="flex h-[17px] items-end gap-[1px]"
         style={{ padding: 0 }}
         aria-label={t("a11y.changeLevel")}
       >
@@ -66,22 +74,25 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
 
       {open && (
         <div
-          className="absolute left-0 top-full mt-2 z-50 bg-app-surface rounded-2xl shadow-2xl border border-app-border p-3"
+          className="bg-app-surface border-app-border absolute top-full left-0 z-50 mt-2 rounded-2xl border p-3 shadow-2xl"
           style={{ minWidth: 216 }}
           onClick={(e) => e.stopPropagation()}
         >
-          <p className="text-xs text-app-text-muted mb-2.5 font-medium text-center">
+          <p className="text-app-text-muted mb-2.5 text-center text-xs font-medium">
             {t("levelChart.title")}
           </p>
-          <div className="flex gap-2 justify-center items-center">
+          <div className="flex items-center justify-center gap-2">
             {[1, 2, 3, 4, 5].map((l) => {
               const active = l === level;
               const color = getLevelColor(l, l);
               return (
                 <button
                   key={l}
-                  onClick={() => { onChangeLevel(l); setOpen(false); }}
-                  className="w-9 h-9 rounded-full font-semibold text-sm border-2"
+                  onClick={() => {
+                    onChangeLevel(l);
+                    setOpen(false);
+                  }}
+                  className="h-9 w-9 rounded-full border-2 text-sm font-semibold"
                   style={{
                     background: active ? color : "transparent",
                     borderColor: active ? color : "#e5e7eb",
@@ -103,11 +114,19 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
                 }
               }}
               disabled={!starEnabled}
-              className="w-9 h-9 rounded-full text-base border-2 flex items-center justify-center"
+              className="flex h-9 w-9 items-center justify-center rounded-full border-2 text-base"
               style={{
                 background: starred ? themeVars.star : "transparent",
-                borderColor: starred ? themeVars.star : starEnabled ? themeVars.star : "#e5e7eb",
-                color: starred ? "white" : starEnabled ? themeVars.star : "#d1d5db",
+                borderColor: starred
+                  ? themeVars.star
+                  : starEnabled
+                    ? themeVars.star
+                    : "#e5e7eb",
+                color: starred
+                  ? "white"
+                  : starEnabled
+                    ? themeVars.star
+                    : "#d1d5db",
                 cursor: starEnabled ? "pointer" : "not-allowed",
                 opacity: starEnabled ? 1 : 0.4,
                 transition: "none",
@@ -120,7 +139,7 @@ export function LevelChart({ level, onChangeLevel, starred = false, onToggleStar
             </button>
           </div>
           {!starEnabled && (
-            <p className="text-[10px] text-app-text-muted text-center mt-2">
+            <p className="text-app-text-muted mt-2 text-center text-[10px]">
               {t("levelChart.starAtLevel5Hint")}
             </p>
           )}

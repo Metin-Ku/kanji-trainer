@@ -3,10 +3,7 @@ import { HorizontalScroll } from "@/components/ui/horizontal-scroll";
 import { useTranslation } from "../../i18n/I18nProvider";
 import { srsDeckLabel } from "../../i18n/srsDeckLabels";
 import { DAILY_GOAL_DECK_IDS } from "../../lib/dailyGoal";
-import {
-  getDailyTotals,
-  SRS_DECK_CHART_COLORS,
-} from "../../lib/progressStats";
+import { getDailyTotals, SRS_DECK_CHART_COLORS } from "../../lib/progressStats";
 import type { DailyGoalDeckId } from "../../lib/dailyGoal";
 
 type DeckActivityChartProps = {
@@ -52,12 +49,15 @@ export function DeckActivityChart({
   const maxWeek = Math.max(1, ...weeks.map((w) => w.total));
 
   return (
-    <div className="min-w-0 w-full max-w-full">
-      <div className="flex flex-wrap gap-3 mb-4">
+    <div className="w-full max-w-full min-w-0">
+      <div className="mb-4 flex flex-wrap gap-3">
         {DAILY_GOAL_DECK_IDS.map((deck) => (
-          <div key={deck} className="flex items-center gap-1.5 text-xs text-app-text-secondary">
+          <div
+            key={deck}
+            className="text-app-text-secondary flex items-center gap-1.5 text-xs"
+          >
             <span
-              className="w-2.5 h-2.5 rounded-sm shrink-0"
+              className="h-2.5 w-2.5 shrink-0 rounded-sm"
               style={{ background: SRS_DECK_CHART_COLORS[deck] }}
             />
             {srsDeckLabel(t, deck).title}
@@ -65,17 +65,21 @@ export function DeckActivityChart({
         ))}
       </div>
 
-      <HorizontalScroll scrollDeps={[weeks.length, days]} isTouchable={true} className="pb-1">
-        <div className="flex items-end gap-1 h-32 w-max min-w-full">
+      <HorizontalScroll
+        scrollDeps={[weeks.length, days]}
+        isTouchable={true}
+        className="pb-1"
+      >
+        <div className="flex h-32 w-max min-w-full items-end gap-1">
           {weeks.map((week) => (
             <div
               key={week.label}
-              className="flex flex-col justify-end items-center gap-1 shrink-0"
+              className="flex shrink-0 flex-col items-center justify-end gap-1"
               style={{ width: 28 }}
               title={t("progress.deckChart.weekTotal", { count: week.total })}
             >
               <div
-                className="w-full flex flex-col-reverse rounded-sm overflow-hidden bg-app-muted"
+                className="bg-app-muted flex w-full flex-col-reverse overflow-hidden rounded-sm"
                 style={{
                   height: `${Math.max(week.total > 0 ? 4 : 0, (week.total / maxWeek) * 100)}%`,
                   minHeight: week.total > 0 ? 4 : 0,
@@ -96,14 +100,16 @@ export function DeckActivityChart({
                   );
                 })}
               </div>
-              <span className="text-[9px] text-app-text-muted tabular-nums">{week.label}</span>
+              <span className="text-app-text-muted text-[9px] tabular-nums">
+                {week.label}
+              </span>
             </div>
           ))}
         </div>
       </HorizontalScroll>
 
       {maxTotal <= 1 && weeks.every((w) => w.total === 0) && (
-        <p className="text-xs text-app-text-muted text-center mt-2">
+        <p className="text-app-text-muted mt-2 text-center text-xs">
           {t("progress.deckChart.empty")}
         </p>
       )}

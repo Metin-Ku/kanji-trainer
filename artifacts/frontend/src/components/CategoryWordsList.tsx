@@ -25,8 +25,8 @@ export function CategoryWordsList({ category, words }: Props) {
 
   if (words.length === 0) {
     return (
-      <div className="border border-app-border rounded-lg bg-app-surface px-4 py-3">
-        <p className="text-xs text-app-text-muted text-center">
+      <div className="border-app-border bg-app-surface rounded-lg border px-4 py-3">
+        <p className="text-app-text-muted text-center text-xs">
           {t("categories.noWordsInCategory")}
         </p>
       </div>
@@ -35,11 +35,11 @@ export function CategoryWordsList({ category, words }: Props) {
 
   return (
     <div
-      className="border border-app-border rounded-lg bg-app-surface overflow-y-auto"
+      className="border-app-border bg-app-surface overflow-y-auto rounded-lg border"
       style={{ maxHeight: 280 }}
       onClick={(e) => e.stopPropagation()}
     >
-      <p className="px-4 pt-3 pb-1 text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
+      <p className="text-app-text-muted px-4 pt-3 pb-1 text-[10px] font-bold tracking-widest uppercase">
         <CategoryTitle
           name={category.name}
           iconSvg={category.iconSvg}
@@ -49,27 +49,30 @@ export function CategoryWordsList({ category, words }: Props) {
       {words.map((w) => {
         const isOpen = openIds.has(w.id);
         return (
-          <div key={w.id} className="border-b border-app-border last:border-b-0">
+          <div
+            key={w.id}
+            className="border-app-border border-b last:border-b-0"
+          >
             <div
-              className="flex items-center gap-3 px-4 py-2.5 cursor-pointer select-none"
+              className="flex cursor-pointer items-center gap-3 px-4 py-2.5 select-none"
               onClick={() => toggle(w.id)}
             >
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-app-text">{w.kanji}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-app-text text-sm font-bold">{w.kanji}</p>
                 {w.pronunciation && (
-                  <p className="text-xs text-app-text-secondary mt-0.5">
+                  <p className="text-app-text-secondary mt-0.5 text-xs">
                     {w.pronunciation}
                   </p>
                 )}
                 {w.meaning && (
-                  <p className="text-xs text-app-text-muted mt-0.5 truncate">
+                  <p className="text-app-text-muted mt-0.5 truncate text-xs">
                     {w.meaning}
                   </p>
                 )}
               </div>
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex shrink-0 items-center gap-1">
                 {w.jlptLevel && (
-                  <span className="text-[10px] bg-app-muted text-app-text-secondary font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
+                  <span className="bg-app-muted text-app-text-secondary shrink-0 rounded-md px-1.5 py-[3px] text-[10px] leading-none font-semibold">
                     {w.jlptLevel}
                   </span>
                 )}
@@ -91,7 +94,7 @@ export function CategoryWordsList({ category, words }: Props) {
                   ).map(({ Icon, starred, level }, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-app-muted"
+                      className="bg-app-muted flex items-center gap-0.5 rounded-full px-1 py-0.5"
                     >
                       <Icon
                         size={10}
@@ -100,14 +103,14 @@ export function CategoryWordsList({ category, words }: Props) {
                       />
                       {starred ? (
                         <div
-                          className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold"
+                          className="flex h-3 w-3 items-center justify-center rounded-full text-[7px] font-bold"
                           style={{ background: themeVars.star, color: "white" }}
                         >
                           ★
                         </div>
                       ) : (
                         <div
-                          className="w-3 h-3 rounded-full flex items-center justify-center text-[7px] font-bold text-white"
+                          className="flex h-3 w-3 items-center justify-center rounded-full text-[7px] font-bold text-white"
                           style={{ background: themeVars.level(level) }}
                         >
                           {level}
@@ -119,13 +122,13 @@ export function CategoryWordsList({ category, words }: Props) {
               </div>
             </div>
             {isOpen && (
-              <div className="px-4 pb-3 pt-0">
+              <div className="px-4 pt-0 pb-3">
                 {w.description ? (
-                  <p className="whitespace-pre-wrap text-xs text-app-text-secondary leading-relaxed">
+                  <p className="text-app-text-secondary text-xs leading-relaxed whitespace-pre-wrap">
                     {w.description}
                   </p>
                 ) : (
-                  <p className="text-xs text-app-text-muted italic">
+                  <p className="text-app-text-muted text-xs italic">
                     {t("common.noDescription")}
                   </p>
                 )}
@@ -150,9 +153,9 @@ export function CategoryChip({ label, iconSvg, active, onClick }: ChipProps) {
     <button
       type="button"
       onClick={onClick}
-      className={`shrink-0 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-semibold transition-colors ${
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-semibold transition-colors ${
         active
-          ? "bg-main-500 text-white dark:bg-main-600"
+          ? "bg-main-500 dark:bg-main-600 text-white"
           : "bg-app-muted text-app-text-secondary hover:bg-main-50 hover:text-main-600 dark:hover:bg-main-950 dark:hover:text-main-300"
       }`}
     >

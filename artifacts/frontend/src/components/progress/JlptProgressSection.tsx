@@ -26,13 +26,13 @@ export function JlptProgressSection({ words }: JlptProgressSectionProps) {
 
   return (
     <div>
-      <div className="flex gap-2 mb-4">
+      <div className="mb-4 flex gap-2">
         {MODES.map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => setMode(m)}
-            className={`px-3 py-1 rounded-full text-xs font-semibold transition-colors ${
+            className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
               mode === m
                 ? "bg-main-700 text-white"
                 : "bg-app-muted text-app-text-secondary"
@@ -46,11 +46,11 @@ export function JlptProgressSection({ words }: JlptProgressSectionProps) {
       <div className="space-y-3">
         {bands.map((band) => (
           <div key={band.jlpt}>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-semibold text-app-text">
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-app-text text-sm font-semibold">
                 {jlptLabel(band.jlpt)}
               </span>
-              <span className="text-xs text-app-text-secondary tabular-nums">
+              <span className="text-app-text-secondary text-xs tabular-nums">
                 {band.total === 0
                   ? t("progress.jlpt.noWords")
                   : t("progress.jlpt.count", {
@@ -60,9 +60,9 @@ export function JlptProgressSection({ words }: JlptProgressSectionProps) {
                     })}
               </span>
             </div>
-            <div className="h-2 rounded-full bg-app-muted overflow-hidden">
+            <div className="bg-app-muted h-2 overflow-hidden rounded-full">
               <div
-                className="h-full rounded-full bg-main-500 transition-[width] duration-300"
+                className="bg-main-500 h-full rounded-full transition-[width] duration-300"
                 style={{
                   width: `${band.ratio * 100}%`,
                   minWidth: band.learned > 0 ? 4 : 0,

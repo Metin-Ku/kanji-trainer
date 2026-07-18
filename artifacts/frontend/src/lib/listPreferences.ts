@@ -18,9 +18,13 @@ const SRS_SORT_MODES = new Set<SrsSortMode>(["due-asc", "date-asc", "date-desc"]
 
 const JLPT_VALUES = new Set(["", "N5", "N4", "N3", "N2", "N1"]);
 
+const PAGE_SIZE_VALUES = new Set([25, 50, 100, 200]);
+
 export type WordsListPrefs = {
   query: string;
   sorts: SortMode[];
+  pageSize?: number;
+  jlptLevels?: string[];
 };
 
 export type SingleSortListPrefs = {
@@ -61,9 +65,23 @@ export function getWordsListPrefs(
     ? saved.sorts.filter(isSortMode)
     : defaults.sorts;
 
+  const pageSize =
+    typeof saved.pageSize === "number" && PAGE_SIZE_VALUES.has(saved.pageSize)
+      ? saved.pageSize
+      : (defaults.pageSize ?? 50);
+
+  const jlptLevels = Array.isArray(saved.jlptLevels)
+    ? saved.jlptLevels.filter(
+        (level): level is string =>
+          typeof level === "string" && JLPT_VALUES.has(level) && level !== "",
+      )
+    : (defaults.jlptLevels ?? []);
+
   return {
     query: typeof saved.query === "string" ? saved.query : defaults.query,
     sorts: sorts.length > 0 ? sorts : defaults.sorts,
+    pageSize,
+    jlptLevels,
   };
 }
 

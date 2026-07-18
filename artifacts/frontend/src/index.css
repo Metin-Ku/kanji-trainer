@@ -173,7 +173,7 @@ html.theme-switching *::after {
     @apply border-border box-border;
   }
   body {
-    @apply font-sans antialiased bg-app-bg text-app-text;
+    @apply font-sans antialiased bg-app-surface text-app-text;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }

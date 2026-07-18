@@ -12,6 +12,7 @@ interface Props {
   isSearching: boolean;
   activityByDate: ActivityByDate;
   activityLoading: boolean;
+  wordCount: number;
 }
 
 export function HomeHeader({
@@ -20,45 +21,48 @@ export function HomeHeader({
   isSearching,
   activityByDate,
   activityLoading,
+  wordCount,
 }: Props) {
   const { t, formatToday } = useTranslation();
   const [, navigate] = useLocation();
 
   return (
-    <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-5 shrink-0">
-      <div className="flex items-center justify-between gap-3 mb-0.5">
-        <p className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+    <div className="bg-app-surface border-app-border shrink-0 border-b px-5 pt-4 pb-5">
+      <div className="mb-0.5 flex items-center justify-between gap-3">
+        <p className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
           {t("home.appSubtitle")}
         </p>
-        <div className="flex items-center gap-0.5 -mr-2 -mt-1">
+        <div className="-mt-1 -mr-2 flex items-center gap-0.5">
           <button
             onClick={() => navigate("/srs")}
-            className="p-2 rounded-xl text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent transition-colors"
+            className="text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent rounded-xl p-2 transition-colors"
             aria-label={t("a11y.srs")}
           >
             <Layers size={20} strokeWidth={2} />
           </button>
           <button
             onClick={() => navigate("/progress")}
-            className="p-2 rounded-xl text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent transition-colors"
+            className="text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent rounded-xl p-2 transition-colors"
             aria-label={t("a11y.progress")}
           >
             <BarChart2 size={20} strokeWidth={2} />
           </button>
           <button
             onClick={() => navigate("/settings")}
-            className="p-2 rounded-xl text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent transition-colors"
+            className="text-app-text-muted hover:text-main-500 dark:hover:text-main-600 hover:bg-app-accent rounded-xl p-2 transition-colors"
             aria-label={t("a11y.settings")}
           >
             <Settings size={20} strokeWidth={2} />
           </button>
         </div>
       </div>
-      <h1 className="text-xl font-bold text-app-text mb-3">{formatToday()}</h1>
+      <h1 className="text-app-text mb-3 text-xl font-bold">{formatToday()}</h1>
       <SearchBar
         value={query}
         onChange={onQueryChange}
         placeholder={t("home.searchPlaceholder")}
+        wordCount={wordCount}
+        onWordCountClick={() => navigate("/words?all=1")}
       />
       {!isSearching && (
         <>

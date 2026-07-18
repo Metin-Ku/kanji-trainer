@@ -13,8 +13,10 @@ const LONG_PRESS_MS = 320;
 const LEVEL_STEP_PX = 30;
 
 function getLevelInfo(word: Word, mode: StudyMode) {
-  if (mode === "okunuş") return { level: word.pronLevel, starred: word.pronStarred };
-  if (mode === "anlam") return { level: word.meaningLevel, starred: word.meaningStarred };
+  if (mode === "okunuş")
+    return { level: word.pronLevel, starred: word.pronStarred };
+  if (mode === "anlam")
+    return { level: word.meaningLevel, starred: word.meaningStarred };
   return { level: word.level, starred: word.starred };
 }
 
@@ -96,12 +98,13 @@ export function StudyPage() {
     // }
     if (direction === "left") {
       const currentWord = wordsRef.current[indexRef.current];
-      setWords(prev => [...prev, currentWord]);
+      setWords((prev) => [...prev, currentWord]);
     }
     const nextIndex = indexRef.current + 1;
-    const newLength = direction === "left"
-      ? wordsRef.current.length + 1
-      : wordsRef.current.length;
+    const newLength =
+      direction === "left"
+        ? wordsRef.current.length + 1
+        : wordsRef.current.length;
     if (nextIndex >= newLength) {
       setDone(true);
     } else {
@@ -119,11 +122,20 @@ export function StudyPage() {
 
   async function saveLevel(wordId: number, level: number, starred: boolean) {
     const patch: Record<string, unknown> = {};
-    if (mode === "kelime") { patch.level = level; patch.starred = starred; }
-    else if (mode === "okunuş") { patch.pronLevel = level; patch.pronStarred = starred; }
-    else { patch.meaningLevel = level; patch.meaningStarred = starred; }
+    if (mode === "kelime") {
+      patch.level = level;
+      patch.starred = starred;
+    } else if (mode === "okunuş") {
+      patch.pronLevel = level;
+      patch.pronStarred = starred;
+    } else {
+      patch.meaningLevel = level;
+      patch.meaningStarred = starred;
+    }
 
-    setWords(prev => prev.map(w => w.id === wordId ? { ...w, ...patch } : w));
+    setWords((prev) =>
+      prev.map((w) => (w.id === wordId ? { ...w, ...patch } : w)),
+    );
 
     apiFetch(`/api/words/${wordId}`, {
       method: "PATCH",
@@ -138,7 +150,8 @@ export function StudyPage() {
     if (!el) return;
 
     function onTouchStart(e: TouchEvent) {
-      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current) return;
+      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current)
+        return;
       const t = e.touches[0];
       touchStart.current = { x: t.clientX, y: t.clientY };
       touchTargetRef.current = e.target;
@@ -164,7 +177,8 @@ export function StudyPage() {
     }
 
     function onTouchMove(e: TouchEvent) {
-      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current) return;
+      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current)
+        return;
       if (!touchStart.current) return;
       const t = e.touches[0];
       const dx = t.clientX - touchStart.current.x;
@@ -198,7 +212,8 @@ export function StudyPage() {
     }
 
     function onTouchEnd(e: TouchEvent) {
-      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current) return;
+      if (flyingRef.current || showPracticeRef.current || showStrokeRef.current)
+        return;
       if (!touchStart.current) return;
       clearLongPress();
 
@@ -207,7 +222,11 @@ export function StudyPage() {
         setIsLevelMode(false);
         const currentWord = wordsRef.current[indexRef.current];
         if (currentWord) {
-          saveLevel(currentWord.id, liveLevelRef.current, liveStarredRef.current);
+          saveLevel(
+            currentWord.id,
+            liveLevelRef.current,
+            liveStarredRef.current,
+          );
         }
         touchStart.current = null;
         isDragging.current = false;
@@ -235,7 +254,9 @@ export function StudyPage() {
         if (showStrokeRef.current || showPracticeRef.current) {
           setDragX(0);
         } else {
-          const tappedOnWord = wordRef.current && wordRef.current.contains(touchTargetRef.current as Node);
+          const tappedOnWord =
+            wordRef.current &&
+            wordRef.current.contains(touchTargetRef.current as Node);
           const w = wordsRef.current[indexRef.current];
           if (tappedOnWord && w?.kanji) {
             if ((mode === "okunuş" || mode === "anlam") && hasKanji(w.kanji)) {
@@ -246,7 +267,7 @@ export function StudyPage() {
               setShowStroke(true);
             }
           } else {
-            setShowDetails(v => !v);
+            setShowDetails((v) => !v);
           }
           setDragX(0);
         }
@@ -294,32 +315,51 @@ export function StudyPage() {
 
   if (!word && !done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col items-center justify-center bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
+      <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col items-center justify-center sm:box-content sm:border-r-2 sm:border-l-2">
         <p className="text-app-text-muted">{t("study.notFound")}</p>
-        <button onClick={() => navigate(backPath)} className="mt-4 text-main-400 text-sm">{t("study.backToList")}</button>
+        <button
+          onClick={() => navigate(backPath)}
+          className="text-main-400 mt-4 text-sm"
+        >
+          {t("study.backToList")}
+        </button>
       </div>
     );
   }
 
   if (done) {
     return (
-      <div className="min-h-dvh max-w-2xl mx-auto flex flex-col bg-app-surface sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-        <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center">
-          <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted">
+      <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+        <div className="bg-app-surface border-app-border sticky top-0 z-20 flex items-center border-b px-5 pt-4 pb-4">
+          <button
+            onClick={() => navigate(backPath)}
+            className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
+          >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">{title}</span>
+            <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
+              {title}
+            </span>
           </button>
         </div>
-        <div className="flex-1 flex flex-col items-center justify-center gap-6 px-8 text-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl" style={{ background: themeVars.star }}>★</div>
-          <div>
-            <p className="text-2xl font-bold text-app-text mb-1">{t("common.completed")}</p>
-            <p className="text-sm text-app-text-muted">{t("study.finishedCount", { count: words.length })}</p>
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-8 text-center">
+          <div
+            className="flex h-16 w-16 items-center justify-center rounded-full text-3xl"
+            style={{ background: themeVars.star }}
+          >
+            ★
           </div>
-          <div className="flex flex-col gap-3 w-full max-w-xs">
+          <div>
+            <p className="text-app-text mb-1 text-2xl font-bold">
+              {t("common.completed")}
+            </p>
+            <p className="text-app-text-muted text-sm">
+              {t("study.finishedCount", { count: words.length })}
+            </p>
+          </div>
+          <div className="flex w-full max-w-xs flex-col gap-3">
             <button
               onClick={handleRestart}
-              className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl font-semibold text-white text-sm"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold text-white"
               style={{ background: themeVars.level(1) }}
             >
               <Dices size={16} strokeWidth={2} />
@@ -327,7 +367,7 @@ export function StudyPage() {
             </button>
             <button
               onClick={() => navigate(backPath)}
-              className="w-full py-3 rounded-2xl font-semibold text-sm border border-app-border-strong text-app-text-secondary"
+              className="border-app-border-strong text-app-text-secondary w-full rounded-2xl border py-3 text-sm font-semibold"
             >
               {t("study.backToList")}
             </button>
@@ -340,7 +380,9 @@ export function StudyPage() {
   const { level, starred } = getLevelInfo(word, mode);
   const displayLevel = isLevelMode ? liveLevel : level;
   const displayStarred = isLevelMode ? liveStarred : starred;
-  const displayColor = displayStarred ? themeVars.star : themeVars.level(displayLevel);
+  const displayColor = displayStarred
+    ? themeVars.star
+    : themeVars.level(displayLevel);
 
   const isAnimating = isFlying || dragX !== 0;
   const cardTransform = isFlying
@@ -348,25 +390,48 @@ export function StudyPage() {
       ? "translateX(-110vw) rotate(-12deg)"
       : "translateX(110vw) rotate(12deg)"
     : dragX !== 0
-    ? `translateX(${dragX}px) rotate(${dragX * 0.04}deg)`
-    : "translateX(0) rotate(0deg)";
-  const cardTransition = isFlying ? "transform 0.18s ease" : dragX !== 0 ? "none" : "transform 0.22s ease";
+      ? `translateX(${dragX}px) rotate(${dragX * 0.04}deg)`
+      : "translateX(0) rotate(0deg)";
+  const cardTransition = isFlying
+    ? "transform 0.18s ease"
+    : dragX !== 0
+      ? "none"
+      : "transform 0.22s ease";
 
   const practiceAvailable =
-    (mode === "okunuş" || mode === "anlam") && !!word.kanji && hasKanji(word.kanji);
+    (mode === "okunuş" || mode === "anlam") &&
+    !!word.kanji &&
+    hasKanji(word.kanji);
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col select-none sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-      <div className="sticky top-0 z-20 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 flex items-center justify-between shrink-0">
-        <button onClick={() => navigate(backPath)} className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted">
+    <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col select-none sm:box-content sm:border-r-2 sm:border-l-2">
+      <div className="bg-app-surface border-app-border sticky top-0 z-20 flex shrink-0 items-center justify-between border-b px-5 pt-4 pb-4">
+        <button
+          onClick={() => navigate(backPath)}
+          className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
+        >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">{title}</span>
+          <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
+            {title}
+          </span>
         </button>
-        <span className="text-sm text-app-text-muted p-1.5 font-medium tabular-nums">{t("common.cardProgress", { current: index + 1, total: words.length })}</span>
+        <span className="text-app-text-muted p-1.5 text-sm font-medium tabular-nums">
+          {t("common.cardProgress", {
+            current: index + 1,
+            total: words.length,
+          })}
+        </span>
       </div>
 
-      <div ref={mainRef} className="flex-1 relative overflow-hidden" style={{ touchAction: "none" }}>
-        <div className="absolute inset-0 flex items-center justify-center" style={{ pointerEvents: "none" }}>
+      <div
+        ref={mainRef}
+        className="relative flex-1 overflow-hidden"
+        style={{ touchAction: "none" }}
+      >
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ pointerEvents: "none" }}
+        >
           <div
             style={{
               transform: cardTransform,
@@ -374,36 +439,40 @@ export function StudyPage() {
               pointerEvents: "auto",
               willChange: isAnimating ? "transform" : "auto",
             }}
-            className="flex flex-col items-center gap-5 px-8 w-full max-w-sm"
+            className="flex w-full max-w-sm flex-col items-center gap-5 px-8"
           >
             <p
               ref={wordRef}
               className={[
-                "font-bold text-app-text text-center leading-tight",
-                practiceAvailable ? "cursor-pointer active:opacity-80 transition-opacity" : "",
+                "text-app-text text-center leading-tight font-bold",
+                practiceAvailable
+                  ? "cursor-pointer transition-opacity active:opacity-80"
+                  : "",
               ].join(" ")}
               style={{ fontSize: mode === "anlam" ? "1.4rem" : "3rem" }}
             >
               {getPrimary(word, mode, t("common.emDash"))}
             </p>
 
-            <div className="flex items-center gap-2 flex-wrap justify-center">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {word.date && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-medium bg-app-muted text-app-text-secondary">
+                <span className="bg-app-muted text-app-text-secondary rounded-full px-2.5 py-1 text-xs font-medium">
                   {formatStudyDate(word.date)}
                 </span>
               )}
               {word.jlptLevel && (
-                <span className="text-xs px-2.5 py-1 rounded-full font-semibold bg-app-muted text-app-text-secondary">
+                <span className="bg-app-muted text-app-text-secondary rounded-full px-2.5 py-1 text-xs font-semibold">
                   {word.jlptLevel}
                 </span>
               )}
 
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                className="flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold text-white"
                 style={{
                   background: displayColor,
-                  outline: isLevelMode ? `2px solid ${displayColor}` : "2px solid transparent",
+                  outline: isLevelMode
+                    ? `2px solid ${displayColor}`
+                    : "2px solid transparent",
                   outlineOffset: "3px",
                   transition: "background 0.15s ease, outline-color 0.15s ease",
                 }}
@@ -415,7 +484,7 @@ export function StudyPage() {
         </div>
 
         <div
-          className="absolute bottom-0 left-0 right-0 bg-app-surface border-t border-app-border rounded-t-2xl shadow-xl"
+          className="bg-app-surface border-app-border absolute right-0 bottom-0 left-0 rounded-t-2xl border-t shadow-xl"
           style={{
             transform: showDetails ? "translateY(0)" : "translateY(100%)",
             transition: "transform 0.3s cubic-bezier(0.4,0,0.2,1)",
@@ -423,36 +492,48 @@ export function StudyPage() {
             overflowY: "auto",
             zIndex: 10,
           }}
-          onTouchStart={e => e.stopPropagation()}
-          onTouchMove={e => e.stopPropagation()}
-          onTouchEnd={e => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
         >
           <div className="flex justify-center pt-3 pb-1">
-            <div className="w-10 h-1 rounded-full bg-app-border-strong" />
+            <div className="bg-app-border-strong h-1 w-10 rounded-full" />
           </div>
-          <div className="px-6 pb-6 pt-2 space-y-4">
+          <div className="space-y-4 px-6 pt-2 pb-6">
             {mode !== "kelime" && word.kanji && (
               <div>
-                <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">{t("study.detailLabels.word")}</p>
-                <p className="text-3xl font-bold text-app-text">{word.kanji}</p>
+                <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
+                  {t("study.detailLabels.word")}
+                </p>
+                <p className="text-app-text text-3xl font-bold">{word.kanji}</p>
               </div>
             )}
             {mode !== "okunuş" && word.pronunciation && (
               <div>
-                <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">{t("study.detailLabels.pronunciation")}</p>
-                <p className="text-lg font-medium text-app-text">{word.pronunciation}</p>
+                <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
+                  {t("study.detailLabels.pronunciation")}
+                </p>
+                <p className="text-app-text text-lg font-medium">
+                  {word.pronunciation}
+                </p>
               </div>
             )}
             {mode !== "anlam" && word.meaning && (
               <div>
-                <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">{t("study.detailLabels.meaning")}</p>
-                <p className="text-base text-app-text">{word.meaning}</p>
+                <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
+                  {t("study.detailLabels.meaning")}
+                </p>
+                <p className="text-app-text text-base">{word.meaning}</p>
               </div>
             )}
             {word.description && (
-              <div className="pt-3 border-t border-app-border">
-                <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest mb-1">{t("study.detailLabels.description")}</p>
-                <p className="whitespace-pre-wrap text-sm text-app-text-secondary leading-relaxed">{word.description}</p>
+              <div className="border-app-border border-t pt-3">
+                <p className="text-app-text-muted mb-1 text-[10px] font-bold tracking-widest uppercase">
+                  {t("study.detailLabels.description")}
+                </p>
+                <p className="text-app-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
+                  {word.description}
+                </p>
               </div>
             )}
           </div>
@@ -462,7 +543,10 @@ export function StudyPage() {
       {showPractice && word.kanji && (
         <KanjiPracticeModal
           kanji={word.kanji}
-          onClose={() => { showPracticeRef.current = false; setShowPractice(false); }}
+          onClose={() => {
+            showPracticeRef.current = false;
+            setShowPractice(false);
+          }}
           onSuccess={handlePracticeSuccess}
           variant="sheet"
         />
@@ -471,7 +555,10 @@ export function StudyPage() {
       {showStroke && word.kanji && (
         <KanjiStrokeModal
           kanji={word.kanji}
-          onClose={() => { showStrokeRef.current = false; setShowStroke(false); }}
+          onClose={() => {
+            showStrokeRef.current = false;
+            setShowStroke(false);
+          }}
           variant="sheet"
         />
       )}

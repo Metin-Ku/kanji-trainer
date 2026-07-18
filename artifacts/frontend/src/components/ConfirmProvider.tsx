@@ -59,46 +59,46 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
       {pending && (
         <div
           ref={backdropRef}
-          className="fixed inset-0 z-999 flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+          className="fixed inset-0 z-999 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
           onClick={handleBackdropClick}
         >
           <div
             role="alertdialog"
             aria-modal="true"
             aria-labelledby="confirm-dialog-title"
-            className="bg-app-surface w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-app-border p-5 shadow-xl"
+            className="bg-app-surface border-app-border w-full rounded-t-2xl border p-5 shadow-xl sm:max-w-md sm:rounded-2xl"
           >
-            <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="mb-3 flex items-start justify-between gap-3">
               <h2
                 id="confirm-dialog-title"
-                className="text-lg font-bold text-app-text"
+                className="text-app-text text-lg font-bold"
               >
                 {pending.title ?? t("common.confirmTitle")}
               </h2>
               <button
                 type="button"
                 onClick={() => close(false)}
-                className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted shrink-0"
+                className="hover:bg-app-muted text-app-text-muted shrink-0 rounded-full p-1.5"
                 aria-label={t("common.cancel")}
               >
                 <X size={18} />
               </button>
             </div>
-            <p className="text-sm text-app-text-secondary leading-relaxed mb-5">
+            <p className="text-app-text-secondary mb-5 text-sm leading-relaxed">
               {pending.message}
             </p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => close(false)}
-                className="flex-1 py-2.5 rounded-xl border border-app-border-strong text-sm font-semibold text-app-text"
+                className="border-app-border-strong text-app-text flex-1 rounded-xl border py-2.5 text-sm font-semibold"
               >
                 {pending.cancelLabel ?? t("common.cancel")}
               </button>
               <button
                 type="button"
                 onClick={() => close(true)}
-                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors"
+                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600"
               >
                 {pending.confirmLabel ?? t("common.delete")}
               </button>

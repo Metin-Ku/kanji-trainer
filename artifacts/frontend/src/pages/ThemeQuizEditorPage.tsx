@@ -59,31 +59,31 @@ export function ThemeQuizEditorPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-app-bg pb-24">
-      <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-        <div className="sticky top-0 z-10 bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
+    <div className="bg-app-bg min-h-dvh pb-24">
+      <div className="sm:border-app-border mx-auto max-w-2xl sm:box-content sm:border-r-2 sm:border-l-2">
+        <div className="bg-app-surface border-app-border sticky top-0 z-10 border-b px-5 pt-4 pb-4">
           <button
             onClick={() => navigate(`/themes/${id}`)}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
+            className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
           >
             <ArrowLeft size={18} />
             <span className={pageTitleLabelClass(theme.name)}>
               {theme.name}
             </span>
           </button>
-          <h1 className="text-xl font-bold text-app-text mt-2">
+          <h1 className="text-app-text mt-2 text-xl font-bold">
             {t("themeQuiz.editTitle")}
           </h1>
         </div>
 
-        <div className="px-5 py-4 space-y-4">
+        <div className="space-y-4 px-5 py-4">
           {questions.map((q, qi) => (
             <div
               key={qi}
-              className="rounded-2xl border border-app-border bg-app-surface overflow-hidden"
+              className="border-app-border bg-app-surface overflow-hidden rounded-2xl border"
             >
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-app-border bg-app-muted/30">
-                <span className="text-sm font-bold text-app-text">
+              <div className="border-app-border bg-app-muted/30 flex items-center gap-2 border-b px-4 py-3">
+                <span className="text-app-text text-sm font-bold">
                   #{qi + 1}
                 </span>
                 <select
@@ -91,7 +91,7 @@ export function ThemeQuizEditorPage() {
                   onChange={(e) =>
                     setQuestionType(qi, e.target.value as "ab" | "four")
                   }
-                  className="text-xs rounded-lg border border-app-border-strong px-2 py-1 bg-app-surface"
+                  className="border-app-border-strong bg-app-surface rounded-lg border px-2 py-1 text-xs"
                 >
                   <option value="ab">{t("themeQuiz.typeAb")}</option>
                   <option value="four">{t("themeQuiz.typeFour")}</option>
@@ -121,9 +121,9 @@ export function ThemeQuizEditorPage() {
               </div>
 
               {!collapsed[qi] && (
-                <div className="p-4 space-y-4">
+                <div className="space-y-4 p-4">
                   <div>
-                    <label className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
+                    <label className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
                       {t("themeQuiz.prompt")}
                     </label>
                     <textarea
@@ -132,13 +132,13 @@ export function ThemeQuizEditorPage() {
                         patchQuestion(qi, { prompt: e.target.value })
                       }
                       rows={4}
-                      className="mt-1 w-full rounded-xl border border-app-border-strong px-3 py-2 text-sm font-medium text-app-text"
+                      className="border-app-border-strong text-app-text mt-1 w-full rounded-xl border px-3 py-2 text-sm font-medium"
                       placeholder={t("themeQuiz.promptPlaceholder")}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
+                    <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
                       {t("themeQuiz.choices")}
                     </p>
                     {q.choices.map((choice, ci) => (
@@ -151,7 +151,7 @@ export function ThemeQuizEditorPage() {
                             patchQuestion(qi, { correctKey: choice.key })
                           }
                         />
-                        <span className="text-sm font-bold w-6">
+                        <span className="w-6 text-sm font-bold">
                           {choice.key}.
                         </span>
                         <input
@@ -162,7 +162,7 @@ export function ThemeQuizEditorPage() {
                             );
                             patchQuestion(qi, { choices });
                           }}
-                          className="flex-1 rounded-lg border border-app-border-strong px-3 py-1.5 text-sm"
+                          className="border-app-border-strong flex-1 rounded-lg border px-3 py-1.5 text-sm"
                         />
                       </div>
                     ))}
@@ -183,19 +183,19 @@ export function ThemeQuizEditorPage() {
             onClick={() =>
               setQuestions((prev) => [...prev, emptyQuestion(prev.length)])
             }
-            className="w-full py-2 rounded-xl border border-dashed border-app-border-strong text-sm font-semibold text-app-text-muted"
+            className="border-app-border-strong text-app-text-muted w-full rounded-xl border border-dashed py-2 text-sm font-semibold"
           >
-            <Plus size={14} className="inline mr-1" />
+            <Plus size={14} className="mr-1 inline" />
             {t("themeQuiz.addQuestion")}
           </button>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-app-border bg-app-surface px-5 py-3">
-          <div className="max-w-2xl mx-auto flex gap-2">
+        <div className="border-app-border bg-app-surface fixed right-0 bottom-0 left-0 z-40 border-t px-5 py-3">
+          <div className="mx-auto flex max-w-2xl gap-2">
             <button
               type="button"
               onClick={() => navigate(`/themes/${id}`)}
-              className="flex-1 py-2.5 rounded-xl border border-app-border-strong text-sm font-semibold"
+              className="border-app-border-strong flex-1 rounded-xl border py-2.5 text-sm font-semibold"
             >
               {t("common.cancel")}
             </button>
@@ -203,7 +203,7 @@ export function ThemeQuizEditorPage() {
               type="button"
               disabled={isSaving}
               onClick={handleSave}
-              className="flex-1 py-2.5 rounded-xl bg-main-500 text-white text-sm font-semibold disabled:opacity-40"
+              className="bg-main-500 flex-1 rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-40"
             >
               {t("common.update")}
             </button>

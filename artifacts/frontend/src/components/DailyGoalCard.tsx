@@ -28,7 +28,7 @@ function ProgressBar({
 }) {
   return (
     <div
-      className={`rounded-full bg-app-surface overflow-hidden ${size === "sm" ? "h-1.5" : "h-2"}`}
+      className={`bg-app-surface overflow-hidden rounded-full ${size === "sm" ? "h-1.5" : "h-2"}`}
     >
       <div
         className={`h-full rounded-full transition-[width] duration-300 ease-out ${
@@ -59,23 +59,31 @@ const DeckRow = memo(function DeckRow({
   return (
     <div className={compact ? "space-y-1" : "space-y-1.5"}>
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
+        <div className="flex min-w-0 items-center gap-1.5">
           <span
-            className={`truncate font-medium text-app-text ${compact ? "text-xs" : "text-sm"}`}
+            className={`text-app-text truncate font-medium ${compact ? "text-xs" : "text-sm"}`}
           >
             {label}
           </span>
           {deck.goalMet && (
-            <Check size={12} className="text-main-500 dark:text-main-600 shrink-0" strokeWidth={2.5} />
+            <Check
+              size={12}
+              className="text-main-500 dark:text-main-600 shrink-0"
+              strokeWidth={2.5}
+            />
           )}
         </div>
         <span
-          className={`tabular-nums shrink-0 ${compact ? "text-xs text-app-text-secondary" : "text-sm font-semibold text-app-text"}`}
+          className={`shrink-0 tabular-nums ${compact ? "text-app-text-secondary text-xs" : "text-app-text text-sm font-semibold"}`}
         >
           {progressLabel}
         </span>
       </div>
-      <ProgressBar ratio={deck.progressRatio} goalMet={deck.goalMet} size="sm" />
+      <ProgressBar
+        ratio={deck.progressRatio}
+        goalMet={deck.goalMet}
+        size="sm"
+      />
     </div>
   );
 });
@@ -114,30 +122,41 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <p className="text-xs font-semibold text-app-text-secondary uppercase tracking-wider">
+            <div className="mb-1 flex items-center gap-2">
+              <p className="text-app-text-secondary text-xs font-semibold tracking-wider uppercase">
                 {t("dailyGoal.title")}
               </p>
               {goalMet && (
-                <Check size={14} className="text-main-500 dark:text-main-600 shrink-0" strokeWidth={2.5} />
+                <Check
+                  size={14}
+                  className="text-main-500 dark:text-main-600 shrink-0"
+                  strokeWidth={2.5}
+                />
               )}
             </div>
             <p
-              className={`font-bold text-app-text leading-tight ${variant === "banner" ? "text-sm" : "text-lg"}`}
+              className={`text-app-text leading-tight font-bold ${variant === "banner" ? "text-sm" : "text-lg"}`}
             >
               {progressLabel}
             </p>
-            <p className="text-xs text-app-text-secondary mt-0.5">{statusLabel}</p>
+            <p className="text-app-text-secondary mt-0.5 text-xs">
+              {statusLabel}
+            </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             {streak > 0 ? (
-              <div className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-app-surface/80 border border-main-100">
-                <Flame size={variant === "banner" ? 14 : 16} className="text-main-500 dark:text-main-600" />
-                <span className="text-sm font-bold text-main-600">{streak}</span>
+              <div className="bg-app-surface/80 border-main-100 inline-flex items-center gap-1 rounded-lg border px-2 py-1">
+                <Flame
+                  size={variant === "banner" ? 14 : 16}
+                  className="text-main-500 dark:text-main-600"
+                />
+                <span className="text-main-600 text-sm font-bold">
+                  {streak}
+                </span>
               </div>
             ) : (
               variant !== "banner" && (
-                <p className="text-[11px] text-app-text-secondary max-w-24 leading-snug text-right">
+                <p className="text-app-text-secondary max-w-24 text-right text-[11px] leading-snug">
                   {t("dailyGoal.streakNone")}
                 </p>
               )
@@ -152,7 +171,7 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
           <ProgressBar ratio={progressRatio} goalMet={goalMet} />
         </div>
         {variant === "banner" && streak > 0 && (
-          <p className="text-[11px] text-main-600 font-medium mt-2">
+          <p className="text-main-600 mt-2 text-[11px] font-medium">
             {t("dailyGoal.streak", { days: streak })}
           </p>
         )}
@@ -164,16 +183,22 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
         }`}
       >
         {detailsMounted && (
-          <div className="pt-3 border-t border-app-border/80">
-            <p className="text-[10px] font-semibold text-app-text-muted uppercase tracking-wider mb-2.5">
+          <div className="border-app-border/80 border-t pt-3">
+            <p className="text-app-text-muted mb-2.5 text-[10px] font-semibold tracking-wider uppercase">
               {t("dailyGoal.byDeck")}
             </p>
             <div className="space-y-3">
               {enabledDecks.length === 0 ? (
-                <p className="text-xs text-app-text-muted">{t("dailyGoal.noDeckTargets")}</p>
+                <p className="text-app-text-muted text-xs">
+                  {t("dailyGoal.noDeckTargets")}
+                </p>
               ) : (
                 enabledDecks.map((deck) => (
-                  <DeckRow key={deck.deck} deck={deck} compact={variant === "banner"} />
+                  <DeckRow
+                    key={deck.deck}
+                    deck={deck}
+                    compact={variant === "banner"}
+                  />
                 ))
               )}
             </div>

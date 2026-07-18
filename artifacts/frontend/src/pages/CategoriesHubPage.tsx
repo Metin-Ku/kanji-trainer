@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ChevronRight,
@@ -11,12 +11,14 @@ import {
 import { useLocation } from "wouter";
 import { useCategories } from "../hooks/useCategories";
 import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
+import { SearchBar } from "../components/SearchBar";
 import { useTranslation } from "../i18n/I18nProvider";
 import {
   getCategoryViewLayout,
   setCategoryViewLayout,
   type CategoryViewLayout,
 } from "../lib/categoryView";
+import { normalizeCategoryLabel } from "../lib/categoryMatch";
 import { CategoryTitle } from "../components/CategoryIcon";
 import { CategoryIconField } from "../components/CategoryIconField";
 
@@ -36,16 +38,16 @@ function CategoryCard({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 p-4 rounded-2xl border border-app-border bg-app-surface hover:border-main-300 transition-colors text-left"
+      className="border-app-border bg-app-surface hover:border-main-300 flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors"
     >
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <CategoryTitle
           name={name}
           iconSvg={iconSvg}
           iconSize={22}
           nameClassName="font-bold text-lg text-app-text leading-snug"
         />
-        <p className="text-xs text-app-text-muted mt-0.5">{wordCountLabel}</p>
+        <p className="text-app-text-muted mt-0.5 text-xs">{wordCountLabel}</p>
       </div>
       <ChevronRight size={18} className="text-app-text-muted shrink-0" />
     </button>
@@ -66,7 +68,10 @@ export function CategoriesHubPage() {
   const { t } = useTranslation();
   const [, navigate] = useLocation();
   const { data: categories = [], isLoading, createCategory } = useCategories();
-  const [layout, setLayout] = useState<CategoryViewLayout>(getCategoryViewLayout);
+  const [layout, setLayout] = useState<CategoryViewLayout>(
+    getCategoryViewLayout,
+  );
+  const [query, setQuery] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [name, setName] = useState("");
   const [iconSvg, setIconSvg] = useState("");
@@ -76,6 +81,14 @@ export function CategoriesHubPage() {
   useEffect(() => {
     setCategoryViewLayout(layout);
   }, [layout]);
+
+  const filtered = useMemo(() => {
+    const q = normalizeCategoryLabel(query);
+    if (!q) return categories;
+    return categories.filter((c) =>
+      normalizeCategoryLabel(c.name).includes(q),
+    );
+  }, [categories, query]);
 
   function closeCreateModal() {
     setShowCreate(false);
@@ -103,27 +116,27 @@ export function CategoriesHubPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-app-bg">
-      <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-        <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
-          <div className="flex items-center justify-between gap-3 h-[29px]">
+    <div className="bg-app-bg min-h-dvh">
+      <div className="sm:border-app-border mx-auto max-w-2xl sm:box-content sm:border-r-2 sm:border-l-2">
+        <div className="bg-app-surface border-app-border border-b px-5 pt-4 pb-4">
+          <div className="flex h-[29px] items-center justify-between gap-3">
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
+              className="text-app-text-muted hover:text-app-text-secondary -ml-1 flex items-center gap-1.5 p-1 transition-colors"
             >
               <ArrowLeft size={18} />
-              <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+              <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
                 {t("nav.categories")}
               </span>
             </button>
-            <div className="flex items-center gap-1 rounded-xl border border-app-border bg-app-muted p-0.5">
+            <div className="border-app-border bg-app-muted flex items-center gap-1 rounded-xl border p-0.5">
               {LAYOUT_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
                 <button
                   key={value}
                   type="button"
                   title={t(`categories.view.${labelKey}`)}
                   onClick={() => setLayout(value)}
-                  className={`p-1.5 rounded-lg transition-colors ${
+                  className={`rounded-lg p-1.5 transition-colors ${
                     layout === value
                       ? "bg-app-surface text-main-500 dark:text-main-600 shadow-sm"
                       : "text-app-text-muted hover:text-app-text-secondary"
@@ -134,12 +147,17 @@ export function CategoriesHubPage() {
               ))}
             </div>
           </div>
-          <h1 className="text-xl font-bold text-app-text mt-2">
+          <h1 className="text-app-text mt-2 text-xl font-bold">
             {t("categories.title")}
           </h1>
-          <p className="text-sm text-app-text-secondary mt-1">
+          <p className="text-app-text-secondary mt-1 mb-3 text-sm">
             {t("categories.subtitle")}
           </p>
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            placeholder={t("categories.searchPlaceholder")}
+          />
         </div>
 
         <div
@@ -157,14 +175,22 @@ export function CategoriesHubPage() {
             </div>
           ) : categories.length === 0 ? (
             <p
-              className={`text-sm text-app-text-muted text-center py-16 ${
+              className={`text-app-text-muted py-16 text-center text-sm ${
                 layout === "row" ? "" : "col-span-full"
               }`}
             >
               {t("categories.empty")}
             </p>
+          ) : filtered.length === 0 ? (
+            <p
+              className={`text-app-text-muted py-16 text-center text-sm ${
+                layout === "row" ? "" : "col-span-full"
+              }`}
+            >
+              {t("categories.selectNotFound", { query })}
+            </p>
           ) : (
-            categories.map((category) => {
+            filtered.map((category) => {
               const wordCountLabel = t("categories.wordCount", {
                 count: category.wordCount,
               });
@@ -188,7 +214,7 @@ export function CategoriesHubPage() {
                   key={category.id}
                   type="button"
                   onClick={onClick}
-                  className="flex flex-col gap-2 p-3 sm:p-4 rounded-2xl border border-app-border bg-app-surface hover:border-main-300 transition-colors text-left min-h-[88px]"
+                  className="border-app-border bg-app-surface hover:border-main-300 flex min-h-[88px] flex-col gap-2 rounded-2xl border p-3 text-left transition-colors sm:p-4"
                 >
                   <CategoryTitle
                     name={category.name}
@@ -198,7 +224,7 @@ export function CategoriesHubPage() {
                       layout === "grid-3" ? "text-sm" : "text-base"
                     }`}
                   />
-                  <p className="text-[11px] text-app-text-muted mt-auto">
+                  <p className="text-app-text-muted mt-auto text-[11px]">
                     {wordCountLabel}
                   </p>
                 </button>
@@ -210,7 +236,7 @@ export function CategoriesHubPage() {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="fixed bottom-6 right-6 sm:right-[max(1.5rem,calc(50%-20rem))] z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-main-500 text-white shadow-lg font-semibold text-sm"
+          className="bg-main-500 fixed right-6 bottom-6 z-40 flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white shadow-lg sm:right-[max(1.5rem,calc(50%-20rem))]"
         >
           <Plus size={18} />
           {t("categories.newCategory")}
@@ -220,37 +246,37 @@ export function CategoriesHubPage() {
       {showCreate && (
         <div
           ref={backdropRef}
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
           onClick={handleBackdropClick}
         >
-          <div className="bg-app-surface w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-app-border p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-app-text">
+          <div className="bg-app-surface border-app-border w-full rounded-t-2xl border p-5 shadow-xl sm:max-w-md sm:rounded-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-app-text text-lg font-bold">
                 {t("categories.newCategory")}
               </h2>
               <button
                 type="button"
                 onClick={closeCreateModal}
-                className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted"
+                className="hover:bg-app-muted text-app-text-muted rounded-full p-1.5"
               >
                 <X size={18} />
               </button>
             </div>
-            <label className="block text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-1.5">
+            <label className="text-app-text-muted mb-1.5 block text-xs font-semibold tracking-wider uppercase">
               {t("categories.nameLabel")}
             </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("categories.namePlaceholder")}
-              className="w-full rounded-xl border border-app-border-strong bg-app-surface px-3 py-2.5 text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 mb-4"
+              className="border-app-border-strong bg-app-surface text-app-text focus:ring-main-300 mb-4 w-full rounded-xl border px-3 py-2.5 focus:ring-2 focus:outline-none"
             />
             <CategoryIconField value={iconSvg} onChange={setIconSvg} />
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={closeCreateModal}
-                className="flex-1 py-2.5 rounded-xl border border-app-border-strong text-sm font-semibold"
+                className="border-app-border-strong flex-1 rounded-xl border py-2.5 text-sm font-semibold"
               >
                 {t("common.cancel")}
               </button>
@@ -258,7 +284,7 @@ export function CategoriesHubPage() {
                 type="button"
                 disabled={!name.trim() || saving}
                 onClick={handleCreate}
-                className="flex-1 py-2.5 rounded-xl bg-main-500 text-white text-sm font-semibold disabled:opacity-40"
+                className="bg-main-500 flex-1 rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-40"
               >
                 {t("common.add")}
               </button>

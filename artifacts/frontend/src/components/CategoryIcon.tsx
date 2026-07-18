@@ -9,7 +9,7 @@ export function CategoryIcon({ svg, size = 20, className = "" }: Props) {
 
   return (
     <span
-      className={`inline-flex mt-[0.2px] shrink-0 items-center justify-center [&_svg]:block [&_svg]:max-w-full [&_svg]:max-h-full ${className}`}
+      className={`mt-[0.2px] inline-flex shrink-0 items-center justify-center [&_svg]:block [&_svg]:max-h-full [&_svg]:max-w-full ${className}`}
       style={{ width: size, height: size }}
       dangerouslySetInnerHTML={{ __html: svg.trim() }}
       aria-hidden
@@ -33,7 +33,7 @@ export function CategoryTitle({
   className = "",
 }: TitleProps) {
   return (
-    <span className={`inline-flex items-center gap-2 min-w-0 ${className}`}>
+    <span className={`inline-flex min-w-0 items-center gap-2 ${className}`}>
       <CategoryIcon svg={iconSvg} size={iconSize} />
       <span className={`truncate ${nameClassName}`}>{name}</span>
     </span>

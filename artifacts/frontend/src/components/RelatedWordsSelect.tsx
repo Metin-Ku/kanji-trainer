@@ -71,7 +71,7 @@ export function RelatedWordsSelect({
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="min-h-[44px] w-full rounded-xl border border-app-border-strong bg-app-muted px-3 py-2 flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-main-300 focus-within:border-transparent transition-all cursor-text"
+        className="border-app-border-strong bg-app-muted focus-within:ring-main-300 flex min-h-[44px] w-full cursor-text flex-wrap items-center gap-2 rounded-xl border px-3 py-2 transition-all focus-within:border-transparent focus-within:ring-2"
         onClick={() => {
           setIsOpen(true);
           inputRef.current?.focus();
@@ -80,7 +80,7 @@ export function RelatedWordsSelect({
         {selectedWords.map((w) => (
           <span
             key={w.id}
-            className="bg-main-100 text-main-600 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-bold select-none"
+            className="bg-main-100 text-main-600 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-bold select-none"
           >
             {w.kanji}
             <button
@@ -91,7 +91,7 @@ export function RelatedWordsSelect({
                 e.stopPropagation();
                 removeWord(w.id);
               }}
-              className="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-main-200/60 transition-all active:scale-90"
+              className="hover:bg-main-200/60 inline-flex h-5 w-5 items-center justify-center rounded-full transition-all active:scale-90"
             >
               <X size={14} strokeWidth={2.5} />
             </button>
@@ -107,20 +107,18 @@ export function RelatedWordsSelect({
           }}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
-          placeholder={
-            selectedWords.length === 0 ? t("a11y.searchWords") : ""
-          }
-          className="flex-1 min-w-[90px] bg-transparent text-sm text-app-text focus:outline-none placeholder:text-app-text-muted"
+          placeholder={selectedWords.length === 0 ? t("a11y.searchWords") : ""}
+          className="text-app-text placeholder:text-app-text-muted min-w-[90px] flex-1 bg-transparent text-sm focus:outline-none"
         />
       </div>
 
       {showDropdown && (
         <div
-          className="absolute z-50 w-full mt-1 rounded-xl border border-app-border bg-app-surface shadow-lg overflow-y-auto"
+          className="border-app-border bg-app-surface absolute z-50 mt-1 w-full overflow-y-auto rounded-xl border shadow-lg"
           style={{ maxHeight: 220 }}
         >
           {filteredWords.length === 0 ? (
-            <p className="px-4 py-3 text-xs text-app-text-muted text-center">
+            <p className="text-app-text-muted px-4 py-3 text-center text-xs">
               {t("search.relatedNotFound", { query })}
             </p>
           ) : (
@@ -130,12 +128,12 @@ export function RelatedWordsSelect({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => addWord(w)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-main-50 dark:hover:bg-main-950 active:bg-main-100 transition-colors text-left"
+                className="hover:bg-main-50 dark:hover:bg-main-950 active:bg-main-100 flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors"
               >
-                <span className="text-base font-bold text-app-text shrink-0">
+                <span className="text-app-text shrink-0 text-base font-bold">
                   {w.kanji}
                 </span>
-                <span className="text-xs text-app-text-muted truncate flex-1">
+                <span className="text-app-text-muted flex-1 truncate text-xs">
                   {w.meaning || w.pronunciation}
                 </span>
               </button>

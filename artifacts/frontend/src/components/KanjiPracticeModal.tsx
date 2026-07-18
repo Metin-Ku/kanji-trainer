@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { X, RotateCcw } from "lucide-react";
 import { useTranslation } from "../i18n/I18nProvider";
 import { LoadingSpinner } from "./LoadingSpinner";
@@ -114,7 +121,12 @@ export function KanjiPracticeModal({
     ctx.clearRect(0, 0, canvasWidth, CANVAS_HEIGHT);
     const strokeColor = getMainStrokeColor();
 
-    const drawPolyline = (pts: Point[], color: string, width: number, alpha = 1) => {
+    const drawPolyline = (
+      pts: Point[],
+      color: string,
+      width: number,
+      alpha = 1,
+    ) => {
       if (pts.length === 0) return;
       ctx.save();
       ctx.globalAlpha = alpha;
@@ -126,7 +138,13 @@ export function KanjiPracticeModal({
 
       if (pts.length === 1) {
         ctx.beginPath();
-        ctx.arc(pts[0].x * drawScale.x, pts[0].y * drawScale.y, width / 2, 0, Math.PI * 2);
+        ctx.arc(
+          pts[0].x * drawScale.x,
+          pts[0].y * drawScale.y,
+          width / 2,
+          0,
+          Math.PI * 2,
+        );
         ctx.fill();
       } else {
         ctx.beginPath();
@@ -160,7 +178,9 @@ export function KanjiPracticeModal({
     groups.forEach((g) => {
       const charIdx = Number(g.getAttribute("data-char") ?? "0");
       const offsetX = charIdx * KANJI_CHAR_VIEW;
-      const paths = Array.from(g.querySelectorAll(":scope > path")) as SVGPathElement[];
+      const paths = Array.from(
+        g.querySelectorAll(":scope > path"),
+      ) as SVGPathElement[];
 
       paths.forEach((path) => {
         const sampled = sampleSvgPath(path, 24);
@@ -229,7 +249,8 @@ export function KanjiPracticeModal({
     (clientX: number, clientY: number) => {
       const pt = toCanvasPoint(clientX, clientY);
       if (!pt) return;
-      const last = currentStrokeRef.current[currentStrokeRef.current.length - 1];
+      const last =
+        currentStrokeRef.current[currentStrokeRef.current.length - 1];
       if (last && dist(last, pt) < 1.2) return;
       currentStrokeRef.current.push(pt);
       drawCanvas();
@@ -326,7 +347,7 @@ export function KanjiPracticeModal({
       onClick={handleBackdropClick}
     >
       <div
-        className="bg-app-surface shadow-2xl overflow-hidden"
+        className="bg-app-surface overflow-hidden shadow-2xl"
         style={
           variant === "sheet"
             ? {
@@ -341,7 +362,7 @@ export function KanjiPracticeModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-4 pt-4 pb-2">
-          <p className="text-[11px] font-semibold text-app-text-muted uppercase tracking-widest">
+          <p className="text-app-text-muted text-[11px] font-semibold tracking-widest uppercase">
             {t("kanjiPractice.title")}
           </p>
           <div className="flex items-center gap-0.5">
@@ -349,7 +370,7 @@ export function KanjiPracticeModal({
               <button
                 type="button"
                 onClick={resetPractice}
-                className="p-1.5 rounded-lg hover:bg-app-muted text-app-text-muted transition-colors"
+                className="hover:bg-app-muted text-app-text-muted rounded-lg p-1.5 transition-colors"
                 title={t("kanjiPractice.reset")}
               >
                 <RotateCcw size={13} />
@@ -358,25 +379,25 @@ export function KanjiPracticeModal({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-lg hover:bg-app-muted text-app-text-muted transition-colors"
+              className="hover:bg-app-muted text-app-text-muted rounded-lg p-1.5 transition-colors"
             >
               <X size={16} />
             </button>
           </div>
         </div>
 
-        <p className="text-center text-xs text-app-text-muted px-4 pb-2">
+        <p className="text-app-text-muted px-4 pb-2 text-center text-xs">
           {t("kanjiPractice.hint")}
         </p>
 
         {progressLabel && (
-          <p className="text-center text-[11px] font-medium text-app-text-muted pb-2 tabular-nums">
+          <p className="text-app-text-muted pb-2 text-center text-[11px] font-medium tabular-nums">
             {progressLabel}
           </p>
         )}
 
         <div
-          className="mx-4 mb-4 rounded-xl flex items-center justify-center relative"
+          className="relative mx-4 mb-4 flex items-center justify-center rounded-xl"
           style={{
             height: 248,
             background: "#f9f9f9",
@@ -384,10 +405,14 @@ export function KanjiPracticeModal({
             transition: "border-color 0.15s ease",
           }}
         >
-          {loading && <LoadingSpinner size={32} className="text-app-text-muted" />}
+          {loading && (
+            <LoadingSpinner size={32} className="text-app-text-muted" />
+          )}
           {error && (
-            <div className="text-center px-6">
-              <p className="text-xs text-app-text-muted">{t("kanjiStroke.svgNotFound")}</p>
+            <div className="px-6 text-center">
+              <p className="text-app-text-muted text-xs">
+                {t("kanjiStroke.svgNotFound")}
+              </p>
             </div>
           )}
           {!loading && !error && (
@@ -425,17 +450,19 @@ export function KanjiPracticeModal({
             overflow: "hidden",
             zIndex: -1,
           }}
-          dangerouslySetInnerHTML={combinedSvg ? { __html: combinedSvg } : undefined}
+          dangerouslySetInnerHTML={
+            combinedSvg ? { __html: combinedSvg } : undefined
+          }
         />
 
         {feedback === "wrong" && (
-          <p className="text-center text-xs font-medium text-red-500 pb-4 -mt-2">
+          <p className="-mt-2 pb-4 text-center text-xs font-medium text-red-500">
             {t("kanjiPractice.tryAgain")}
           </p>
         )}
         {feedback === "correct" && (
           <p
-            className="text-center text-xs font-medium pb-4 -mt-2"
+            className="-mt-2 pb-4 text-center text-xs font-medium"
             style={{ color: "var(--main-600)" }}
           >
             {strokeIndex >= totalStrokes - 1 && totalStrokes > 0

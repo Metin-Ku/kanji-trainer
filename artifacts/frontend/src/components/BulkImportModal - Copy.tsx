@@ -303,13 +303,13 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
       onClick={handleBackdropClick}
     >
       <div className="modal-sheet">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-app-text">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-app-text text-lg font-bold">
             {t("bulkImport.title")}
           </h2>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted"
+            className="hover:bg-app-muted text-app-text-muted rounded-full p-1.5"
           >
             <X size={18} />
           </button>
@@ -317,7 +317,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
 
         {!result ? (
           <>
-            <p className="text-xs text-app-text-muted mb-3 leading-relaxed">
+            <p className="text-app-text-muted mb-3 text-xs leading-relaxed">
               {t("bulkImport.instructions")}
             </p>
 
@@ -327,22 +327,22 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
               onChange={handleHtmlChange}
               placeholder={t("bulkImport.placeholder")}
               rows={6}
-              className="w-full rounded-xl border border-app-border-strong bg-app-muted px-3.5 py-2.5 max-h-[90vh]Z text-xs text-app-text-secondary font-mono focus:outline-none focus:ring-2 focus:ring-main-300 transition-all mb-3"
+              className="border-app-border-strong bg-app-muted max-h-[90vh]Z text-app-text-secondary focus:ring-main-300 mb-3 w-full rounded-xl border px-3.5 py-2.5 font-mono text-xs transition-all focus:ring-2 focus:outline-none"
             />
 
             {preview.length === 0 ? (
               <button
                 onClick={handleParse}
                 disabled={!html.trim()}
-                className="w-full py-2.5 rounded-xl font-semibold text-sm border-2 border-app-border-strong text-app-text-secondary hover:border-main-300 hover:text-main-500 dark:hover:text-main-600 transition-colors disabled:opacity-40"
+                className="border-app-border-strong text-app-text-secondary hover:border-main-300 hover:text-main-500 dark:hover:text-main-600 w-full rounded-xl border-2 py-2.5 text-sm font-semibold transition-colors disabled:opacity-40"
               >
                 {html.trim() ? t("common.preview") : t("bulkImport.pasteTable")}
               </button>
             ) : (
               <div className="space-y-3">
-                <div className="bg-main-50 dark:bg-main-950 border border-main-100 rounded-xl px-4 py-3 text-sm text-app-text">
-                  <div className="flex items-center justify-between mb-2">
-                    <p className="font-semibold text-app-text">
+                <div className="bg-main-50 dark:bg-main-950 border-main-100 text-app-text rounded-xl border px-4 py-3 text-sm">
+                  <div className="mb-2 flex items-center justify-between">
+                    <p className="text-app-text font-semibold">
                       {t("bulkImport.wordsDetected", { count: preview.length })}
                     </p>
                   </div>
@@ -351,7 +351,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                       {t("bulkImport.existingResolveHint")}
                     </p>
                   )} */}
-                  <div className="max-h-36 overflow-y-auto space-y-1.5">
+                  <div className="max-h-36 space-y-1.5 overflow-y-auto">
                     {preview.map((w) => {
                       const knownKanji = new Set([
                         ...allWords.map((word) => word.kanji.normalize("NFC")),
@@ -376,12 +376,12 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                       return (
                         <div
                           key={w.id}
-                          className={`flex gap-2 text-xs items-center flex-wrap rounded-lg px-2 py-1 -mx-2 transition-colors`}
+                          className={`-mx-2 flex flex-wrap items-center gap-2 rounded-lg px-2 py-1 text-xs transition-colors`}
                         >
-                          <span className="font-bold text-app-text w-16 shrink-0">
+                          <span className="text-app-text w-16 shrink-0 font-bold">
                             {w.kanji}
                           </span>
-                          <span className="text-app-text-secondary truncate flex-1 min-w-0">
+                          <span className="text-app-text-secondary min-w-0 flex-1 truncate">
                             {w.pronunciation}
                           </span>
                           {/* {resolveExisting && existing && (
@@ -391,7 +391,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                         )} */}
                           {w.jlptLevel && (
                             <span
-                              className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0"
+                              className="shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold"
                               style={{
                                 background: "#f3f4f6",
                                 color: "#6b7280",
@@ -401,7 +401,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                             </span>
                           )}
                           {w.srsExamples && w.srsExamples.length > 0 && (
-                            <span className="text-[10px] font-semibold px-1 py-0.5 rounded shrink-0 bg-main-100 text-main-600">
+                            <span className="bg-main-100 text-main-600 shrink-0 rounded px-1 py-0.5 text-[10px] font-semibold">
                               {t("common.srsBadge", {
                                 count: w.srsExamples.length,
                               })}
@@ -409,7 +409,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                           )}
                           {matchedCategoryNames.length > 0 && (
                             <span
-                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-amber-100 text-amber-700 ${shorten ? "max-w-12 truncate" : "max-w-24"}`}
+                              className={`shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-700 ${shorten ? "max-w-12 truncate" : "max-w-24"}`}
                               title={matchedCategoryNames.join(", ")}
                             >
                               {t("bulkImport.categoriesBadge", {
@@ -419,7 +419,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                           )}
                           {w.synonymKanji && w.synonymKanji.length > 0 && (
                             <span
-                              className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 bg-violet-100 text-violet-700 ${shorten ? "max-w-15 truncate" : "max-w-24"}`}
+                              className={`shrink-0 rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700 ${shorten ? "max-w-15 truncate" : "max-w-24"}`}
                               title={w.synonymKanji.join(", ")}
                             >
                               {t("bulkImport.synonymsBadge", {
@@ -451,7 +451,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                                   e.stopPropagation();
                                   removePreviewEntry(w.id);
                                 }}
-                                className="transition-colors shrink-0"
+                                className="shrink-0 transition-colors"
                                 aria-label={t("bulkImport.excludeWord")}
                               >
                                 <X size={17} className="text-red-500" />
@@ -466,12 +466,12 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                                 e.stopPropagation();
                                 removePreviewEntry(w.id);
                               }}
-                              className="transition-colors shrink-0"
+                              className="shrink-0 transition-colors"
                               aria-label={t("bulkImport.excludeWord")}
                             >
                               <CircleX
                                 size={17}
-                                className="text-red-500 invisible"
+                                className="invisible text-red-500"
                               />
                             </button>
                           )}
@@ -483,12 +483,12 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                                 e.stopPropagation();
                                 removePreviewEntry(w.id);
                               }}
-                              className="transition-colors shrink-0"
+                              className="shrink-0 transition-colors"
                               aria-label={t("bulkImport.excludeWord")}
                             >
                               <CircleX
                                 size={17}
-                                className="text-red-500 invisible"
+                                className="invisible text-red-500"
                               />
                             </button>
                           )}
@@ -505,14 +505,14 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
                 <div className="flex gap-2">
                   <button
                     onClick={resetPreview}
-                    className="flex-1 py-2.5 rounded-xl font-semibold text-sm border-2 border-app-border-strong text-app-text-muted hover:border-app-border-strong transition-colors"
+                    className="border-app-border-strong text-app-text-muted hover:border-app-border-strong flex-1 rounded-xl border-2 py-2.5 text-sm font-semibold transition-colors"
                   >
                     {t("common.cancel")}
                   </button>
                   <button
                     onClick={handleAddWords}
                     disabled={loading}
-                    className="flex-1 py-2.5 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white text-sm flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                    className="bg-main-500 hover:bg-main-600 flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-sm font-bold text-white transition-all active:scale-[0.98]"
                   >
                     {loading ? (
                       <>
@@ -534,23 +534,23 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
           </>
         ) : (
           <div className="space-y-4">
-            <div className="bg-app-muted border border-app-border rounded-xl px-4 py-4 space-y-2">
-              <p className="text-sm text-app-text-secondary">
+            <div className="bg-app-muted border-app-border space-y-2 rounded-xl border px-4 py-4">
+              <p className="text-app-text-secondary text-sm">
                 {t("bulkImport.result.totalGiven", { count: result.total })}
               </p>
-              <p className="text-base font-bold text-app-text">
+              <p className="text-app-text text-base font-bold">
                 {t("bulkImport.result.added", { count: result.added })}
               </p>
               {result.updated > 0 && (
                 <>
-                  <p className="text-sm text-app-text-muted">
+                  <p className="text-app-text-muted text-sm">
                     {t("bulkImport.result.updated", { count: result.updated })}
                   </p>
                   <div className="flex flex-wrap gap-1.5 pt-1">
                     {result.updatedWords.map((w) => (
                       <span
                         key={w}
-                        className="text-sm font-medium text-app-text-secondary bg-app-muted px-2 py-0.5 rounded-lg"
+                        className="text-app-text-secondary bg-app-muted rounded-lg px-2 py-0.5 text-sm font-medium"
                       >
                         {w}
                       </span>
@@ -562,7 +562,7 @@ export function BulkImportModal({ onImport, onClose, allWords }: Props) {
 
             <button
               onClick={onClose}
-              className="w-full py-3 rounded-xl font-bold bg-main-500 hover:bg-main-600 text-white text-sm active:scale-[0.98]"
+              className="bg-main-500 hover:bg-main-600 w-full rounded-xl py-3 text-sm font-bold text-white active:scale-[0.98]"
             >
               {t("common.close")}
             </button>

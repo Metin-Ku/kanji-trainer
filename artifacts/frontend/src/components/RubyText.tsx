@@ -15,7 +15,7 @@ export function RubyInline({
   return (
     <ruby className={`align-baseline ${className}`}>
       {base}
-      <rt className="text-[0.45em] font-normal text-app-text-secondary leading-none">
+      <rt className="text-app-text-secondary text-[0.45em] leading-none font-normal">
         {reading}
       </rt>
     </ruby>
@@ -56,21 +56,20 @@ export function HiddenAnswerDisplay({
   liveInput?: string;
   ruby?: TargetChunk["ruby"];
 }) {
-  
   if (mode === "live") {
     const text = liveInput ?? "";
 
     if (!text) {
       // return <span className="text-black">＿＿</span>;
       return (
-        <span className="relative mx-[0.1em] inline-block shrink-0 wrap-anywhere select-text before:absolute before:right-0 before:top-10 before:left-0 before:w-full before:bg-current min-w-[2.5em] before:h-0.5 before:content-['']">
-          <span className="text-black invisible">xxx</span>
+        <span className="relative mx-[0.1em] inline-block min-w-[2.5em] shrink-0 wrap-anywhere select-text before:absolute before:top-10 before:right-0 before:left-0 before:h-0.5 before:w-full before:bg-current before:content-['']">
+          <span className="invisible text-black">xxx</span>
         </span>
       );
     }
     return (
       // <span className="text-black">{text}</span>
-      <span className="relative mx-[0.1em] inline-block shrink-0 wrap-anywhere select-text before:absolute before:right-0 before:top-10 before:left-0 before:w-full before:bg-current min-w-[2.5em] before:h-0.5 before:content-['']">
+      <span className="relative mx-[0.1em] inline-block min-w-[2.5em] shrink-0 wrap-anywhere select-text before:absolute before:top-10 before:right-0 before:left-0 before:h-0.5 before:w-full before:bg-current before:content-['']">
         <span className="text-black">{text}</span>
       </span>
     );
@@ -79,7 +78,7 @@ export function HiddenAnswerDisplay({
   if (mode === "correct") {
     // Green highlight is independent of <ruby>; ruby only adds furigana when present.
     return (
-      <span className="text-green-500 font-bold">
+      <span className="font-bold text-green-500">
         {ruby?.length ? <RubyParts parts={ruby} /> : expected}
       </span>
     );
@@ -88,12 +87,12 @@ export function HiddenAnswerDisplay({
   if (mode === "revealed") {
     if (ruby?.length) {
       return (
-        <span className="text-green-500 font-bold">
+        <span className="font-bold text-green-500">
           <RubyParts parts={ruby} />
         </span>
       );
     }
-    return <span className="text-red-600 font-bold">{expected}</span>;
+    return <span className="font-bold text-red-600">{expected}</span>;
   }
 
   const exp = [...expected];
@@ -110,7 +109,7 @@ export function HiddenAnswerDisplay({
   return (
     <span className="inline">
       {inp.slice(0, matchLen).map((c, i) => (
-        <span key={`ok-${i}`} className="text-green-500 font-bold">
+        <span key={`ok-${i}`} className="font-bold text-green-500">
           {c}
         </span>
       ))}

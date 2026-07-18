@@ -40,12 +40,16 @@ export async function fetchSrsQueue(
     jlptMin?: string | null;
     jlptMax?: string | null;
     sort?: SrsSortMode;
+    wordIds?: number[];
+    ignoreDue?: boolean;
   },
 ): Promise<SrsQueueItem[]> {
   const params = new URLSearchParams({ deck });
   if (options.jlptMin) params.set("jlptMin", options.jlptMin);
   if (options.jlptMax) params.set("jlptMax", options.jlptMax);
   if (options.sort) params.set("sort", options.sort);
+  if (options.wordIds?.length) params.set("wordIds", options.wordIds.join(","));
+  if (options.ignoreDue) params.set("ignoreDue", "1");
 
   const res = await apiFetch(`/api/srs/queue?${params}`);
   if (!res.ok) throw new Error("Failed to load review queue");

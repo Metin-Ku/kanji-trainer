@@ -117,12 +117,38 @@ export function useCategory(id: number) {
     },
   });
 
+  const setWordsMutation = useMutation({
+    mutationFn: async (wordIds: number[]): Promise<number[]> => {
+      const res = await apiFetch(`/api/categories/${id}/words`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wordIds }),
+      });
+      if (!res.ok) throw new Error("Failed to update category words");
+      const data = (await res.json()) as { wordIds: number[] };
+      return data.wordIds;
+    },
+    onSuccess: (wordIds) => {
+      queryClient.setQueryData(
+        [...CATEGORIES_QUERY_KEY, id],
+        (prev: CategoryDetail | undefined) =>
+          prev ? { ...prev, wordIds } : prev,
+      );
+      invalidate();
+    },
+  });
+
   return {
     data: query.data,
     isLoading: query.isLoading,
     isError: query.isError,
     updateCategory: (input: CategoryInput) => updateMutation.mutateAsync(input),
     deleteCategory: () => deleteMutation.mutateAsync(),
-    isSaving: updateMutation.isPending || deleteMutation.isPending,
+    setCategoryWords: (wordIds: number[]) =>
+      setWordsMutation.mutateAsync(wordIds),
+    isSaving:
+      updateMutation.isPending ||
+      deleteMutation.isPending ||
+      setWordsMutation.isPending,
   };
 }

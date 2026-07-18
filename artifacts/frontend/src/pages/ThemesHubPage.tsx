@@ -51,38 +51,38 @@ export function ThemesHubPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-app-bg">
-      <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-        <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4">
+    <div className="bg-app-bg min-h-dvh">
+      <div className="sm:border-app-border mx-auto max-w-2xl sm:box-content sm:border-r-2 sm:border-l-2">
+        <div className="bg-app-surface border-app-border border-b px-5 pt-4 pb-4">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
+              className="text-app-text-muted hover:text-app-text-secondary -ml-1 flex items-center gap-1.5 p-1 transition-colors"
             >
               <ArrowLeft size={18} />
-              <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+              <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
                 {t("nav.themes")}
               </span>
             </button>
             {/* For pixel perfection */}
-            <button className="invisible p-1.5 rounded-lg text-app-text-muted hover:bg-app-muted transition-colors disabled:opacity-30 shrink-0">
+            <button className="text-app-text-muted hover:bg-app-muted invisible shrink-0 rounded-lg p-1.5 transition-colors disabled:opacity-30">
               <Plus size={17} />
             </button>
           </div>
 
-          <h1 className="text-xl font-bold text-app-text mt-2">
+          <h1 className="text-app-text mt-2 text-xl font-bold">
             {t("themes.title")}
           </h1>
-          <p className="text-sm text-app-text-secondary mt-1">
+          <p className="text-app-text-secondary mt-1 text-sm">
             {t("themes.subtitle")}
           </p>
         </div>
 
-        <div className="px-5 py-4 space-y-3 pb-24">
+        <div className="space-y-3 px-5 py-4 pb-24">
           {isLoading ? (
             <LoadingPlaceholder padding="lg" />
           ) : themes.length === 0 ? (
-            <p className="text-sm text-app-text-muted text-center py-16">
+            <p className="text-app-text-muted py-16 text-center text-sm">
               {t("themes.empty")}
             </p>
           ) : (
@@ -91,16 +91,16 @@ export function ThemesHubPage() {
                 key={theme.id}
                 type="button"
                 onClick={() => navigate(`/themes/${theme.id}`)}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl border border-app-border bg-app-surface hover:border-main-300 transition-colors text-left"
+                className="border-app-border bg-app-surface hover:border-main-300 flex w-full items-center gap-3 rounded-2xl border p-4 text-left transition-colors"
               >
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <CategoryTitle
                     name={theme.name}
                     iconSvg={theme.iconSvg}
                     iconSize={22}
                     nameClassName="font-bold text-lg text-app-text truncate"
                   />
-                  <p className="text-xs text-app-text-muted mt-0.5">
+                  <p className="text-app-text-muted mt-0.5 text-xs">
                     {t("themes.meta", {
                       words: theme.wordCount,
                       questions: theme.questionCount,
@@ -119,7 +119,7 @@ export function ThemesHubPage() {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="fixed bottom-6 right-6 sm:right-[max(1.5rem,calc(50%-20rem))] z-40 flex items-center gap-2 px-4 py-3 rounded-full bg-main-500 text-white shadow-lg font-semibold text-sm"
+          className="bg-main-500 fixed right-6 bottom-6 z-40 flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white shadow-lg sm:right-[max(1.5rem,calc(50%-20rem))]"
         >
           <Plus size={18} />
           {t("themes.newTheme")}
@@ -129,30 +129,30 @@ export function ThemesHubPage() {
       {showCreate && (
         <div
           ref={backdropRef}
-          className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/40 p-0 sm:p-4"
+          className="fixed inset-0 z-[100] flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
           onClick={handleBackdropClick}
         >
-          <div className="bg-app-surface w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl border border-app-border p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-app-text">
+          <div className="bg-app-surface border-app-border w-full rounded-t-2xl border p-5 shadow-xl sm:max-w-md sm:rounded-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-app-text text-lg font-bold">
                 {t("themes.newTheme")}
               </h2>
               <button
                 type="button"
                 onClick={closeCreateModal}
-                className="p-1.5 rounded-full hover:bg-app-muted text-app-text-muted"
+                className="hover:bg-app-muted text-app-text-muted rounded-full p-1.5"
               >
                 <X size={18} />
               </button>
             </div>
-            <label className="block text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-1.5">
+            <label className="text-app-text-muted mb-1.5 block text-xs font-semibold tracking-wider uppercase">
               {t("themes.nameLabel")}
             </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={t("themes.namePlaceholder")}
-              className="w-full rounded-xl border border-app-border-strong bg-app-surface px-3 py-2.5 text-app-text focus:outline-none focus:ring-2 focus:ring-main-300 mb-3"
+              className="border-app-border-strong bg-app-surface text-app-text focus:ring-main-300 mb-3 w-full rounded-xl border px-3 py-2.5 focus:ring-2 focus:outline-none"
             />
             <SvgIconField
               value={iconSvg}
@@ -162,7 +162,7 @@ export function ThemesHubPage() {
             <button
               type="button"
               onClick={() => setShowPicker(true)}
-              className="w-full py-2.5 rounded-xl border border-dashed border-app-border-strong text-sm font-semibold text-app-text-secondary mb-4"
+              className="border-app-border-strong text-app-text-secondary mb-4 w-full rounded-xl border border-dashed py-2.5 text-sm font-semibold"
             >
               {t("themes.pickWordsOptional")} ({selectedIds.size})
             </button>
@@ -170,7 +170,7 @@ export function ThemesHubPage() {
               <button
                 type="button"
                 onClick={closeCreateModal}
-                className="flex-1 py-2.5 rounded-xl border border-app-border-strong text-sm font-semibold"
+                className="border-app-border-strong flex-1 rounded-xl border py-2.5 text-sm font-semibold"
               >
                 {t("common.cancel")}
               </button>
@@ -178,7 +178,7 @@ export function ThemesHubPage() {
                 type="button"
                 disabled={!name.trim() || saving}
                 onClick={handleCreate}
-                className="flex-1 py-2.5 rounded-xl bg-main-500 text-white text-sm font-semibold disabled:opacity-40"
+                className="bg-main-500 flex-1 rounded-xl py-2.5 text-sm font-semibold text-white disabled:opacity-40"
               >
                 {t("common.add")}
               </button>

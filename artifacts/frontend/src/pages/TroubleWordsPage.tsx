@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  ArrowLeft,
-  ChevronRight,
-  Dices,
-  X,
-} from "lucide-react";
+import { ArrowLeft, ChevronRight, Dices, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTranslation } from "../i18n/I18nProvider";
 import { LoadingSpinner } from "../components/LoadingSpinner";
@@ -67,36 +62,40 @@ function TroubleWordRow({
       : item.decks.filter((d) => d.deckType === deckFilter);
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3 border-b border-app-border last:border-b-0 bg-app-surface">
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-base font-bold text-app-text leading-tight">
+    <div className="border-app-border bg-app-surface flex items-start gap-3 border-b px-4 py-3 last:border-b-0">
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-app-text text-base leading-tight font-bold">
             {item.kanji}
           </p>
           {item.jlptLevel && (
-            <span className="text-[10px] bg-app-muted text-app-text-secondary font-semibold px-1.5 py-0.5 rounded-md">
+            <span className="bg-app-muted text-app-text-secondary rounded-md px-1.5 py-0.5 text-[10px] font-semibold">
               {item.jlptLevel}
             </span>
           )}
         </div>
         {item.pronunciation && (
-          <p className="text-xs text-app-text-secondary mt-0.5">{item.pronunciation}</p>
+          <p className="text-app-text-secondary mt-0.5 text-xs">
+            {item.pronunciation}
+          </p>
         )}
         {item.meaning && (
-          <p className="text-xs text-app-text-muted mt-0.5 truncate">{item.meaning}</p>
+          <p className="text-app-text-muted mt-0.5 truncate text-xs">
+            {item.meaning}
+          </p>
         )}
-        <div className="flex flex-wrap gap-1.5 mt-2">
+        <div className="mt-2 flex flex-wrap gap-1.5">
           {visibleDecks.map((d) => (
             <span
               key={d.deckType}
-              className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100"
+              className="inline-flex items-center gap-1 rounded-full border border-red-100 bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-600"
             >
               {srsDeckLabel(t, d.deckType).title}
               <span className="tabular-nums">×{d.mistakeCount}</span>
             </span>
           ))}
         </div>
-        <p className="text-[10px] text-app-text-muted mt-1.5">
+        <p className="text-app-text-muted mt-1.5 text-[10px]">
           {t("troubleWords.lastMistake", {
             when: formatRelativeDate(item.lastMistakeAt, t),
           })}
@@ -105,7 +104,7 @@ function TroubleWordRow({
       <button
         type="button"
         onClick={() => onDismiss(item.wordId)}
-        className="p-2 rounded-lg text-app-text-muted hover:text-red-500 hover:bg-red-50 transition-colors shrink-0"
+        className="text-app-text-muted shrink-0 rounded-lg p-2 transition-colors hover:bg-red-50 hover:text-red-500"
         aria-label={t("troubleWords.dismiss")}
       >
         <X size={16} />
@@ -183,33 +182,35 @@ export function TroubleWordsPage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-bg flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
+    <div className="bg-app-bg sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+      <div className="bg-app-surface border-app-border shrink-0 border-b px-5 pt-4 pb-4">
         <button
           onClick={() => navigate("/srs")}
-          className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
+          className="text-app-text-muted hover:text-app-text-secondary -ml-1 flex items-center gap-1.5 p-1 transition-colors"
         >
           <ArrowLeft size={18} />
-          <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+          <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
             {t("nav.srs")}
           </span>
         </button>
-        <h1 className="text-xl font-bold text-app-text mt-2">
+        <h1 className="text-app-text mt-2 text-xl font-bold">
           {t("troubleWords.title")}
         </h1>
-        <p className="text-sm text-app-text-secondary mt-1">{t("troubleWords.subtitle")}</p>
+        <p className="text-app-text-secondary mt-1 text-sm">
+          {t("troubleWords.subtitle")}
+        </p>
       </div>
 
-      <div className="px-4 py-3 flex gap-2 overflow-x-auto shrink-0 scrollbar-none">
+      <div className="flex shrink-0 scrollbar-none gap-2 overflow-x-auto px-4 py-3">
         {DECK_FILTERS.map((filter) => (
           <button
             key={filter}
             type="button"
             onClick={() => setDeckFilter(filter)}
-            className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold transition-colors ${
+            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
               deckFilter === filter
                 ? "bg-main-500 text-white"
-                : "bg-app-surface text-app-text-secondary border border-app-border-strong"
+                : "bg-app-surface text-app-text-secondary border-app-border-strong border"
             }`}
           >
             {deckFilterLabel(t, filter)}
@@ -221,16 +222,18 @@ export function TroubleWordsPage() {
         {isLoading ? (
           <LoadingPlaceholder />
         ) : isError ? (
-          <p className="text-center text-sm text-red-500 py-16">
+          <p className="py-16 text-center text-sm text-red-500">
             {t("troubleWords.loadFailed")}
           </p>
         ) : items.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 px-8 text-center">
-            <p className="text-4xl text-app-border-strong mb-3">✓</p>
-            <p className="text-app-text-secondary text-sm">{t("troubleWords.empty")}</p>
+          <div className="flex flex-col items-center justify-center px-8 py-20 text-center">
+            <p className="text-app-border-strong mb-3 text-4xl">✓</p>
+            <p className="text-app-text-secondary text-sm">
+              {t("troubleWords.empty")}
+            </p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-app-border overflow-hidden mx-3">
+          <div className="border-app-border mx-3 overflow-hidden rounded-2xl border">
             {items.map((item) => (
               <TroubleWordRow
                 key={item.wordId}
@@ -243,7 +246,7 @@ export function TroubleWordsPage() {
         )}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 p-3.5 bg-gradient-to-t from-gray-50 via-gray-50 to-transparent pointer-events-none max-w-2xl mx-auto">
+      <div className="pointer-events-none fixed right-0 bottom-0 left-0 mx-auto max-w-2xl bg-gradient-to-t from-gray-50 via-gray-50 to-transparent p-3.5">
         <button
           type="button"
           disabled={items.length === 0 || starting}
@@ -251,7 +254,7 @@ export function TroubleWordsPage() {
             if (deckFilter === "example") warmMobileKeyboard();
           }}
           onClick={handleStudyClick}
-          className="pointer-events-auto w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-main-500 text-white font-bold text-base shadow-lg disabled:opacity-50 active:scale-[0.98] transition-transform"
+          className="bg-main-500 pointer-events-auto flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-base font-bold text-white shadow-lg transition-transform active:scale-[0.98] disabled:opacity-50"
         >
           {starting ? (
             <LoadingSpinner size={20} className="text-white" />
@@ -270,40 +273,40 @@ export function TroubleWordsPage() {
           onClick={() => setDeckPickerOpen(false)}
         >
           <div
-            className="w-full max-w-2xl bg-app-surface rounded-t-2xl p-4 pb-8 space-y-2"
+            className="bg-app-surface w-full max-w-2xl space-y-2 rounded-t-2xl p-4 pb-8"
             onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-sm font-semibold text-app-text mb-3">
+            <p className="text-app-text mb-3 text-sm font-semibold">
               {t("troubleWords.pickDeck")}
             </p>
-            {(["word", "pronunciation", "meaning", "example"] as SrsDeckType[]).map(
-              (deck) => {
-                const count = wordIdsForStudy(deck).length;
-                const label = srsDeckLabel(t, deck);
-                return (
-                  <button
-                    key={deck}
-                    type="button"
-                    disabled={count === 0 || starting}
-                    onPointerDown={() => {
-                      if (deck === "example") warmMobileKeyboard();
-                    }}
-                    onClick={() => startStudy(deck)}
-                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-app-border disabled:opacity-40 active:bg-app-muted"
-                  >
-                    <div className="flex-1 text-left">
-                      <p className="text-sm font-bold text-app-text">
-                        {label.title}
-                      </p>
-                      <p className="text-xs text-app-text-muted">
-                        {t("troubleWords.deckWordCount", { count })}
-                      </p>
-                    </div>
-                    <ChevronRight size={18} className="text-app-text-muted" />
-                  </button>
-                );
-              },
-            )}
+            {(
+              ["word", "pronunciation", "meaning", "example"] as SrsDeckType[]
+            ).map((deck) => {
+              const count = wordIdsForStudy(deck).length;
+              const label = srsDeckLabel(t, deck);
+              return (
+                <button
+                  key={deck}
+                  type="button"
+                  disabled={count === 0 || starting}
+                  onPointerDown={() => {
+                    if (deck === "example") warmMobileKeyboard();
+                  }}
+                  onClick={() => startStudy(deck)}
+                  className="border-app-border active:bg-app-muted flex w-full items-center gap-3 rounded-xl border px-4 py-3 disabled:opacity-40"
+                >
+                  <div className="flex-1 text-left">
+                    <p className="text-app-text text-sm font-bold">
+                      {label.title}
+                    </p>
+                    <p className="text-app-text-muted text-xs">
+                      {t("troubleWords.deckWordCount", { count })}
+                    </p>
+                  </div>
+                  <ChevronRight size={18} className="text-app-text-muted" />
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

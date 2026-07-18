@@ -43,7 +43,7 @@ export function HomeStudyLinks({
 
   return (
     <div className="flex-1 overflow-y-auto px-5 py-4 pb-24">
-      <p className="text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-2.5 px-1">
+      <p className="text-app-text-muted mb-2.5 px-1 text-xs font-semibold tracking-wider uppercase">
         {t("home.studySection")}
       </p>
       <div className="space-y-2">
@@ -60,9 +60,9 @@ export function HomeStudyLinks({
                 (titleKey === "nav.themes" && themesLoading) ||
                 (titleKey === "nav.categories" && categoriesLoading)
               }
-              className="w-full flex items-center gap-4 bg-app-surface rounded-2xl border border-app-border px-4 py-3.5 active:scale-[0.99] transition-transform disabled:opacity-60"
+              className="bg-app-surface border-app-border flex w-full items-center gap-4 rounded-2xl border px-4 py-3.5 transition-transform active:scale-[0.99] disabled:opacity-60"
             >
-              <div className="w-10 h-10 rounded-xl bg-app-accent flex items-center justify-center shrink-0">
+              <div className="bg-app-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                 {star ? (
                   <span className="text-main-500">★</span>
                 ) : (
@@ -75,8 +75,8 @@ export function HomeStudyLinks({
                   )
                 )}
               </div>
-              <div className="flex-1 text-left min-w-0">
-                <p className="text-base font-bold text-app-text">
+              <div className="min-w-0 flex-1 text-left">
+                <p className="text-app-text text-base font-bold">
                   {t(titleKey)}
                 </p>
                 <div className="flex items-center gap-1">
@@ -86,18 +86,21 @@ export function HomeStudyLinks({
                         size={14}
                         className="text-app-text-muted"
                       />
-                      <p className="text-xs text-app-text-muted mt-0.5 invisible">
+                      <p className="text-app-text-muted invisible mt-0.5 text-xs">
                         {studyCountLabel(titleKey, studyCounts[titleKey], t)}
                       </p>
                     </>
                   ) : (
-                    <p className="text-xs text-app-text-muted mt-0.5">
+                    <p className="text-app-text-muted mt-0.5 text-xs">
                       {studyCountLabel(titleKey, studyCounts[titleKey], t)}
                     </p>
                   )}
                 </div>
               </div>
-              <ChevronRight size={18} className="text-app-text-muted shrink-0" />
+              <ChevronRight
+                size={18}
+                className="text-app-text-muted shrink-0"
+              />
             </button>
           );
         })}

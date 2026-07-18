@@ -1,5 +1,8 @@
 import type { Word, TargetChunk, SrsExample } from "../types";
-import { getExpectedAnswer, expectedForPartialFeedback } from "../lib/srsExamples";
+import {
+  getExpectedAnswer,
+  expectedForPartialFeedback,
+} from "../lib/srsExamples";
 import {
   buildWordsById,
   segmentTextWithLinks,
@@ -69,7 +72,7 @@ function LinkedTextSpan({
               key={i}
               type="button"
               onClick={() => onWordTap?.(word)}
-              className="underline decoration-dotted underline-offset-4 decoration-app-text-muted hover:decoration-main-500 text-app-text"
+              className="decoration-app-text-muted hover:decoration-main-500 text-app-text underline decoration-dotted underline-offset-4"
             >
               <RubyParts parts={parts} />
             </button>
@@ -134,11 +137,7 @@ function SecondaryHiddenChunk({
   wordLinksEnabled: boolean;
   onWordTap?: (word: Word) => void;
 }) {
-  const token = findLinkedTokenForChunk(
-    chunkOffset,
-    chunk.text,
-    linkedTokens,
-  );
+  const token = findLinkedTokenForChunk(chunkOffset, chunk.text, linkedTokens);
 
   if (wordLinksEnabled && token) {
     const word = wordsById.get(token.wordId);
@@ -147,11 +146,11 @@ function SecondaryHiddenChunk({
         ? chunk.ruby
         : rubyPartsForLinkedSpan(chunk.text, word);
       return (
-        <span className="inline-block mx-0.5">
+        <span className="mx-0.5 inline-block">
           <button
             type="button"
             onClick={() => onWordTap?.(word)}
-            className="underline decoration-dotted underline-offset-4 decoration-app-text-muted hover:decoration-main-500 text-app-text"
+            className="decoration-app-text-muted hover:decoration-main-500 text-app-text underline decoration-dotted underline-offset-4"
           >
             <RubyParts parts={parts} />
           </button>
@@ -162,13 +161,13 @@ function SecondaryHiddenChunk({
 
   if (chunk.ruby?.length) {
     return (
-      <span className="inline-block mx-0.5">
+      <span className="mx-0.5 inline-block">
         <RubyParts parts={chunk.ruby} />
       </span>
     );
   }
 
-  return <span className="inline-block mx-0.5">{chunk.text}</span>;
+  return <span className="mx-0.5 inline-block">{chunk.text}</span>;
 }
 
 function HiddenSlot({
@@ -230,7 +229,7 @@ export function ExampleSentenceDisplay({
     let offset = 0;
     return (
       <p
-        className={`text-2xl font-bold text-app-text leading-loose ${className}`}
+        className={`text-app-text text-2xl leading-loose font-bold ${className}`}
       >
         {chunks.map((chunk, i) => {
           const chunkOffset = offset;
@@ -252,7 +251,7 @@ export function ExampleSentenceDisplay({
               );
             }
             return (
-              <span key={i} className="inline-block mx-0.5 align-baseline">
+              <span key={i} className="mx-0.5 inline-block align-baseline">
                 <HiddenSlot
                   chunk={chunk}
                   expected={expected}
@@ -263,7 +262,11 @@ export function ExampleSentenceDisplay({
               </span>
             );
           }
-          if (chunk.type === "text" && !chunk.text.trim() && !chunk.ruby?.length) {
+          if (
+            chunk.type === "text" &&
+            !chunk.text.trim() &&
+            !chunk.ruby?.length
+          ) {
             return null;
           }
           return (
@@ -287,13 +290,15 @@ export function ExampleSentenceDisplay({
   const hiddenWord = example.hiddenWord;
   const sentence = example.sentence;
 
-  const before = hiddenWord ? sentence.split(hiddenWord)[0] ?? "" : sentence;
-  const after = hiddenWord ? sentence.split(hiddenWord)[1] ?? "" : "";
+  const before = hiddenWord ? (sentence.split(hiddenWord)[0] ?? "") : sentence;
+  const after = hiddenWord ? (sentence.split(hiddenWord)[1] ?? "") : "";
   const beforeLen = before.length;
   const afterOffset = beforeLen + (hiddenWord?.length ?? 0);
 
   return (
-    <p className={`text-2xl font-bold text-app-text leading-relaxed ${className}`}>
+    <p
+      className={`text-app-text text-2xl leading-relaxed font-bold ${className}`}
+    >
       <LinkedTextSpan
         text={before}
         chunkOffset={0}
@@ -303,7 +308,7 @@ export function ExampleSentenceDisplay({
         onWordTap={onWordTap}
       />
       {hiddenWord ? (
-        <span className="inline-block mx-0.5 align-baseline">
+        <span className="mx-0.5 inline-block align-baseline">
           <HiddenAnswerDisplay
             expected={
               answerState === "partial"

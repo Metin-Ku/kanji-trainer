@@ -18,9 +18,9 @@ export function SvgIconField({
 
   return (
     <div className="mb-4">
-      <label className="block text-xs font-semibold text-app-text-muted uppercase tracking-wider mb-1.5">
+      <label className="text-app-text-muted mb-1.5 block text-xs font-semibold tracking-wider uppercase">
         {t(`${namespace}.iconLabel`)}
-        <span className="normal-case font-normal text-app-text-muted">
+        <span className="text-app-text-muted font-normal normal-case">
           {" "}
           {t(`${namespace}.iconOptional`)}
         </span>
@@ -30,11 +30,11 @@ export function SvgIconField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={t(`${namespace}.iconPlaceholder`)}
         rows={4}
-        className="w-full rounded-xl border border-app-border-strong bg-app-surface px-3 py-2.5 text-xs text-app-text font-mono focus:outline-none focus:ring-2 focus:ring-main-300"
+        className="border-app-border-strong bg-app-surface text-app-text focus:ring-main-300 w-full rounded-xl border px-3 py-2.5 font-mono text-xs focus:ring-2 focus:outline-none"
       />
       {value.trim() && (
-        <div className="mt-2 flex items-center gap-2 rounded-xl border border-app-border bg-app-muted px-3 py-2">
-          <span className="text-[10px] font-semibold text-app-text-muted uppercase tracking-wider">
+        <div className="border-app-border bg-app-muted mt-2 flex items-center gap-2 rounded-xl border px-3 py-2">
+          <span className="text-app-text-muted text-[10px] font-semibold tracking-wider uppercase">
             {t(`${namespace}.iconPreview`)}
           </span>
           <CategoryIcon svg={value} size={24} />

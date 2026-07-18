@@ -10,11 +10,7 @@ interface Props {
   onChange: (ids: number[]) => void;
 }
 
-export function CategoriesSelect({
-  categories,
-  selectedIds,
-  onChange,
-}: Props) {
+export function CategoriesSelect({ categories, selectedIds, onChange }: Props) {
   const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -67,7 +63,7 @@ export function CategoriesSelect({
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="min-h-[44px] w-full rounded-xl border border-app-border-strong bg-app-muted px-3 py-2 flex flex-wrap gap-2 items-center focus-within:ring-2 focus-within:ring-main-300 focus-within:border-transparent transition-all cursor-text"
+        className="border-app-border-strong bg-app-muted focus-within:ring-main-300 flex min-h-[44px] w-full cursor-text flex-wrap items-center gap-2 rounded-xl border px-3 py-2 transition-all focus-within:border-transparent focus-within:ring-2"
         onClick={() => {
           setIsOpen(true);
           inputRef.current?.focus();
@@ -76,7 +72,7 @@ export function CategoriesSelect({
         {selected.map((cat) => (
           <span
             key={cat.id}
-            className="bg-main-100 text-main-600 dark:bg-main-950 dark:text-main-300 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-semibold select-none max-w-full"
+            className="bg-main-100 text-main-600 dark:bg-main-950 dark:text-main-300 inline-flex max-w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-semibold select-none"
           >
             <CategoryIcon svg={cat.iconSvg} size={16} />
             <span className="truncate">{cat.name}</span>
@@ -88,7 +84,7 @@ export function CategoriesSelect({
                 e.stopPropagation();
                 removeCategory(cat.id);
               }}
-              className="inline-flex items-center justify-center w-5 h-5 rounded-full hover:bg-main-200/60 transition-all active:scale-90 shrink-0"
+              className="hover:bg-main-200/60 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-all active:scale-90"
             >
               <X size={14} strokeWidth={2.5} />
             </button>
@@ -107,17 +103,17 @@ export function CategoriesSelect({
           placeholder={
             selected.length === 0 ? t("categories.selectPlaceholder") : ""
           }
-          className="flex-1 min-w-[90px] bg-transparent text-sm text-app-text focus:outline-none placeholder:text-app-text-muted"
+          className="text-app-text placeholder:text-app-text-muted min-w-[90px] flex-1 bg-transparent text-sm focus:outline-none"
         />
       </div>
 
       {showDropdown && (
         <div
-          className="absolute z-50 w-full mt-1 rounded-xl border border-app-border bg-app-surface shadow-lg overflow-y-auto"
+          className="border-app-border bg-app-surface absolute z-50 mt-1 w-full overflow-y-auto rounded-xl border shadow-lg"
           style={{ maxHeight: 220 }}
         >
           {filtered.length === 0 ? (
-            <p className="px-4 py-3 text-xs text-app-text-muted text-center">
+            <p className="text-app-text-muted px-4 py-3 text-center text-xs">
               {t("categories.selectNotFound", { query })}
             </p>
           ) : (
@@ -127,13 +123,13 @@ export function CategoriesSelect({
                 type="button"
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => addCategory(cat)}
-                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-main-50 dark:hover:bg-main-950 active:bg-main-100 transition-colors text-left"
+                className="hover:bg-main-50 dark:hover:bg-main-950 active:bg-main-100 flex w-full items-center gap-3 px-4 py-2.5 text-left transition-colors"
               >
                 <CategoryIcon svg={cat.iconSvg} size={16} />
-                <span className="text-sm font-semibold text-app-text flex-1 min-w-0 truncate">
+                <span className="text-app-text min-w-0 flex-1 truncate text-sm font-semibold">
                   {cat.name}
                 </span>
-                <span className="text-[11px] text-app-text-muted shrink-0">
+                <span className="text-app-text-muted shrink-0 text-[11px]">
                   {cat.wordCount}
                 </span>
               </button>

@@ -90,13 +90,14 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-dvh bg max-w-2xl mx-auto bg-app-bg flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
+    <div className="bg bg-app-bg sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
       <HomeHeader
         query={query}
         onQueryChange={setQuery}
         isSearching={isSearching}
         activityByDate={activityByDate}
         activityLoading={activityLoading}
+        wordCount={words.length}
       />
 
       {isSearching ? (

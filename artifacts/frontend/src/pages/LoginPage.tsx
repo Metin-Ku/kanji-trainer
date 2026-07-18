@@ -37,19 +37,19 @@ export function LoginPage() {
   }
 
   return (
-    <div className="min-h-dvh max-w-md mx-auto flex flex-col justify-center px-6 py-10 bg-app-bg">
-      <h1 className="text-2xl font-bold text-app-text mb-1">
+    <div className="bg-app-bg mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6 py-10">
+      <h1 className="text-app-text mb-1 text-2xl font-bold">
         {t("auth.loginTitle")}
       </h1>
 
-      <p className="text-sm text-app-text-secondary mb-6">
+      <p className="text-app-text-secondary mb-6 text-sm">
         {t("auth.loginSubtitle")}
       </p>
 
       <form onSubmit={onSubmit} className="space-y-4">
         {/* Email */}
         <label className="block">
-          <span className="text-xs font-semibold text-app-text-muted uppercase tracking-wider">
+          <span className="text-app-text-muted text-xs font-semibold tracking-wider uppercase">
             {t("auth.email")}
           </span>
 
@@ -62,20 +62,18 @@ export function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               onFocus={() => setFocusedInput("email")}
               onBlur={() => setFocusedInput(null)}
-              className={`w-full rounded-xl border bg-app-surface px-3 py-2.5 text-app-text outline-none transition-all duration-150
-                ${
-                  focusedInput === "email"
-                    ? "border-main-400 dark:border-main-500 ring-2 ring-main-400 dark:ring-main-500 ring-inset"
-                    : "border-app-border-strong"
-                }
-              `}
+              className={`bg-app-surface text-app-text w-full rounded-xl border px-3 py-2.5 transition-all duration-150 outline-none ${
+                focusedInput === "email"
+                  ? "border-main-400 dark:border-main-500 ring-main-400 dark:ring-main-500 ring-2 ring-inset"
+                  : "border-app-border-strong"
+              } `}
             />
           </div>
         </label>
 
         {/* Password */}
         <label className="block">
-          <span className="text-xs font-semibold text-app-text-muted uppercase tracking-wider">
+          <span className="text-app-text-muted text-xs font-semibold tracking-wider uppercase">
             {t("auth.password")}
           </span>
 
@@ -88,26 +86,28 @@ export function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               onFocus={() => setFocusedInput("password")}
               onBlur={() => setFocusedInput(null)}
-              className={`w-full rounded-xl border bg-app-surface px-3 py-2.5 pr-12 text-app-text outline-none transition-all duration-150
-                ${
-                  focusedInput === "password"
-                    ? "border-main-400 dark:border-main-500 ring-2 ring-main-400 dark:ring-main-500 ring-inset"
-                    : "border-app-border-strong"
-                }
-              `}
+              className={`bg-app-surface text-app-text w-full rounded-xl border px-3 py-2.5 pr-12 transition-all duration-150 outline-none ${
+                focusedInput === "password"
+                  ? "border-main-400 dark:border-main-500 ring-main-400 dark:ring-main-500 ring-2 ring-inset"
+                  : "border-app-border-strong"
+              } `}
             />
 
             <button
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => setShowPassword((prev) => !prev)}
-              className="absolute right-5 top-1/2 -translate-y-1/2"
+              className="absolute top-1/2 right-5 -translate-y-1/2"
               tabIndex={-1}
             >
               {showPassword ? (
-                <EyeOff className={`w-5.5 h-5.5 ${focusedInput === "password" ? "text-main-400 dark:text-main-500" : "text-app-text-muted"} hover:text-main-400 dark:hover:text-main-500 transition-colors`} />
+                <EyeOff
+                  className={`h-5.5 w-5.5 ${focusedInput === "password" ? "text-main-400 dark:text-main-500" : "text-app-text-muted"} hover:text-main-400 dark:hover:text-main-500 transition-colors`}
+                />
               ) : (
-                <Eye className={`w-5.5 h-5.5 ${focusedInput === "password" ? "text-main-400 dark:text-main-500" : "text-app-text-muted"} hover:text-main-400 dark:hover:text-main-500 transition-colors`} />
+                <Eye
+                  className={`h-5.5 w-5.5 ${focusedInput === "password" ? "text-main-400 dark:text-main-500" : "text-app-text-muted"} hover:text-main-400 dark:hover:text-main-500 transition-colors`}
+                />
               )}
             </button>
           </div>
@@ -118,11 +118,11 @@ export function LoginPage() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full py-3 rounded-2xl font-semibold text-white bg-main-500 dark:bg-main-600 disabled:opacity-60 flex items-center justify-center gap-2"
+          className="bg-main-500 dark:bg-main-600 flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-semibold text-white disabled:opacity-60"
         >
           {busy ? (
             <>
-              <LoadingSpinner className="w-5 h-5" />
+              <LoadingSpinner className="h-5 w-5" />
               {/* <span>{t("auth.login")}</span> */}
             </>
           ) : (
@@ -131,7 +131,7 @@ export function LoginPage() {
         </button>
       </form>
 
-      <div className="mt-6 flex flex-col gap-2 text-sm text-center text-app-text-secondary">
+      <div className="text-app-text-secondary mt-6 flex flex-col gap-2 text-center text-sm">
         <Link
           href="/forgot-password"
           className="text-main-500 dark:text-main-600 hover:underline"

@@ -8,34 +8,34 @@ export function LearnedHubPage() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-dvh max-w-2xl mx-auto bg-app-surface flex flex-col sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
-      <div className="bg-app-surface border-b border-app-border px-5 pt-4 pb-4 shrink-0">
+    <div className="bg-app-surface sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+      <div className="bg-app-surface border-app-border shrink-0 border-b px-5 pt-4 pb-4">
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigate("/")}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
+            className="text-app-text-muted hover:text-app-text-secondary -ml-1 flex items-center gap-1.5 p-1 transition-colors"
           >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+            <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
               {t("learned.hubTitle")}
             </span>
           </button>
         </div>
       </div>
 
-      <div className="flex-1 flex">
+      <div className="flex flex-1">
         <button
           onClick={() => navigate("/learned/words")}
-          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-app-muted transition-colors border-r border-app-border"
+          className="active:bg-app-muted border-app-border flex flex-1 flex-col items-center justify-center gap-3 border-r transition-colors"
         >
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            className="flex h-12 w-12 items-center justify-center rounded-xl"
             style={{ background: themeVars.iconBg }}
           >
             <Languages size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-base font-bold text-app-text leading-tight">
+            <p className="text-app-text text-base leading-tight font-bold">
               {t("learned.wordsTitle")}
             </p>
           </div>
@@ -43,16 +43,16 @@ export function LearnedHubPage() {
 
         <button
           onClick={() => navigate("/learned/pronunciation")}
-          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-app-muted transition-colors border-r border-app-border"
+          className="active:bg-app-muted border-app-border flex flex-1 flex-col items-center justify-center gap-3 border-r transition-colors"
         >
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            className="flex h-12 w-12 items-center justify-center rounded-xl"
             style={{ background: themeVars.iconBg }}
           >
             <Waves size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-base font-bold text-app-text leading-tight">
+            <p className="text-app-text text-base leading-tight font-bold">
               {t("learned.pronunciationTitle")}
             </p>
           </div>
@@ -60,16 +60,16 @@ export function LearnedHubPage() {
 
         <button
           onClick={() => navigate("/learned/meaning")}
-          className="flex-1 flex flex-col items-center justify-center gap-3 active:bg-app-muted transition-colors"
+          className="active:bg-app-muted flex flex-1 flex-col items-center justify-center gap-3 transition-colors"
         >
           <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center"
+            className="flex h-12 w-12 items-center justify-center rounded-xl"
             style={{ background: themeVars.iconBg }}
           >
             <BookOpen size={22} className="text-main-400" strokeWidth={1.8} />
           </div>
           <div className="text-center">
-            <p className="text-base font-bold text-app-text leading-tight">
+            <p className="text-app-text text-base leading-tight font-bold">
               {t("learned.meaningTitle")}
             </p>
           </div>

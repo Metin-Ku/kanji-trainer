@@ -124,12 +124,12 @@ export function ThemeQuizStudyPage() {
 
   if (questions.length === 0) {
     return (
-      <div className="min-h-dvh flex flex-col items-center justify-center p-8 text-center">
+      <div className="flex min-h-dvh flex-col items-center justify-center p-8 text-center">
         <p className="text-app-text-muted mb-4">{t("themeQuiz.noQuestions")}</p>
         <button
           type="button"
           onClick={() => navigate(`/themes/${id}/quiz/edit`)}
-          className="px-4 py-2 rounded-xl bg-main-500 text-white font-semibold"
+          className="bg-main-500 rounded-xl px-4 py-2 font-semibold text-white"
         >
           {t("themeQuiz.edit")}
         </button>
@@ -139,23 +139,28 @@ export function ThemeQuizStudyPage() {
 
   if (finished) {
     return (
-      <div className="min-h-dvh bg-app-bg flex flex-col items-center justify-center p-8">
-        <p className="text-2xl font-bold text-app-text mb-2">{t("common.completed")}</p>
+      <div className="bg-app-bg flex min-h-dvh flex-col items-center justify-center p-8">
+        <p className="text-app-text mb-2 text-2xl font-bold">
+          {t("common.completed")}
+        </p>
         <p className="text-app-text-secondary mb-8">
-          {t("themeQuiz.score", { correct: correctCount, total: questions.length })}
+          {t("themeQuiz.score", {
+            correct: correctCount,
+            total: questions.length,
+          })}
         </p>
         <div className="flex gap-3">
           <button
             type="button"
             onClick={() => navigate(`/themes/${id}`)}
-            className="px-4 py-2.5 rounded-xl border border-app-border-strong font-semibold"
+            className="border-app-border-strong rounded-xl border px-4 py-2.5 font-semibold"
           >
             {t("themes.backToTheme")}
           </button>
           <button
             type="button"
             onClick={restart}
-            className="px-4 py-2.5 rounded-xl bg-main-500 text-white font-semibold"
+            className="bg-main-500 rounded-xl px-4 py-2.5 font-semibold text-white"
           >
             {t("themeQuiz.retry")}
           </button>
@@ -165,37 +170,46 @@ export function ThemeQuizStudyPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-app-bg">
-      <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border min-h-dvh flex flex-col">
-        <div className="px-5 pt-4 pb-3 border-b border-app-border bg-app-surface">
+    <div className="bg-app-bg min-h-dvh">
+      <div className="sm:border-app-border mx-auto flex min-h-dvh max-w-2xl flex-col sm:box-content sm:border-r-2 sm:border-l-2">
+        <div className="border-app-border bg-app-surface border-b px-5 pt-4 pb-3">
           <button
             onClick={() => navigate(`/themes/${id}`)}
-            className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted"
+            className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
           >
             <ArrowLeft size={18} />
-            <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+            <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
               {theme.name}
             </span>
           </button>
-          <p className="text-xs text-app-text-muted mt-2">
-            {t("themeQuiz.progress", { current: index + 1, total: questions.length })}
+          <p className="text-app-text-muted mt-2 text-xs">
+            {t("themeQuiz.progress", {
+              current: index + 1,
+              total: questions.length,
+            })}
           </p>
         </div>
 
         <div className="flex-1 px-5 py-6">
-          <p className="text-base sm:text-lg font-medium text-app-text leading-relaxed whitespace-pre-wrap">
+          <p className="text-app-text text-base leading-relaxed font-medium whitespace-pre-wrap sm:text-lg">
             {q.prompt}
           </p>
 
-          <div className={`mt-6 grid gap-2 ${q.type === "ab" ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"}`}>
+          <div
+            className={`mt-6 grid gap-2 ${q.type === "ab" ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"}`}
+          >
             {q.choices.map((choice) => {
               const selected = selectedKey === choice.key;
               const isCorrect = choice.key === q.correctKey;
               let cls =
                 "rounded-xl border px-3 py-3 text-sm font-semibold transition-colors ";
               if (revealed) {
-                if (isCorrect) cls += "border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300";
-                else if (selected) cls += "border-red-400 bg-red-50 text-red-600 dark:bg-red-950";
+                if (isCorrect)
+                  cls +=
+                    "border-green-500 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300";
+                else if (selected)
+                  cls +=
+                    "border-red-400 bg-red-50 text-red-600 dark:bg-red-950";
                 else cls += "border-app-border text-app-text-muted opacity-60";
               } else {
                 cls += selected
@@ -210,7 +224,8 @@ export function ThemeQuizStudyPage() {
                   onClick={() => setSelectedKey(choice.key)}
                   className={cls}
                 >
-                  <span className="font-bold">{choice.key}.</span> {choice.label}
+                  <span className="font-bold">{choice.key}.</span>{" "}
+                  {choice.label}
                 </button>
               );
             })}
@@ -221,7 +236,7 @@ export function ThemeQuizStudyPage() {
               <button
                 type="button"
                 onClick={toggleHints}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-app-border-strong text-sm font-semibold text-app-text-secondary"
+                className="border-app-border-strong text-app-text-secondary inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-semibold"
               >
                 <Lightbulb size={16} />
                 {t("themeQuiz.showHint")}
@@ -230,7 +245,7 @@ export function ThemeQuizStudyPage() {
                 type="button"
                 disabled={!selectedKey}
                 onClick={handleSubmit}
-                className="px-4 py-2 rounded-xl bg-main-500 text-white text-sm font-semibold disabled:opacity-40"
+                className="bg-main-500 rounded-xl px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
               >
                 {t("themeQuiz.submit")}
               </button>
@@ -242,7 +257,7 @@ export function ThemeQuizStudyPage() {
           {revealed && (
             <div className="mt-6">
               <p
-                className={`text-sm font-semibold mb-3 ${selectedKey === q.correctKey ? "text-green-600" : "text-red-500"}`}
+                className={`mb-3 text-sm font-semibold ${selectedKey === q.correctKey ? "text-green-600" : "text-red-500"}`}
               >
                 {selectedKey === q.correctKey
                   ? t("themeQuiz.correct")
@@ -251,9 +266,11 @@ export function ThemeQuizStudyPage() {
               <button
                 type="button"
                 onClick={goNext}
-                className="w-full py-3 rounded-xl bg-main-500 text-white font-semibold"
+                className="bg-main-500 w-full rounded-xl py-3 font-semibold text-white"
               >
-                {index + 1 >= questions.length ? t("themeQuiz.finish") : t("themeQuiz.next")}
+                {index + 1 >= questions.length
+                  ? t("themeQuiz.finish")
+                  : t("themeQuiz.next")}
               </button>
             </div>
           )}

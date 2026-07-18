@@ -1,13 +1,23 @@
 import { useRef, useState } from "react";
 import { Search, X } from "lucide-react";
+import { useTranslation } from "../i18n/I18nProvider";
 
 interface Props {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  wordCount?: number;
+  onWordCountClick?: () => void;
 }
 
-export function SearchBar({ value, onChange, placeholder = "" }: Props) {
+export function SearchBar({
+  value,
+  onChange,
+  placeholder = "",
+  wordCount,
+  onWordCountClick,
+}: Props) {
+  const { t } = useTranslation();
   const inputRef = useRef<HTMLInputElement>(null);
   const [focused, setFocused] = useState(false);
 
@@ -16,7 +26,7 @@ export function SearchBar({ value, onChange, placeholder = "" }: Props) {
       <Search
         size={17}
         strokeWidth={2}
-        className={`absolute left-2.5 pointer-events-none shrink-0 ${focused ? "text-main-400 dark:text-main-500 transition-colors duration-100" : "text-app-text-secondary transition-colors duration-100"}`}
+        className={`pointer-events-none absolute left-2.5 shrink-0 ${focused ? "text-main-400 dark:text-main-500 transition-colors duration-100" : "text-app-text-secondary transition-colors duration-100"}`}
         // style={{
         //   color: focused ? "rgb(251,146,60)" : "rgb(209,213,219)",
         //   transition: "color 0.12s ease",
@@ -30,13 +40,11 @@ export function SearchBar({ value, onChange, placeholder = "" }: Props) {
         placeholder={placeholder}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
-        className={`rounded-sm w-full pl-8 pr-7 py-1.5 border bg-gray-50 dark:bg-app-border text-sm text-app-text placeholder-app-text-secondary outline-none transition-all duration-150
-          ${
-            focused
-              ? "border-main-400 ring-2 ring-main-400 dark:ring-main-500 dark:border-main-500 dark:ring-main-500 ring-inset ring-offset-0"
-              : "border-app-border-strong"
-          }
-        `}
+        className={`dark:bg-app-border text-app-text placeholder-app-text-secondary w-full rounded-sm border bg-gray-50 py-1.5 pr-7 pl-8 text-sm transition-all duration-150 outline-none ${
+          focused
+            ? "border-main-400 ring-main-400 dark:ring-main-500 dark:border-main-500 ring-2 ring-offset-0 ring-inset"
+            : "border-app-border-strong"
+        } `}
         // style={{
         //   borderRadius: "0.5rem",
         //   boxShadow: focused ? "inset 0 0 0 2px rgb(251,146,60)" : "none",
@@ -44,6 +52,15 @@ export function SearchBar({ value, onChange, placeholder = "" }: Props) {
         //   transition: "box-shadow 0.12s ease, border-color 0.12s ease",
         // }}
       />
+      {!value && wordCount !== undefined && onWordCountClick && (
+        <button
+          type="button"
+          onClick={onWordCountClick}
+          className="bg-main-500 dark:bg-main-600 dark:text-app-text absolute right-1.5 flex h-[1.45rem] shrink-0 items-center justify-center rounded-sm px-2 text-xs text-white active:opacity-80"
+        >
+          {t("common.wordCount", { count: wordCount })}
+        </button>
+      )}
       {value && (
         <button
           onClick={() => {

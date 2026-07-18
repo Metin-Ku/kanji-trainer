@@ -108,14 +108,14 @@ function PronCard({
     if (!isOpen) setShowRelated(false);
   }, [isOpen]);
   return (
-    <div ref={cardRef} className="border-b border-app-border last:border-b-0">
+    <div ref={cardRef} className="border-app-border border-b last:border-b-0">
       <div
-        className="flex items-center gap-2.5 px-4 py-3 cursor-pointer select-none"
+        className="flex cursor-pointer items-center gap-2.5 px-4 py-3 select-none"
         onClick={selectMode ? onSelect : onToggle}
       >
         {selectMode ? (
           <div
-            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isSelected ? "border-main-500 bg-main-500" : "border-app-border-strong bg-transparent"}`}
+            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-main-500 bg-main-500" : "border-app-border-strong bg-transparent"}`}
           >
             {isSelected && (
               <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -130,7 +130,7 @@ function PronCard({
             )}
           </div>
         ) : (
-          <span className="text-app-text-muted font-medium text-sm w-5 text-right shrink-0 tabular-nums">
+          <span className="text-app-text-muted w-5 shrink-0 text-right text-sm font-medium tabular-nums">
             {index}
           </span>
         )}
@@ -144,33 +144,35 @@ function PronCard({
             !selectMode && onUpdate(word.id, { pronStarred: !word.pronStarred })
           }
         />
-        <div className="flex-1 min-w-0">
-          <p className="text-base font-semibold text-app-text leading-none truncate">
+        <div className="min-w-0 flex-1">
+          <p className="text-app-text truncate text-base leading-none font-semibold">
             {word.pronunciation || (
-              <span className="text-app-text-muted italic font-normal text-sm">
+              <span className="text-app-text-muted text-sm font-normal italic">
                 {t("common.noPronunciation")}
               </span>
             )}
           </p>
         </div>
         {word.jlptLevel && !selectMode && (
-          <span className="text-[10px] bg-app-muted text-app-text-secondary font-semibold leading-none px-1.5 py-[3px] rounded-md shrink-0">
+          <span className="bg-app-muted text-app-text-secondary shrink-0 rounded-md px-1.5 py-[3px] text-[10px] leading-none font-semibold">
             {word.jlptLevel}
           </span>
         )}
       </div>
       {!selectMode && (
         <div className={`word-detail ${isOpen ? "open" : ""}`}>
-          <div className="px-5 pb-4 space-y-2">
+          <div className="space-y-2 px-5 pb-4">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0 flex-1">
                 {!showRelated && word.kanji && (
-                  <p className="text-2xl font-bold text-app-text">
+                  <p className="text-app-text text-2xl font-bold">
                     {word.kanji}
                   </p>
                 )}
                 {!showRelated && word.meaning && (
-                  <p className="text-sm text-app-text-secondary mt-0.5">{word.meaning}</p>
+                  <p className="text-app-text-secondary mt-0.5 text-sm">
+                    {word.meaning}
+                  </p>
                 )}
               </div>
               {word.meaning && allWords && (
@@ -187,8 +189,8 @@ function PronCard({
               <RelatedWordsList word={word} allWords={allWords} />
             ) : (
               word.description && (
-                <div className="pt-1.5 border-t border-app-border">
-                  <p className="whitespace-pre-wrap text-sm text-app-text-secondary leading-relaxed">
+                <div className="border-app-border border-t pt-1.5">
+                  <p className="text-app-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
                     {word.description}
                   </p>
                 </div>
@@ -214,7 +216,11 @@ export function PronunciationPage() {
     { value: "level-desc", label: t("words.sort.levelDesc"), group: "level" },
     { value: "date-asc", label: t("words.sort.dateAsc"), group: "date" },
     { value: "date-desc", label: t("words.sort.dateDesc"), group: "date" },
-    { value: "kanji-cluster", label: t("words.sort.kanjiCluster"), group: "kanji" },
+    {
+      value: "kanji-cluster",
+      label: t("words.sort.kanjiCluster"),
+      group: "kanji",
+    },
   ];
 
   const groups: { key: SortGroup; label: string }[] = [
@@ -302,36 +308,41 @@ export function PronunciationPage() {
   const displayed = filterWords(sortWords(nonStarred, sort), query);
 
   return (
-    <div className="min-h-dvh bg-app-surface">
-      <div className="max-w-2xl mx-auto pb-8 sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border">
+    <div className="bg-app-surface min-h-dvh">
+      <div className="sm:border-app-border mx-auto max-w-2xl pb-8 sm:box-content sm:border-r-2 sm:border-l-2">
         <div
           ref={headerRef}
-          className="sticky top-0 z-10 bg-app-surface border-b border-app-border px-5 pt-4 pb-4 space-y-2"
+          className="bg-app-surface border-app-border sticky top-0 z-10 space-y-2 border-b px-5 pt-4 pb-4"
         >
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-1.5 p-1 -ml-1 text-app-text-muted hover:text-app-text-secondary transition-colors"
+              className="text-app-text-muted hover:text-app-text-secondary -ml-1 flex items-center gap-1.5 p-1 transition-colors"
             >
               <ArrowLeft size={18} />
-              <span className="text-[11px] font-semibold text-main-500 dark:text-main-600 uppercase tracking-widest">
+              <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
                 {t("nav.pronunciation")}
               </span>
             </button>
             <button
               onClick={() => {
                 if (displayed.length === 0) return;
-                startStudy(displayed, "okunuş", t("nav.pronunciation"), "/pronunciation");
+                startStudy(
+                  displayed,
+                  "okunuş",
+                  t("nav.pronunciation"),
+                  "/pronunciation",
+                );
                 navigate("/study");
               }}
               disabled={displayed.length === 0}
-              className="p-1.5 rounded-lg text-app-text-muted hover:bg-app-muted transition-colors disabled:opacity-30"
+              className="text-app-text-muted hover:bg-app-muted rounded-lg p-1.5 transition-colors disabled:opacity-30"
             >
               <Dices size={17} strokeWidth={2} />
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <p className="text-sm text-app-text-muted shrink-0 min-w-[1.25rem] flex items-center justify-center">
+            <p className="text-app-text-muted flex min-w-[1.25rem] shrink-0 items-center justify-center text-sm">
               {isLoading ? (
                 <LoadingSpinner size={18} />
               ) : (
@@ -345,32 +356,33 @@ export function PronunciationPage() {
             <div className="relative shrink-0" ref={sortMenuRef}>
               <button
                 onClick={() => setShowSortMenu((v) => !v)}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900 transition-colors"
+                className="text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900 flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors"
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
                 <span className="text-xs font-medium">{t("common.sort")}</span>
               </button>
               {showSortMenu && (
-                <div className="absolute right-0 top-full mt-1.5 z-50 bg-app-surface rounded-xl shadow-xl border border-app-border overflow-hidden w-56">
+                <div className="bg-app-surface border-app-border absolute top-full right-0 z-50 mt-1.5 w-56 overflow-hidden rounded-xl border shadow-xl">
                   {groups.map((group, gi) => (
                     <div key={group.key}>
                       {gi > 0 && (
-                        <div className="mx-3 my-1.5 border-t border-app-border" />
+                        <div className="border-app-border mx-3 my-1.5 border-t" />
                       )}
                       <div className="px-3 pt-2.5 pb-1">
-                        <p className="text-[10px] font-bold text-app-text-muted uppercase tracking-widest">
+                        <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
                           {group.label}
                         </p>
                       </div>
-                      {sortOptions.filter((o) => o.group === group.key).map(
-                        (opt) => (
+                      {sortOptions
+                        .filter((o) => o.group === group.key)
+                        .map((opt) => (
                           <button
                             key={opt.value}
                             onClick={() => {
                               setSort(opt.value);
                               setShowSortMenu(false);
                             }}
-                            className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-left hover:bg-app-muted"
+                            className="hover:bg-app-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm"
                           >
                             {sort === opt.value ? (
                               <CheckSquare
@@ -395,8 +407,7 @@ export function PronunciationPage() {
                               {opt.label}
                             </span>
                           </button>
-                        ),
-                      )}
+                        ))}
                     </div>
                   ))}
                   <div className="h-2" />
@@ -408,7 +419,7 @@ export function PronunciationPage() {
               onClick={() =>
                 selectMode ? exitSelectMode() : setSelectMode(true)
               }
-              className={`shrink-0 text-xs font-medium px-2 py-1.5 rounded-lg transition-colors ${selectMode ? "text-main-400 bg-main-50 dark:bg-main-950" : "text-app-text-muted hover:bg-app-muted"}`}
+              className={`shrink-0 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors ${selectMode ? "text-main-400 bg-main-50 dark:bg-main-950" : "text-app-text-muted hover:bg-app-muted"}`}
             >
               {selectMode ? t("common.cancel") : t("common.select")}
             </button>
@@ -466,14 +477,14 @@ export function PronunciationPage() {
       </div>
 
       {selectMode && (
-        <div className="max-w-2xl mx-auto sm:box-content sm:border-l-2 sm:border-r-2 sm:border-app-border fixed bottom-0 left-0 right-0 z-50 bg-app-surface border-t border-app-border-strong px-4 py-3 flex items-center gap-3">
+        <div className="sm:border-app-border bg-app-surface border-app-border-strong fixed right-0 bottom-0 left-0 z-50 mx-auto flex max-w-2xl items-center gap-3 border-t px-4 py-3 sm:box-content sm:border-r-2 sm:border-l-2">
           <button
             onClick={() => setSelectedIds(new Set(displayed.map((w) => w.id)))}
-            className="text-xs text-app-text-secondary shrink-0"
+            className="text-app-text-secondary shrink-0 text-xs"
           >
             {t("common.selectAll")}
           </button>
-          <span className="flex-1 text-center text-sm text-app-text-secondary font-medium">
+          <span className="text-app-text-secondary flex-1 text-center text-sm font-medium">
             {selectedIds.size > 0
               ? t("common.selectedCount", { count: selectedIds.size })
               : t("common.selectRows")}
@@ -481,7 +492,7 @@ export function PronunciationPage() {
           <button
             onClick={handleBulkDelete}
             disabled={selectedIds.size === 0}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-40 shrink-0"
+            className="flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold text-white disabled:opacity-40"
             style={{ background: "rgb(239,68,68)" }}
           >
             <Trash2 size={14} />
