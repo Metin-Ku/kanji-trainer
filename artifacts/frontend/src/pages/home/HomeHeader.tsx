@@ -29,7 +29,7 @@ export function HomeHeader({
   return (
     <div className="bg-app-surface border-app-border shrink-0 border-b px-5 pt-4 pb-5">
       <div className="mb-0.5 flex items-center justify-between gap-3">
-        <p className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
+        <p className="text-main-400 dark:text-main-500 text-[11px] font-semibold tracking-widest uppercase">
           {t("home.appSubtitle")}
         </p>
         <div className="-mt-1 -mr-2 flex items-center gap-0.5">

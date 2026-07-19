@@ -193,7 +193,7 @@ export const HorizontalScroll = forwardRef<
           ref={trackRef}
           className={cn(
             "mt-1.5 touch-none pb-2 select-none",
-            isTouchable ? "pt-2" : "pt-5",
+            isTouchable ? "pt-2" : "pt-3",
             interactiveTrack && "cursor-pointer",
           )}
           aria-hidden={!interactiveTrack}

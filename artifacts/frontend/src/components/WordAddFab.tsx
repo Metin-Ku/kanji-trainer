@@ -28,7 +28,7 @@ export function WordAddFab({ onNewWord, onBulkImport }: Props) {
   return (
     <div
       ref={fabRef}
-      className="fixed right-[max(1rem,calc((100vw-42rem)/2+1.2rem))] z-40"
+      className="fixed right-5 sm:right-[max(1rem,calc((100vw-42rem)/2+1.2rem))] z-40"
       style={{ bottom: 32 }}
     >
       <div

@@ -464,7 +464,7 @@ function SrsStudyPageInner({
             className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
           >
             <ArrowLeft size={18} />
-            <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
+            <span className="text-main-400 dark:text-main-500 text-[11px] font-semibold tracking-widest uppercase">
               {title}
             </span>
           </button>
@@ -530,7 +530,7 @@ function SrsStudyPageInner({
           className="text-app-text-muted -ml-1 flex items-center gap-1.5 p-1"
         >
           <ArrowLeft size={18} />
-          <span className="text-main-500 dark:text-main-600 text-[11px] font-semibold tracking-widest uppercase">
+          <span className="text-main-400 dark:text-main-500 text-[11px] font-semibold tracking-widest uppercase">
             {title}
           </span>
         </button>
