@@ -1,5 +1,9 @@
 import { CronJob } from "cron";
-import { isDemoAutoLoginEnabled } from "./lib/auth";
+
+function isDemoAutoLoginEnabled(): boolean {
+  const v = process.env.DEMO_AUTO_LOGIN?.trim().toLowerCase();
+  return v === "true" || v === "1";
+}
 
 const backendUrl = isDemoAutoLoginEnabled()
   ? "https://kanji-trainer-cv.onrender.com/api/healthz"
@@ -22,5 +26,6 @@ const job = new CronJob("*/14 * * * *", async () => {
 });
 
 job.start();
+console.log(`[cron] keep-alive job started → ${backendUrl} (every 14 min)`);
 
 export default job;

@@ -97,7 +97,10 @@ export function getEsbuildOptions({ clean = false } = {}) {
   const distDir = path.resolve(artifactDir, "dist");
 
   return {
-    entryPoints: [path.resolve(artifactDir, "src/index.ts")],
+    entryPoints: [
+      path.resolve(artifactDir, "src/index.ts"),
+      path.resolve(artifactDir, "src/cron.ts"),
+    ],
     platform: "node",
     bundle: true,
     format: "esm",
