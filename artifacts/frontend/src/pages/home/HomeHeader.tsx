@@ -13,6 +13,7 @@ interface Props {
   activityByDate: ActivityByDate;
   activityLoading: boolean;
   wordCount: number;
+  wordCountLoading?: boolean;
 }
 
 export function HomeHeader({
@@ -22,6 +23,7 @@ export function HomeHeader({
   activityByDate,
   activityLoading,
   wordCount,
+  wordCountLoading = false,
 }: Props) {
   const { t, formatToday } = useTranslation();
   const [, navigate] = useLocation();
@@ -62,6 +64,7 @@ export function HomeHeader({
         onChange={onQueryChange}
         placeholder={t("home.searchPlaceholder")}
         wordCount={wordCount}
+        wordCountLoading={wordCountLoading}
         onWordCountClick={() => navigate("/words?all=1")}
       />
       {!isSearching && (

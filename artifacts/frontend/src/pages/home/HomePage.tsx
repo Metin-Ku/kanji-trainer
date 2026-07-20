@@ -98,6 +98,7 @@ export function HomePage() {
         activityByDate={activityByDate}
         activityLoading={activityLoading}
         wordCount={words.length}
+        wordCountLoading={isLoading}
       />
 
       {isSearching ? (

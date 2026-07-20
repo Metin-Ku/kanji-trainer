@@ -1,12 +1,14 @@
 import { useRef, useState } from "react";
 import { Search, X } from "lucide-react";
 import { useTranslation } from "../i18n/I18nProvider";
+import { LoadingSpinner } from "./LoadingSpinner";
 
 interface Props {
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
   wordCount?: number;
+  wordCountLoading?: boolean;
   onWordCountClick?: () => void;
 }
 
@@ -15,6 +17,7 @@ export function SearchBar({
   onChange,
   placeholder = "",
   wordCount,
+  wordCountLoading = false,
   onWordCountClick,
 }: Props) {
   const { t } = useTranslation();
@@ -56,9 +59,20 @@ export function SearchBar({
         <button
           type="button"
           onClick={onWordCountClick}
-          className="bg-main-500 dark:bg-main-600 dark:text-app-text absolute right-1.5 flex h-[1.55rem] shrink-0 items-center justify-center rounded-sm px-2 text-xs font-bold text-white active:opacity-80"
+          disabled={wordCountLoading}
+          className="bg-main-500 dark:bg-main-600 dark:text-app-text absolute right-1.5 flex h-[1.55rem] shrink-0 items-center justify-center rounded-sm px-2 text-xs font-bold text-white active:opacity-80 disabled:opacity-90"
         >
-          {t("common.wordCount", { count: wordCount })}
+          {wordCountLoading ? (
+            <span className="relative inline-flex items-center justify-center">
+              <LoadingSpinner size={14} className="text-white" />
+              <span className="invisible">
+              2
+              </span>
+              <span> {t("common.words")}</span>
+            </span>
+          ) : (
+            t("common.wordCount", { count: wordCount })
+          )}
         </button>
       )}
       {value && (
