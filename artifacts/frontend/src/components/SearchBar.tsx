@@ -56,7 +56,7 @@ export function SearchBar({
         <button
           type="button"
           onClick={onWordCountClick}
-          className="bg-main-500 dark:bg-main-600 dark:text-app-text absolute right-1.5 flex h-[1.45rem] shrink-0 items-center justify-center rounded-sm px-2 text-xs text-white active:opacity-80"
+          className="bg-main-500 dark:bg-main-600 dark:text-app-text absolute right-1.5 flex h-[1.55rem] shrink-0 items-center justify-center rounded-sm px-2 text-xs font-bold text-white active:opacity-80"
         >
           {t("common.wordCount", { count: wordCount })}
         </button>
@@ -70,13 +70,13 @@ export function SearchBar({
           className="absolute right-1.5 flex items-center justify-center text-white active:opacity-80"
           style={{
             width: "2.6rem",
-            height: "1.45rem",
+            height: "1.55rem",
             background: "rgb(248,113,113)",
             borderRadius: "9999px",
             flexShrink: 0,
           }}
         >
-          <X size={11} strokeWidth={3} />
+          <X size={13} strokeWidth={3} />
         </button>
       )}
     </div>
