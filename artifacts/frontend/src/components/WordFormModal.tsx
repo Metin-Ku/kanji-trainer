@@ -499,16 +499,16 @@ export function WordFormModal({
                               setOpenLevelField(key);
                             }
                           }}
-                          className={`bg-app-muted border-app-border-strong flex h-10.5 cursor-pointer items-center gap-1.5 rounded-xl border px-2 py-2 font-semibold transition-all hover:brightness-[0.98] active:brightness-95 ${
+                          className={`bg-app-muted border-app-border-strong flex h-10.5 cursor-pointer items-center gap-1.5 rounded-xl border px-3.5 py-2 font-semibold transition-all hover:brightness-[0.98] active:brightness-95 ${
                             hideOnDesktop ? "sm:hidden" : ""
                           } ${isOpen ? "w-full flex-1" : "flex-1"}`}
                         >
                           <Icon
                             size={16}
                             strokeWidth={2}
-                            className="text-app-text-secondary mt-px shrink-0"
+                            className="text-app-text-muted mt-px shrink-0"
                           />
-                          <span className="text-app-text-secondary truncate text-sm font-semibold">
+                          <span className="text-app-text-muted truncate text-sm font-semibold">
                             {t(labelKey)}
                           </span>
                           {isOpen

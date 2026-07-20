@@ -63,7 +63,7 @@ export function CategoriesSelect({ categories, selectedIds, onChange }: Props) {
   return (
     <div ref={containerRef} className="relative">
       <div
-        className="border-app-border-strong bg-app-muted focus-within:ring-main-300 flex min-h-10.5 w-full cursor-text flex-wrap items-center gap-2 rounded-xl border px-3 py-2 transition-all focus-within:border-transparent focus-within:ring-2"
+        className="border-app-border-strong bg-app-muted focus-within:ring-main-300 flex min-h-10.5 w-full cursor-text flex-wrap items-center gap-2 rounded-xl border px-3.5 py-2 transition-all focus-within:border-transparent focus-within:ring-2"
         onClick={() => {
           setIsOpen(true);
           inputRef.current?.focus();
