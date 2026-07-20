@@ -129,7 +129,7 @@ export function HomeSearchResultItem({
 
                   {starred ? (
                     <div
-                      className="flex h-[18px] w-[18px] items-center justify-center rounded-full text-[10px] font-bold"
+                      className="flex h-4.5 w-4.5 items-center justify-center rounded-full text-[10px] font-bold"
                       style={{
                         background: themeVars.star,
                         color: "rgb(255,255,255)",
@@ -139,7 +139,7 @@ export function HomeSearchResultItem({
                     </div>
                   ) : (
                     <div
-                      className="flex h-[18px] w-[18px] items-center justify-center rounded-full text-[10px] font-bold text-white"
+                      className="flex h-4.5 w-4.5 items-center justify-center rounded-full text-[10px] font-bold text-white"
                       style={{ background: themeVars.level(level) }}
                     >
                       {level}

@@ -243,6 +243,7 @@ export const tr: Messages = {
     },
     labels: {
       kanji: "Japonca kelime",
+      word: "Kelime",
       pronunciation: "Okunuş",
       meaning: "Anlam",
       examplesAndNotes: "Örnek cümleler ve notlar",

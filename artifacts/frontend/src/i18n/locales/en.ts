@@ -241,6 +241,7 @@ export const en = {
     },
     labels: {
       kanji: "Japanese word",
+      word: "Word",
       pronunciation: "Pronunciation",
       meaning: "Meaning",
       examplesAndNotes: "Example sentences & notes",

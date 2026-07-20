@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { X } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { X, BookOpen, Languages, Waves } from "lucide-react";
 import { Word, SrsExample } from "../types";
 import { RelatedWordsSelect } from "./RelatedWordsSelect";
 import { CategoriesSelect } from "./CategoriesSelect";
@@ -10,6 +10,7 @@ import {
 } from "../lib/srsExamples";
 import { useTranslation } from "../i18n/I18nProvider";
 import { useCategories } from "../hooks/useCategories";
+import { themeVars } from "../theme";
 
 interface SaveData {
   kanji: string;
@@ -18,6 +19,11 @@ interface SaveData {
   description: string;
   srsExamples: SrsExample[];
   level: number;
+  starred: boolean;
+  pronLevel: number;
+  pronStarred: boolean;
+  meaningLevel: number;
+  meaningStarred: boolean;
   jlptLevel: string | null;
   date: string;
   relatedWordIds: number[];
@@ -42,6 +48,24 @@ function todayStr() {
 const JLPT_LEVELS = ["N5", "N4", "N3", "N2", "N1"] as const;
 
 type TabId = "general" | "srs";
+type LevelField = "word" | "pronunciation" | "meaning";
+
+const LEVEL_ROWS: {
+  key: LevelField;
+  labelKey:
+    | "wordForm.labels.word"
+    | "wordForm.labels.pronunciation"
+    | "wordForm.labels.meaning";
+  Icon: typeof Languages;
+}[] = [
+  { key: "word", labelKey: "wordForm.labels.word", Icon: Languages },
+  {
+    key: "pronunciation",
+    labelKey: "wordForm.labels.pronunciation",
+    Icon: Waves,
+  },
+  { key: "meaning", labelKey: "wordForm.labels.meaning", Icon: BookOpen },
+];
 
 export function WordFormModal({
   initial,
@@ -62,6 +86,13 @@ export function WordFormModal({
     initial?.srsExamples ?? [],
   );
   const [level, setLevel] = useState(initial?.level ?? 1);
+  const [pronLevel, setPronLevel] = useState(initial?.pronLevel ?? 1);
+  const [meaningLevel, setMeaningLevel] = useState(initial?.meaningLevel ?? 1);
+  const [starred, setStarred] = useState(initial?.starred ?? false);
+  const [pronStarred, setPronStarred] = useState(initial?.pronStarred ?? false);
+  const [meaningStarred, setMeaningStarred] = useState(
+    initial?.meaningStarred ?? false,
+  );
   const [jlptLevel, setJlptLevel] = useState<string | null>(
     initial?.jlptLevel ?? null,
   );
@@ -72,7 +103,146 @@ export function WordFormModal({
   const [categoryIds, setCategoryIds] = useState<number[]>(
     initial?.categoryIds ?? [],
   );
+  const [openLevelField, setOpenLevelField] = useState<LevelField | null>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
+  const levelPickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!openLevelField) return;
+    function handler(e: MouseEvent | TouchEvent) {
+      if (
+        levelPickerRef.current &&
+        !levelPickerRef.current.contains(e.target as Node)
+      ) {
+        setOpenLevelField(null);
+      }
+    }
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("touchstart", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("touchstart", handler);
+    };
+  }, [openLevelField]);
+
+  function getLevelState(field: LevelField) {
+    switch (field) {
+      case "word":
+        return { level, starred };
+      case "pronunciation":
+        return { level: pronLevel, starred: pronStarred };
+      case "meaning":
+        return { level: meaningLevel, starred: meaningStarred };
+    }
+  }
+
+  function applyLevelState(
+    field: LevelField,
+    nextLevel: number,
+    nextStarred: boolean,
+  ) {
+    switch (field) {
+      case "word":
+        setLevel(nextLevel);
+        setStarred(nextStarred);
+        break;
+      case "pronunciation":
+        setPronLevel(nextLevel);
+        setPronStarred(nextStarred);
+        break;
+      case "meaning":
+        setMeaningLevel(nextLevel);
+        setMeaningStarred(nextStarred);
+        break;
+    }
+  }
+
+  function renderLevelIndicator(levelValue: number, isStarred: boolean) {
+    if (isStarred) {
+      return (
+        <div
+          className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold"
+          style={{
+            background: themeVars.star,
+            color: "rgb(255,255,255)",
+          }}
+        >
+          ★
+        </div>
+      );
+    }
+    return (
+      <div
+        className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold text-white"
+        style={{ background: themeVars.level(levelValue) }}
+      >
+        {levelValue}
+      </div>
+    );
+  }
+
+  function renderLevelPicker(field: LevelField) {
+    const { level: pickLevel, starred: pickStarred } = getLevelState(field);
+    const starEnabled = pickLevel === 5 || pickStarred;
+
+    return (
+      <div
+        className="ml-auto flex shrink-0 items-center gap-1"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {[1, 2, 3, 4, 5].map((l) => {
+          const active = pickLevel === l && !pickStarred;
+          const color = themeVars.level(l);
+          return (
+            <button
+              key={l}
+              type="button"
+              onClick={() => {
+                applyLevelState(field, l, false);
+                setOpenLevelField(null);
+              }}
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold"
+              style={{
+                background: active ? color : "transparent",
+                boxShadow: active ? "none" : `inset 0 0 0 2px ${color}`,
+                color: active ? "white" : color,
+              }}
+            >
+              {l}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          disabled={!starEnabled}
+          onClick={() => {
+            if (!starEnabled) return;
+            applyLevelState(field, 5, !pickStarred);
+            setOpenLevelField(null);
+          }}
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[12px] font-bold"
+          style={{
+            background: pickStarred ? themeVars.star : "transparent",
+            boxShadow: pickStarred
+              ? "none"
+              : `inset 0 0 0 2px ${starEnabled ? themeVars.star : "#e5e7eb"}`,
+            color: pickStarred
+              ? "white"
+              : starEnabled
+                ? themeVars.star
+                : "#d1d5db",
+            cursor: starEnabled ? "pointer" : "not-allowed",
+            opacity: starEnabled ? 1 : 0.4,
+          }}
+          aria-label={
+            pickStarred ? t("a11y.unmarkLearned") : t("a11y.markLearned")
+          }
+        >
+          ★
+        </button>
+      </div>
+    );
+  }
 
   function handleBackdropClick(e: React.MouseEvent<HTMLDivElement>) {
     if (e.target === backdropRef.current) onClose();
@@ -100,6 +270,11 @@ export function WordFormModal({
       description,
       srsExamples: sanitizeSrsExamples(srsExamples),
       level,
+      starred,
+      pronLevel,
+      pronStarred,
+      meaningLevel,
+      meaningStarred,
       jlptLevel,
       date,
       relatedWordIds,
@@ -187,7 +362,7 @@ export function WordFormModal({
                     value={pronunciation}
                     onChange={(e) => setPronunciation(e.target.value)}
                     placeholder={t("wordForm.placeholders.pronunciation")}
-                    className="border-app-border-strong bg-app-muted text-app-text focus:ring-main-300 w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+                    className="border-app-border-strong bg-app-muted text-app-text focus:ring-main-300 min-h-10.5 w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
                   />
                 </div>
 
@@ -200,7 +375,7 @@ export function WordFormModal({
                     value={meaning}
                     onChange={(e) => setMeaning(e.target.value)}
                     placeholder={t("wordForm.placeholders.meaning")}
-                    className="border-app-border-strong bg-app-muted text-app-text focus:ring-main-300 w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+                    className="border-app-border-strong bg-app-muted text-app-text focus:ring-main-300 min-h-10.5 w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
                   />
                 </div>
 
@@ -258,32 +433,9 @@ export function WordFormModal({
                   </div>
                 )}
 
-                <div>
-                  <label className="text-app-text-muted mb-1.5 block text-xs font-semibold tracking-wide uppercase">
-                    {t("wordForm.labels.jlptLevel")}{" "}
-                    <span className="text-app-text-muted font-normal normal-case">
-                      {t("wordForm.labels.jlptOptional")}
-                    </span>
-                  </label>
-                  <div className="flex gap-1.5">
-                    {JLPT_LEVELS.map((lvl) => {
-                      const active = jlptLevel === lvl;
-                      return (
-                        <button
-                          key={lvl}
-                          type="button"
-                          onClick={() => setJlptLevel(active ? null : lvl)}
-                          className={`h-[38px] flex-1 rounded-xl border-2 text-sm font-semibold ${active ? "bg-main-400 border-main-400 text-white" : "border-app-border-strong text-app-text-muted bg-transparent"}`}
-                        >
-                          {lvl}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
                 <div className="flex gap-3">
-                  <div className="flex-1">
+                  {/* <div className="flex-1"> */}
+                  <div className="max-w-2/5">
                     <label className="text-app-text-muted mb-1.5 block text-xs font-semibold tracking-wide uppercase">
                       {t("wordForm.labels.date")}
                     </label>
@@ -291,32 +443,80 @@ export function WordFormModal({
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="border-app-border-strong bg-app-muted text-app-text focus:ring-main-300 w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
+                      className="border-app-border-strong bg-app-muted text-app-text focus:ring-main-300 min-h-10.5 w-full rounded-xl border px-3.5 py-2.5 text-sm transition-all focus:ring-2 focus:outline-none"
                     />
                   </div>
-                  <div>
+
+                  <div className="flex-1">
                     <label className="text-app-text-muted mb-1.5 block text-xs font-semibold tracking-wide uppercase">
-                      {t("wordForm.labels.level")}
+                      {t("wordForm.labels.jlptLevel")}{" "}
+                      <span className="text-app-text-muted font-normal normal-case">
+                        {t("wordForm.labels.jlptOptional")}
+                      </span>
                     </label>
                     <div className="flex gap-1.5">
-                      {[1, 2, 3, 4, 5].map((l) => (
-                        <button
-                          key={l}
-                          type="button"
-                          onClick={() => setLevel(l)}
-                          className="h-[42px] w-9 rounded-xl border-2 text-sm font-bold"
-                          style={{
-                            background:
-                              level === l ? `var(--level-${l})` : "transparent",
-                            borderColor:
-                              level === l ? `var(--level-${l})` : "#e5e7eb",
-                            color: level === l ? "white" : "#9ca3af",
-                          }}
-                        >
-                          {l}
-                        </button>
-                      ))}
+                      {JLPT_LEVELS.map((lvl) => {
+                        const active = jlptLevel === lvl;
+                        return (
+                          <button
+                            key={lvl}
+                            type="button"
+                            onClick={() => setJlptLevel(active ? null : lvl)}
+                            className={`h-10.5 flex-1 rounded-xl border-2 text-sm font-semibold ${active ? "bg-main-400 border-main-400 text-white" : "border-app-border-strong text-app-text-muted bg-transparent"}`}
+                          >
+                            {lvl}
+                          </button>
+                        );
+                      })}
                     </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-app-text-muted mb-1.5 block text-xs font-semibold tracking-wide uppercase">
+                    {t("wordForm.labels.level")}
+                  </label>
+                  <div
+                    ref={levelPickerRef}
+                    className="flex flex-col gap-1.5 sm:flex-row sm:gap-1"
+                  >
+                    {LEVEL_ROWS.map(({ key, labelKey, Icon }) => {
+                      const isOpen = openLevelField === key;
+                      const hideOnDesktop =
+                        openLevelField !== null && openLevelField !== key;
+                      const { level: rowLevel, starred: rowStarred } =
+                        getLevelState(key);
+
+                      return (
+                        <div
+                          key={key}
+                          role="button"
+                          tabIndex={0}
+                          onClick={() => setOpenLevelField(key)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              setOpenLevelField(key);
+                            }
+                          }}
+                          className={`bg-app-muted border-app-border-strong flex h-10.5 cursor-pointer items-center gap-1.5 rounded-xl border px-2 py-2 font-semibold transition-all hover:brightness-[0.98] active:brightness-95 ${
+                            hideOnDesktop ? "sm:hidden" : ""
+                          } ${isOpen ? "w-full flex-1" : "flex-1"}`}
+                        >
+                          <Icon
+                            size={16}
+                            strokeWidth={2}
+                            className="text-app-text-secondary mt-px shrink-0"
+                          />
+                          <span className="text-app-text-secondary truncate text-sm font-semibold">
+                            {t(labelKey)}
+                          </span>
+                          {isOpen
+                            ? renderLevelPicker(key)
+                            : renderLevelIndicator(rowLevel, rowStarred)}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </>
