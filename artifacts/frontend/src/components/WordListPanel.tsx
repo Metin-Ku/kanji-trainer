@@ -2,26 +2,27 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import {
   ArrowLeft,
   ArrowUpDown,
-  CheckSquare,
-  Square,
   Trash2,
   Dices,
+  Pin,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { WordCard } from "./WordCard";
 import { WordFormModal } from "./WordFormModal";
 import { SearchBar } from "./SearchBar";
+import { ListSortMenuContent } from "./ListSortMenuContent";
 import { LoadingSpinner } from "./LoadingSpinner";
 import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { filterWords } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import type { Word, WordUpdate } from "../types";
-import { JLPT_LEVELS } from "../types/srs";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
 import { pageTitleLabelClass } from "../lib/japaneseScript";
 import { useConfirm } from "../components/ConfirmProvider";
 import { getWordsListPrefs, saveWordsListPrefs } from "../lib/listPreferences";
+import { partitionPinnedWords } from "../lib/pinnedWords";
+import { usePinnedWords } from "../hooks/usePinnedWords";
 
 export type SortMode =
   | "level-asc"
@@ -31,10 +32,9 @@ export type SortMode =
   | "jlpt-asc"
   | "jlpt-desc"
   | "kanji-cluster";
-type SortGroup = "level" | "date" | "jlpt" | "kanji";
+type SortGroup = "level" | "date" | "jlpt" | "kanji" | "jlptOrder";
 
 const JLPT_RANK: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
-const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
 function jlptRank(w: Word): number {
   return w.jlptLevel ? (JLPT_RANK[w.jlptLevel] ?? 99) : 99;
 }
@@ -82,25 +82,6 @@ export function sortWords(words: Word[], sorts: Set<SortMode>): Word[] {
   const arr = [...words];
   if (!cmp) return arr;
   return arr.sort(cmp);
-}
-
-function toggleSort(
-  prev: Set<SortMode>,
-  value: SortMode,
-  sortOptions: { value: SortMode; group: SortGroup }[],
-): Set<SortMode> {
-  const next = new Set(prev);
-  const opt = sortOptions.find((o) => o.value === value)!;
-  const others = sortOptions
-    .filter((o) => o.group === opt.group && o.value !== value)
-    .map((o) => o.value);
-  if (next.has(value)) {
-    next.delete(value);
-  } else {
-    others.forEach((o) => next.delete(o));
-    next.add(value);
-  }
-  return next;
 }
 
 export type WordListPanelProps = {
@@ -156,8 +137,8 @@ export function WordListPanel({
     { value: "level-desc", label: t("words.sort.levelDesc"), group: "level" },
     { value: "date-asc", label: t("words.sort.dateAsc"), group: "date" },
     { value: "date-desc", label: t("words.sort.dateDesc"), group: "date" },
-    { value: "jlpt-asc", label: t("words.sort.jlptAsc"), group: "jlpt" },
-    { value: "jlpt-desc", label: t("words.sort.jlptDesc"), group: "jlpt" },
+    { value: "jlpt-asc", label: t("words.sort.jlptAsc"), group: "jlptOrder" },
+    { value: "jlpt-desc", label: t("words.sort.jlptDesc"), group: "jlptOrder" },
     {
       value: "kanji-cluster",
       label: t("words.sort.kanjiCluster"),
@@ -166,7 +147,8 @@ export function WordListPanel({
   ];
 
   const groups: { key: SortGroup; label: string }[] = [
-    { key: "jlpt", label: t("common.jlpt") },
+    // { key: "jlpt", label: t("common.jlpt") },
+    { key: "jlptOrder", label: t("common.jlptOrder") },
     { key: "level", label: t("common.level") },
     { key: "date", label: t("common.date") },
     { key: "kanji", label: t("common.clustering") },
@@ -196,6 +178,7 @@ export function WordListPanel({
   const [visibleCount, setVisibleCount] = useState(savedPrefs.pageSize ?? 50);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const { pinnedIds, togglePinMany, isPinned } = usePinnedWords(studyReturnPath);
 
   const headerRef = useRef<HTMLDivElement>(null);
   const sortMenuRef = useRef<HTMLDivElement>(null);
@@ -242,13 +225,17 @@ export function WordListPanel({
     if (layout !== "page" || selectedJlpt.size === 0) return searched;
     return searched.filter((w) => w.jlptLevel && selectedJlpt.has(w.jlptLevel));
   }, [searched, layout, selectedJlpt]);
-  const visibleWords = useMemo(
-    () => (layout === "page" ? filtered.slice(0, visibleCount) : filtered),
-    [filtered, layout, visibleCount],
+  const orderedWords = useMemo(
+    () => partitionPinnedWords(filtered, pinnedIds),
+    [filtered, pinnedIds],
   );
-  const hasMore = layout === "page" && visibleCount < filtered.length;
+  const visibleWords = useMemo(
+    () =>
+      layout === "page" ? orderedWords.slice(0, visibleCount) : orderedWords,
+    [orderedWords, layout, visibleCount],
+  );
+  const hasMore = layout === "page" && visibleCount < orderedWords.length;
   const activeSortCount = activeSorts.size;
-  const selectedJlptCount = selectedJlpt.size;
 
   useEffect(() => {
     if (layout !== "page" || !hasMore) return;
@@ -264,7 +251,7 @@ export function WordListPanel({
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [layout, hasMore, pageSize, visibleWords.length, filtered.length]);
+  }, [layout, hasMore, pageSize, visibleWords.length, orderedWords.length]);
 
   const handleScroll = useCallback(() => {
     if (!headerRef.current || selectMode) return;
@@ -300,6 +287,12 @@ export function WordListPanel({
 
   function exitSelectMode() {
     setSelectMode(false);
+    setSelectedIds(new Set());
+  }
+
+  function handlePinSelected() {
+    if (selectedIds.size === 0) return;
+    togglePinMany(Array.from(selectedIds));
     setSelectedIds(new Set());
   }
 
@@ -340,7 +333,7 @@ export function WordListPanel({
     <button
       onClick={() => {
         if (filtered.length === 0) return;
-        startStudy(filtered, "kelime", studyTitle, studyReturnPath);
+        startStudy(orderedWords, "kelime", studyTitle, studyReturnPath);
         navigate("/study");
       }}
       disabled={filtered.length === 0}
@@ -384,158 +377,20 @@ export function WordListPanel({
           </span>
         </button>
         {showSortMenu && (
-          <div className="bg-app-surface border-app-border absolute top-full right-0 z-50 mt-1.5 max-h-[min(70dvh,28rem)] w-56 overflow-y-auto rounded-xl border shadow-xl">
-            {layout === "page" && (
-              <>
-                <div className="border-app-border mx-3 my-1.5 border-t" />
-                <div className="px-3 pt-2.5 pb-1">
-                  <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
-                    {t("words.filters.pageSize")}
-                  </p>
-                </div>
-                <div className="px-3 pb-2">
-                  <select
-                    value={pageSize}
-                    onChange={(e) => setPageSize(Number(e.target.value))}
-                    className="border-app-border-strong bg-app-muted text-app-text w-full rounded-lg border px-3 py-2 text-sm"
-                  >
-                    {PAGE_SIZE_OPTIONS.map((size) => (
-                      <option key={size} value={size}>
-                        {size}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="border-app-border mx-3 my-1.5 border-t" />
-                <div className="px-3 pt-2.5 pb-1">
-                  <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
-                    {t("words.filters.jlpt")}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setSelectedJlpt(new Set())}
-                  className="hover:bg-app-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
-                >
-                  {selectedJlptCount === 0 ? (
-                    <CheckSquare
-                      size={15}
-                      className="text-main-400 shrink-0"
-                      strokeWidth={2}
-                    />
-                  ) : (
-                    <Square
-                      size={15}
-                      className="text-app-text-muted shrink-0"
-                      strokeWidth={2}
-                    />
-                  )}
-                  <span
-                    className={
-                      selectedJlptCount === 0
-                        ? "text-app-text font-medium"
-                        : "text-app-text-secondary"
-                    }
-                  >
-                    {t("common.all")}
-                  </span>
-                </button>
-                {JLPT_LEVELS.map((level) => {
-                  const active = selectedJlpt.has(level);
-                  return (
-                    <button
-                      key={level}
-                      type="button"
-                      onClick={() => toggleJlpt(level)}
-                      className="hover:bg-app-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
-                    >
-                      {active ? (
-                        <CheckSquare
-                          size={15}
-                          className="text-main-400 shrink-0"
-                          strokeWidth={2}
-                        />
-                      ) : (
-                        <Square
-                          size={15}
-                          className="text-app-text-muted shrink-0"
-                          strokeWidth={2}
-                        />
-                      )}
-                      <span
-                        className={
-                          active
-                            ? "text-app-text font-medium"
-                            : "text-app-text-secondary"
-                        }
-                      >
-                        {level}
-                      </span>
-                    </button>
-                  );
-                })}
-              </>
-            )}
-            {groups.map((group, gi) => (
-              <div key={group.key}>
-                {gi > 0 && (
-                  <div className="border-app-border mx-3 my-1.5 border-t" />
-                )}
-                <div className="px-3 pt-2.5 pb-1">
-                  <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
-                    {group.label}
-                  </p>
-                </div>
-                {sortOptions
-                  .filter((o) => o.group === group.key)
-                  .map((opt) => {
-                    const active = activeSorts.has(opt.value);
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() =>
-                          setActiveSorts((p) =>
-                            toggleSort(p, opt.value, sortOptions),
-                          )
-                        }
-                        className="hover:bg-app-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors"
-                      >
-                        {active ? (
-                          <CheckSquare
-                            size={15}
-                            className="text-main-400 shrink-0"
-                            strokeWidth={2}
-                          />
-                        ) : (
-                          <Square
-                            size={15}
-                            className="text-app-text-muted shrink-0"
-                            strokeWidth={2}
-                          />
-                        )}
-                        <span
-                          className={
-                            active
-                              ? "text-app-text font-medium"
-                              : "text-app-text-secondary"
-                          }
-                        >
-                          {opt.label}
-                        </span>
-                      </button>
-                    );
-                  })}
-              </div>
-            ))}
-            {activeSortCount > 1 && (
-              <div className="bg-main-50 dark:bg-main-950 mx-3 mt-1.5 mb-2.5 rounded-lg px-2.5 py-1.5">
-                <p className="text-main-400 text-[11px] font-medium">
-                  {t("words.sort.multiCriteria", { count: activeSortCount })}
-                </p>
-              </div>
-            )}
-            <div className="h-1" />
-          </div>
+          <ListSortMenuContent
+            menuOpen={showSortMenu}
+            mode="multi"
+            sortOptions={sortOptions}
+            groups={groups}
+            activeSorts={activeSorts}
+            onActiveSortsChange={setActiveSorts}
+            showPageSize={layout === "page"}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            selectedJlpt={selectedJlpt}
+            onToggleJlpt={toggleJlpt}
+            onClearJlpt={() => setSelectedJlpt(new Set())}
+          />
         )}
       </div>
       <button
@@ -553,7 +408,7 @@ export function WordListPanel({
         ref={headerRef}
         className={
           layout === "page"
-            ? "bg-app-surface border-app-border sticky top-0 z-10 space-y-2 border-b px-5 pt-4 pb-4"
+            ? "bg-app-surface border-app-border sticky top-0 z-10 space-y-2 border-b px-4 pt-4 pb-4"
             : "space-y-2"
         }
       >
@@ -644,6 +499,7 @@ export function WordListPanel({
                     return n;
                   })
                 }
+                pinned={isPinned(word.id)}
                 allWords={allWords}
               />
             ))}
@@ -663,7 +519,7 @@ export function WordListPanel({
       {selectMode && (
         <div className="sm:border-app-border bg-app-surface border-app-border-strong fixed right-0 bottom-0 left-0 z-50 mx-auto flex max-w-2xl items-center gap-3 border-t px-4 py-3 sm:box-content sm:border-r-2 sm:border-l-2">
           <button
-            onClick={() => setSelectedIds(new Set(filtered.map((w) => w.id)))}
+            onClick={() => setSelectedIds(new Set(orderedWords.map((w) => w.id)))}
             className="text-app-text-secondary hover:text-app-text shrink-0 text-xs transition-colors"
           >
             {t("common.selectAll")}
@@ -673,6 +529,14 @@ export function WordListPanel({
               ? t("common.selectedCount", { count: selectedIds.size })
               : t("common.selectRows")}
           </span>
+          <button
+            onClick={handlePinSelected}
+            disabled={selectedIds.size === 0}
+            className="text-main-400 bg-main-50 dark:bg-main-950 flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-opacity disabled:opacity-40"
+          >
+            <Pin size={14} />
+            {t("common.pin")}
+          </button>
           <button
             onClick={handleBulkAction}
             disabled={selectedIds.size === 0}

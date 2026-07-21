@@ -21,6 +21,7 @@ interface Props {
   selectMode?: boolean;
   isSelected?: boolean;
   onSelect?: () => void;
+  pinned?: boolean;
   allWords?: Word[];
 }
 
@@ -36,6 +37,7 @@ export function WordCard({
   selectMode = false,
   isSelected = false,
   onSelect,
+  pinned = false,
   allWords,
 }: Props) {
   const { t, formatCardDate } = useTranslation();
@@ -81,12 +83,12 @@ export function WordCard({
     <>
       <div ref={cardRef} className="border-app-border border-b last:border-b-0">
         <div
-          className="flex cursor-pointer items-center gap-2.5 px-4 py-3 select-none"
+          className={`flex cursor-pointer items-center gap-2.5 px-4 py-3 select-none ${pinned ? "bg-main-50/50 dark:bg-main-950/50" : ""}`}
           onClick={handleRowClick}
         >
           {selectMode ? (
             <div
-              className={`border-app-border-strong flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
+              className={`border-app-border-strong flex h-4.5 w-4.5 mt-[2px] shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
             >
               {isSelected && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -161,6 +163,25 @@ export function WordCard({
                 className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-red-400"
                 onClick={() => onDelete(word.id)}
                 aria-label={t("common.delete")}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          )}
+          {selectMode && (
+            <div
+              className="invisible flex shrink-0 gap-0.5"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-blue-400"
+                disabled
+              >
+                <Pencil size={14} />
+              </button>
+              <button
+                className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-red-400"
+                disabled
               >
                 <Trash2 size={14} />
               </button>

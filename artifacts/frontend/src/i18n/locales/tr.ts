@@ -4,6 +4,7 @@ export const tr: Messages = {
   common: {
     cancel: "İptal",
     select: "Seç",
+    pin: "Sabitle",
     delete: "Sil",
     sort: "Sırala",
     sortWithCount: "Sırala ({count})",
@@ -34,6 +35,7 @@ export const tr: Messages = {
     level: "Seviye",
     date: "Tarih",
     jlpt: "JLPT",
+    jlptOrder: "JLPT Sıralaması",
     clustering: "Kümeleme",
     noPronunciation: "Okunuş yok",
     noMeaning: "Anlam yok",
@@ -570,10 +572,22 @@ export const tr: Messages = {
     title: "İlerleme",
     subtitle: "Çalışma aktivitesi, seviyeler ve JLPT kapsamı",
     sections: {
+      studiedWords: "Çalışılan kelimeler",
       heatmap: "Çalışma takvimi",
       deckActivity: "Deste aktivitesi",
       levelDistribution: "Seviye dağılımı",
       jlpt: "JLPT tamamlanma",
+    },
+    studiedWords: {
+      empty: "Bu aralıkta çalışılan kelime yok.",
+      startDate: "Başlangıç",
+      endDate: "Bitiş",
+      presets: {
+        today: "Bugün",
+        yesterday: "Dün",
+        twoDaysAgo: "2 gün önce",
+        lastWeek: "Son 1 hafta",
+      },
     },
     heatmap: {
       year: "Yıl",

@@ -272,3 +272,72 @@ Her instance icin ayri ayri:
 
 - Supabase free x2, Render free x2, Vercel free x2
 - Render free tier: 15 dk idle sonrasi uyku; ilk istek 30-60 sn
+
+---------------------------------------------------------------
+
+## Iki veritabanina sema guncelleme (CV + kisisel)
+
+Kod tek repo; **veritabani semasi otomatik senkron olmaz**. Her sema degisikliginde **her iki Supabase projesine** ayri ayri uygulayin.
+
+### Hangi arac ne zaman?
+
+| Degisiklik | Komut / dosya |
+|------------|----------------|
+| `lib/db/src/schema/tables.ts` (Drizzle) | `pnpm --filter @workspace/db run push` |
+| Yeni `lib/db/migrations/*.sql` | Supabase SQL Editor veya `psql ... -f lib/db/migrations/XXX.sql` |
+| Auth semasi (ilk kurulum) | `pnpm db:migrate-auth` |
+
+### Kisa yol — PowerShell (`.env` degistirmeden)
+
+Proje kokunde, her DB icin `DATABASE_URL`'i gecici set edin:
+
+```powershell
+# DB 1 (kisisel)
+$env:DATABASE_URL = "postgresql://KISISEL_POOLER_URL"
+pnpm --filter @workspace/db run push
+# Gerekirse:
+psql $env:DATABASE_URL -f lib/db/migrations/004_srs_review_log.sql
+
+# DB 2 (CV)
+$env:DATABASE_URL = "postgresql://CV_POOLER_URL"
+pnpm --filter @workspace/db run push
+psql $env:DATABASE_URL -f lib/db/migrations/004_srs_review_log.sql
+```
+
+### Tek komut — her iki DB'ye sema (`DATABASE_URL_CV`)
+
+`.env` dosyasina ikinci URL'i ayri degisken olarak yazin:
+
+```env
+DATABASE_URL=postgresql://...kisisel...
+DATABASE_URL_CV=postgresql://...cv...
+```
+
+Proje kokunden:
+
+```powershell
+pnpm db:push-all
+```
+
+Bu komut sirayla her iki veritabanina `drizzle-kit push` uygular. Elle SQL migration varsa her iki Supabase SQL Editor'de de calistirin (veya yukaridaki `psql` adimini iki URL ile tekrarlayin).
+
+### Kisisel → CV veri klonu (tam kopya)
+
+CV veritabanini kisisel ile ayni icerige getirmek icin (kelimeler, SRS, kategoriler, temalar, study activity):
+
+```powershell
+pnpm db:push-all
+pnpm db:clone -- --yes
+```
+
+- **Kaynak:** `DATABASE_URL` (kisisel)
+- **Hedef:** `DATABASE_URL_CV` (CV) — hedefteki mevcut veri **silinir** ve uzerine yazilir
+- Onay icin `--yes` zorunlu (veya `CLONE_CONFIRM=yes`)
+
+Ozel kaynak/hedef:
+
+```powershell
+$env:DATABASE_URL_SOURCE = "postgresql://..."
+$env:DATABASE_URL_TARGET = "postgresql://..."
+pnpm db:clone -- --yes
+```

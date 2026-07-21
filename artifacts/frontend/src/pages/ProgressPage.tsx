@@ -10,6 +10,7 @@ import { DeckActivityChart } from "../components/progress/DeckActivityChart";
 import { LevelDistributionChart } from "../components/progress/LevelDistributionChart";
 import { JlptProgressSection } from "../components/progress/JlptProgressSection";
 import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
+import { StudiedWordsSection } from "../components/progress/StudiedWordsSection";
 import { membershipYear, yearRange } from "../lib/authApi";
 
 function Section({
@@ -66,6 +67,8 @@ export function ProgressPage() {
       </div>
 
       <div className="min-w-0 flex-1 space-y-4 overflow-x-hidden overflow-y-auto px-5 py-4 pb-8">
+        <StudiedWordsSection />
+
         {isLoading ? (
           <LoadingPlaceholder padding="lg" />
         ) : (

@@ -8,6 +8,8 @@
     "db:migrate-auth": "pnpm --filter @workspace/db run migrate-auth",
     "db:assign-owner": "pnpm --filter @workspace/db run assign-owner",
     "db:migrate-srs-user": "pnpm --filter @workspace/db run migrate-srs-user",
+    "db:push-all": "node scripts/db-push-all.mjs",
+    "db:clone": "pnpm --filter @workspace/db run clone",
     "build": "pnpm run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"

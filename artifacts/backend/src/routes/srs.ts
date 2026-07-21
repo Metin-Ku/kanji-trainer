@@ -19,6 +19,11 @@ import {
   recordMistake,
   recordSuccess,
 } from "../lib/wordMistakes";
+import {
+  getStudiedWords,
+  isValidDateKey,
+  recordSrsReviewLog,
+} from "../lib/srsReviewLog";
 import { getUserId } from "../middleware/auth";
 
 const router = Router();
@@ -116,6 +121,40 @@ router.get("/srs/queue", async (req, res, next) => {
   }
 });
 
+router.get("/srs/studied-words", async (req, res, next) => {
+  try {
+    const deck = parseDeckType(String(req.query.deck ?? ""));
+    if (!deck) {
+      res.status(400).json({ error: "Invalid deck" });
+      return;
+    }
+    const from =
+      typeof req.query.from === "string" && isValidDateKey(req.query.from)
+        ? req.query.from
+        : undefined;
+    const to =
+      typeof req.query.to === "string" && isValidDateKey(req.query.to)
+        ? req.query.to
+        : undefined;
+    if (!from && !to) {
+      res.status(400).json({ error: "from or to date required" });
+      return;
+    }
+
+    const words = await getStudiedWords(getUserId(req), deck, from, to);
+    res.json(
+      words.map((w) => ({
+        ...w,
+        createdAt: w.createdAt.toISOString(),
+        relatedWordIds: [],
+        categoryIds: [],
+      })),
+    );
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post("/srs/cards/:id/review", async (req, res, next) => {
   try {
     const cardId = Number(req.params.id);
@@ -165,6 +204,22 @@ router.post("/srs/cards/:id/review", async (req, res, next) => {
     }
 
     const deckType = row.card.deckType as SrsDeckType;
+    const dateKey =
+      typeof req.body?.date === "string" ? req.body.date : undefined;
+    if (dateKey && isValidDateKey(dateKey)) {
+      try {
+        await recordSrsReviewLog(
+          getUserId(req),
+          row.word.id,
+          deckType,
+          dateKey,
+          now,
+        );
+      } catch {
+        // Non-fatal
+      }
+    }
+
     try {
       if (deckType === "example") {
         if (correct === true) {

@@ -203,7 +203,7 @@ export function ExampleSrsStudyPage() {
     reviewingRef.current = true;
     setReviewing(true);
     try {
-      await reviewSrsExample(current.card.id, correct);
+      await reviewSrsExample(current.card.id, correct, localDateKey());
       if (correct)
         recordStudy.mutate({ deck: "example", date: localDateKey() });
       queryClient.invalidateQueries({ queryKey: ["trouble-words"] });

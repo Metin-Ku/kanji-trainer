@@ -8,6 +8,7 @@ import {
   primaryKey,
   real,
   uniqueIndex,
+  index,
   jsonb,
 } from "drizzle-orm/pg-core";
 
@@ -256,6 +257,33 @@ export const studyActivityTable = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.userId, t.date, t.deckType] }),
+  ],
+);
+
+/** Per-review log for listing words studied on a given calendar day. */
+export const srsReviewLogTable = pgTable(
+  "srs_review_log",
+  {
+    id: serial("id").primaryKey(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => usersTable.id, { onDelete: "cascade" }),
+    wordId: integer("word_id")
+      .notNull()
+      .references(() => wordsTable.id, { onDelete: "cascade" }),
+    deckType: text("deck_type").notNull(),
+    /** Local calendar date YYYY-MM-DD when the review occurred. */
+    date: text("date").notNull(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("srs_review_log_user_deck_date_idx").on(
+      t.userId,
+      t.deckType,
+      t.date,
+    ),
   ],
 );
 

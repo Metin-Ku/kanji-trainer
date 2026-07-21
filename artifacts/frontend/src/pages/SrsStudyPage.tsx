@@ -162,7 +162,7 @@ function SrsStudyPageInner({
       reviewingRef.current = true;
       setReviewing(true);
       try {
-        await reviewSrsCard(current.card.id, rating);
+        await reviewSrsCard(current.card.id, rating, localDateKey());
         const ratingMeta = RATING_KEYS.find((r) => r.rating === rating);
         const intervalLabel = ratingMeta
           ? current.card.intervals[ratingMeta.key]

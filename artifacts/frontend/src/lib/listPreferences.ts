@@ -30,6 +30,7 @@ export type WordsListPrefs = {
 export type SingleSortListPrefs = {
   query: string;
   sort: SortMode;
+  jlptLevels?: string[];
 };
 
 export type SrsListPrefs = {
@@ -96,9 +97,17 @@ export function getSingleSortListPrefs(
   const saved = readEphemeral<Partial<SingleSortListPrefs>>(storageKey(scope));
   if (!saved) return defaults;
 
+  const jlptLevels = Array.isArray(saved.jlptLevels)
+    ? saved.jlptLevels.filter(
+        (level): level is string =>
+          typeof level === "string" && JLPT_VALUES.has(level) && level !== "",
+      )
+    : (defaults.jlptLevels ?? []);
+
   return {
     query: typeof saved.query === "string" ? saved.query : defaults.query,
     sort: isSortMode(saved.sort) ? saved.sort : defaults.sort,
+    jlptLevels,
   };
 }
 

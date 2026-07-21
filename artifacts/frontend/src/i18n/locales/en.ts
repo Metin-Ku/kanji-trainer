@@ -2,6 +2,7 @@ export const en = {
   common: {
     cancel: "Cancel",
     select: "Select",
+    pin: "Pin",
     delete: "Delete",
     sort: "Sort",
     sortWithCount: "Sort ({count})",
@@ -32,6 +33,7 @@ export const en = {
     level: "Level",
     date: "Date",
     jlpt: "JLPT",
+    jlptOrder: "JLPT Order",
     clustering: "Clustering",
     noPronunciation: "No pronunciation",
     noMeaning: "No meaning",
@@ -568,10 +570,22 @@ export const en = {
     title: "Progress",
     subtitle: "Study activity, levels, and JLPT coverage",
     sections: {
+      studiedWords: "Studied words",
       heatmap: "Study calendar",
       deckActivity: "Deck activity",
       levelDistribution: "Level distribution",
       jlpt: "JLPT completion",
+    },
+    studiedWords: {
+      empty: "No words studied in this period.",
+      startDate: "Start",
+      endDate: "End",
+      presets: {
+        today: "Today",
+        yesterday: "Yesterday",
+        twoDaysAgo: "2 days ago",
+        lastWeek: "Last week",
+      },
     },
     heatmap: {
       year: "Year",

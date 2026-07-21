@@ -3,9 +3,8 @@ import {
   ArrowLeft,
   Trash2,
   ArrowUpDown,
-  CheckSquare,
-  Square,
   Dices,
+  Pin,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useWords } from "../hooks/useWords";
@@ -16,13 +15,17 @@ import {
   RelatedWordsButton,
 } from "../components/RelatedWordsList";
 import { SearchBar } from "../components/SearchBar";
+import { ListSortMenuContent } from "../components/ListSortMenuContent";
 import { LoadingSpinner } from "../components/LoadingSpinner";
 import { LoadingPlaceholder } from "../components/LoadingPlaceholder";
-import { filterWords } from "../utils/filterWords";
+import { filterWords, filterByJlptLevels } from "../utils/filterWords";
 import { clusterByKanji } from "../utils/kanjiCluster";
 import { startStudy } from "../store/studyStore";
 import { useTranslation } from "../i18n/I18nProvider";
 import { useConfirm } from "../components/ConfirmProvider";
+import { useJlptFilter } from "../hooks/useJlptFilter";
+import { usePinnedWords } from "../hooks/usePinnedWords";
+import { partitionPinnedWords } from "../lib/pinnedWords";
 import {
   getSingleSortListPrefs,
   saveSingleSortListPrefs,
@@ -36,7 +39,7 @@ type SortMode =
   | "jlpt-asc"
   | "jlpt-desc"
   | "kanji-cluster";
-type SortGroup = "jlpt" | "level" | "date" | "kanji";
+type SortGroup = "jlptOrder" | "level" | "date" | "kanji";
 
 const JLPT_RANK: Record<string, number> = { N5: 1, N4: 2, N3: 3, N2: 4, N1: 5 };
 function jlptRank(w: Word): number {
@@ -88,6 +91,7 @@ function MeaningCard({
   selectMode,
   isSelected,
   onSelect,
+  pinned = false,
   cardRef,
   allWords,
 }: {
@@ -99,6 +103,7 @@ function MeaningCard({
   selectMode: boolean;
   isSelected: boolean;
   onSelect: () => void;
+  pinned?: boolean;
   cardRef?: (el: HTMLDivElement | null) => void;
   allWords?: Word[];
 }) {
@@ -107,10 +112,11 @@ function MeaningCard({
   useEffect(() => {
     if (!isOpen) setShowRelated(false);
   }, [isOpen]);
+
   return (
     <div ref={cardRef} className="border-app-border border-b last:border-b-0">
       <div
-        className="flex cursor-pointer items-center gap-2.5 px-4 py-3 select-none"
+        className={`flex cursor-pointer items-center gap-2.5 px-4 py-3 select-none ${pinned ? "bg-main-50/50 dark:bg-main-950/50" : ""}`}
         onClick={selectMode ? onSelect : onToggle}
       >
         {selectMode ? (
@@ -211,8 +217,8 @@ export function MeaningPage() {
   const { words, isLoading, updateWord, deleteWords } = useWords();
 
   const sortOptions: { value: SortMode; label: string; group: SortGroup }[] = [
-    { value: "jlpt-asc", label: t("words.sort.jlptAsc"), group: "jlpt" },
-    { value: "jlpt-desc", label: t("words.sort.jlptDesc"), group: "jlpt" },
+    { value: "jlpt-asc", label: t("words.sort.jlptAsc"), group: "jlptOrder" },
+    { value: "jlpt-desc", label: t("words.sort.jlptDesc"), group: "jlptOrder" },
     { value: "level-asc", label: t("words.sort.levelAsc"), group: "level" },
     { value: "level-desc", label: t("words.sort.levelDesc"), group: "level" },
     { value: "date-asc", label: t("words.sort.dateAsc"), group: "date" },
@@ -225,18 +231,27 @@ export function MeaningPage() {
   ];
 
   const groups: { key: SortGroup; label: string }[] = [
-    { key: "jlpt", label: t("common.jlpt") },
+    // { key: "jlpt", label: t("common.jlpt") },
+    { key: "jlptOrder", label: t("common.jlptOrder") },
     { key: "level", label: t("common.level") },
     { key: "date", label: t("common.date") },
     { key: "kanji", label: t("common.clustering") },
   ];
   const prefsScope = "meaning";
-  const defaultPrefs = { query: "", sort: "level-asc" as SortMode };
+  const defaultPrefs = {
+    query: "",
+    sort: "level-asc" as SortMode,
+    jlptLevels: [] as string[],
+  };
   const savedPrefs = getSingleSortListPrefs(prefsScope, defaultPrefs);
 
   const [openIds, setOpenIds] = useState<Set<number>>(new Set());
   const [query, setQuery] = useState(savedPrefs.query);
   const [sort, setSort] = useState<SortMode>(savedPrefs.sort);
+  const { selectedJlpt, toggleJlpt, clearJlpt } = useJlptFilter(
+    savedPrefs.jlptLevels ?? [],
+  );
+  const { pinnedIds, togglePinMany, isPinned } = usePinnedWords(prefsScope);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
@@ -245,8 +260,12 @@ export function MeaningPage() {
   const cardRefs = useRef<Map<number, HTMLDivElement>>(new Map());
 
   useEffect(() => {
-    saveSingleSortListPrefs(prefsScope, { query, sort });
-  }, [prefsScope, query, sort]);
+    saveSingleSortListPrefs(prefsScope, {
+      query,
+      sort,
+      jlptLevels: [...selectedJlpt],
+    });
+  }, [prefsScope, query, sort, selectedJlpt]);
 
   useEffect(() => {
     if (!showSortMenu) return;
@@ -293,6 +312,12 @@ export function MeaningPage() {
     setSelectedIds(new Set());
   }
 
+  function handlePinSelected() {
+    if (selectedIds.size === 0) return;
+    togglePinMany(Array.from(selectedIds));
+    setSelectedIds(new Set());
+  }
+
   async function handleBulkDelete() {
     if (
       !(await confirm(
@@ -306,14 +331,20 @@ export function MeaningPage() {
   }
 
   const nonStarred = words.filter((w) => !w.meaningStarred);
-  const displayed = filterWords(sortWords(nonStarred, sort), query);
+  const displayed = filterWords(
+    partitionPinnedWords(
+      filterByJlptLevels(sortWords(nonStarred, sort), selectedJlpt),
+      pinnedIds,
+    ),
+    query,
+  );
 
   return (
     <div className="bg-app-surface min-h-dvh">
       <div className="sm:border-app-border mx-auto max-w-2xl pb-8 sm:box-content sm:border-r-2 sm:border-l-2">
         <div
           ref={headerRef}
-          className="bg-app-surface border-app-border sticky top-0 z-10 space-y-2 border-b px-5 pt-4 pb-4"
+          className="bg-app-surface border-app-border sticky top-0 z-10 space-y-2 border-b px-4 pt-4 pb-4"
         >
           <div className="flex items-center justify-between">
             <button
@@ -358,56 +389,20 @@ export function MeaningPage() {
                 <span className="text-xs font-medium">{t("common.sort")}</span>
               </button>
               {showSortMenu && (
-                <div className="bg-app-surface border-app-border absolute top-full right-0 z-50 mt-1.5 w-56 overflow-hidden rounded-xl border shadow-xl">
-                  {groups.map((group, gi) => (
-                    <div key={group.key}>
-                      {gi > 0 && (
-                        <div className="border-app-border mx-3 my-1.5 border-t" />
-                      )}
-                      <div className="px-3 pt-2.5 pb-1">
-                        <p className="text-app-text-muted text-[10px] font-bold tracking-widest uppercase">
-                          {group.label}
-                        </p>
-                      </div>
-                      {sortOptions
-                        .filter((o) => o.group === group.key)
-                        .map((opt) => (
-                          <button
-                            key={opt.value}
-                            onClick={() => {
-                              setSort(opt.value);
-                              setShowSortMenu(false);
-                            }}
-                            className="hover:bg-app-muted flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm"
-                          >
-                            {sort === opt.value ? (
-                              <CheckSquare
-                                size={15}
-                                className="text-main-400 shrink-0"
-                                strokeWidth={2}
-                              />
-                            ) : (
-                              <Square
-                                size={15}
-                                className="text-app-text-muted shrink-0"
-                                strokeWidth={2}
-                              />
-                            )}
-                            <span
-                              className={
-                                sort === opt.value
-                                  ? "text-app-text font-medium"
-                                  : "text-app-text-secondary"
-                              }
-                            >
-                              {opt.label}
-                            </span>
-                          </button>
-                        ))}
-                    </div>
-                  ))}
-                  <div className="h-2" />
-                </div>
+                <ListSortMenuContent
+                  menuOpen={showSortMenu}
+                  mode="single"
+                  sortOptions={sortOptions}
+                  groups={groups}
+                  sort={sort}
+                  onSortSelect={(value) => {
+                    setSort(value);
+                    setShowSortMenu(false);
+                  }}
+                  selectedJlpt={selectedJlpt}
+                  onToggleJlpt={toggleJlpt}
+                  onClearJlpt={clearJlpt}
+                />
               )}
             </div>
 
@@ -460,6 +455,7 @@ export function MeaningPage() {
                       return n;
                     })
                   }
+                  pinned={isPinned(word.id)}
                   cardRef={(el) => {
                     if (el) cardRefs.current.set(word.id, el);
                     else cardRefs.current.delete(word.id);
@@ -485,6 +481,14 @@ export function MeaningPage() {
               ? t("common.selectedCount", { count: selectedIds.size })
               : t("common.selectRows")}
           </span>
+          <button
+            onClick={handlePinSelected}
+            disabled={selectedIds.size === 0}
+            className="text-main-400 bg-main-50 dark:bg-main-950 flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-semibold transition-opacity disabled:opacity-40"
+          >
+            <Pin size={14} />
+            {t("common.pin")}
+          </button>
           <button
             onClick={handleBulkDelete}
             disabled={selectedIds.size === 0}
