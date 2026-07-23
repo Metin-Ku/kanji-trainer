@@ -90,7 +90,7 @@ export function HomeSearchResultItem({
         </div>
 
         <div className="flex shrink-0 flex-row items-center gap-1.5">
-          <div className="flex flex-row items-center gap-1.5">
+          <div className="flex flex-row items-stretch gap-1.5">
             {word.jlptLevel && (
               <span className="bg-app-muted text-app-text-secondary inline-flex items-center rounded-full px-2 py-1 text-[11px] font-semibold">
                 {word.jlptLevel}
