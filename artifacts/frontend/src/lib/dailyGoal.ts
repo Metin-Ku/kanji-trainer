@@ -10,6 +10,7 @@ export const DAILY_GOAL_DECK_IDS: DailyGoalDeckId[] = [
   "pronunciation",
   "meaning",
   "example",
+  "drawing",
   //"flashcard",
 ];
 
@@ -48,6 +49,7 @@ const DEFAULT_TARGETS: Record<DailyGoalDeckId, number> = {
   pronunciation: 5,
   meaning: 5,
   example: 5,
+  drawing: 5,
   //flashcard: 5,
 };
 

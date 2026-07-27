@@ -496,7 +496,11 @@ export function StudyPage() {
           onTouchMove={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
         >
-          <div className="flex justify-center pt-3 pb-1">
+          <div
+            className="flex cursor-pointer justify-center pt-3 pb-1"
+            onClick={() => setShowDetails(false)}
+            role="button"
+          >
             <div className="bg-app-border-strong h-1 w-10 rounded-full" />
           </div>
           <div className="space-y-4 px-6 pt-2 pb-6">

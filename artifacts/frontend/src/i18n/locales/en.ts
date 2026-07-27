@@ -93,7 +93,7 @@ export const en = {
     settingsTarget: "Daily word target",
     settingsTargetDeck: "Daily target for {deck}",
     settingsHint:
-      "SRS (word/pronunciation/meaning): counts when the next interval is at least 1 day. Example deck: correct answers only. Flashcards: swipe right or save level.",
+      "SRS (word/pronunciation/meaning/drawing): counts when the next interval is at least 1 day. Example deck: correct answers only. Flashcards: swipe right or save level.",
     byDeck: "By deck",
     noDeckTargets: "Set a target above 0 for at least one deck.",
     off: "Off",
@@ -184,6 +184,7 @@ export const en = {
       pronunciation: { title: "Pronunciation", subtitle: "Pronunciation" },
       meaning: { title: "Meaning", subtitle: "Meaning" },
       example: { title: "Example", subtitle: "Example sentences" },
+      drawing: { title: "Drawing", subtitle: "Write the kanji" },
     },
     sort: {
       dueAsc: "Review date",
@@ -202,6 +203,16 @@ export const en = {
         hard: "Hard",
         good: "Good",
         easy: "Easy",
+      },
+      draw: {
+        clear: "Clear",
+        undo: "Undo",
+        grid: "Grid",
+        fuzzy: "Fuzzy",
+        offby1: "±1 stroke",
+        match: "Matched",
+        noMatch: "Keep drawing…",
+        noKanji: "This word has no kanji to draw.",
       },
     },
     example: {

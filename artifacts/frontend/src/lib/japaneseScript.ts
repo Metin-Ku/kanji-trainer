@@ -10,6 +10,11 @@ export function hasKanji(str: string): boolean {
   return HAN_RE.test(str);
 }
 
+/** Extract kanji characters in order (ignores kana/latin/punctuation). */
+export function extractKanjiChars(str: string): string[] {
+  return [...str].filter((ch) => HAN_RE.test(ch));
+}
+
 export function hasHiragana(str: string): boolean {
   return HIRAGANA_RE.test(str);
 }

@@ -7,6 +7,7 @@ import {
   ChevronRight,
   FileText,
   AlertCircle,
+  PenTool,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useSrsDecks, useSrsSync, fetchSrsQueue } from "../hooks/useSrs";
@@ -19,12 +20,14 @@ import { LoadingSpinner } from "../components/LoadingSpinner";
 import { useTroubleWordCount } from "../hooks/useTroubleWords";
 import { getSrsListPrefs, saveSrsListPrefs } from "../lib/listPreferences";
 import { warmMobileKeyboard } from "../lib/mobileKeyboard";
+import { extractKanjiChars } from "../lib/japaneseScript";
 
 const DECK_ICONS: Record<SrsDeckType, typeof Languages> = {
   word: Languages,
   pronunciation: Waves,
   meaning: BookOpen,
   example: FileText,
+  drawing: PenTool,
 };
 
 export function SrsHubPage() {
@@ -66,11 +69,16 @@ export function SrsHubPage() {
     // Keyboard is warmed on pointerdown for example deck (before this await).
     setStarting(deck);
     try {
-      const items = await fetchSrsQueue(deck, {
+      let items = await fetchSrsQueue(deck, {
         jlptMin: jlptMin || null,
         jlptMax: jlptMax || null,
         sort,
       });
+      if (deck === "drawing") {
+        items = items.filter(
+          (item) => extractKanjiChars(item.word.kanji).length > 0,
+        );
+      }
       if (items.length === 0) {
         alert(t("srs.hub.noCardsWithFilters"));
         return;
@@ -207,7 +215,13 @@ export function SrsHubPage() {
 
         <div className="space-y-2.5">
           {(
-            ["word", "pronunciation", "meaning", "example"] as SrsDeckType[]
+            [
+              "word",
+              "pronunciation",
+              "meaning",
+              "example",
+              "drawing",
+            ] as SrsDeckType[]
           ).map((deck) => {
             const Icon = DECK_ICONS[deck];
             const label = srsDeckLabel(t, deck);

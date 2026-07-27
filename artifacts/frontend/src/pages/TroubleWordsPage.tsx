@@ -22,6 +22,7 @@ const DECK_FILTERS: TroubleDeckFilter[] = [
   "pronunciation",
   "meaning",
   "example",
+  "drawing",
 ];
 
 function deckFilterLabel(
@@ -280,7 +281,13 @@ export function TroubleWordsPage() {
               {t("troubleWords.pickDeck")}
             </p>
             {(
-              ["word", "pronunciation", "meaning", "example"] as SrsDeckType[]
+              [
+                "word",
+                "pronunciation",
+                "meaning",
+                "example",
+                "drawing",
+              ] as SrsDeckType[]
             ).map((deck) => {
               const count = wordIdsForStudy(deck).length;
               const label = srsDeckLabel(t, deck);

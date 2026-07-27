@@ -15,6 +15,7 @@ import type { Word, WordUpdate } from "../types";
 import { themeVars } from "../theme";
 import { useWords } from "../hooks/useWords";
 import { ExampleSrsStudyPage } from "./ExampleSrsStudyPage";
+import { DrawingSrsStudyPage } from "./DrawingSrsStudyPage";
 import { useTranslation } from "../i18n/I18nProvider";
 import { intervalCountsAsDailyLearn, localDateKey } from "../lib/dailyGoal";
 import { useStudyActivity } from "../hooks/useStudyActivity";
@@ -75,6 +76,9 @@ export function SrsStudyPage() {
   const sessionRef = useRef(getSrsSession());
   if (sessionRef.current.deck === "example") {
     return <ExampleSrsStudyPage />;
+  }
+  if (sessionRef.current.deck === "drawing") {
+    return <DrawingSrsStudyPage />;
   }
 
   return <SrsStudyPageInner sessionRef={sessionRef} />;
@@ -607,7 +611,11 @@ function SrsStudyPageInner({
           pointerEvents: showDetails ? "auto" : "none",
         }}
       >
-        <div className="flex justify-center pt-3 pb-1">
+        <div
+          className="flex cursor-pointer justify-center pt-3 pb-1"
+          onClick={() => setShowDetails(false)}
+          role="button"
+        >
           <div className="bg-app-border-strong h-1 w-10 rounded-full" />
         </div>
         <div

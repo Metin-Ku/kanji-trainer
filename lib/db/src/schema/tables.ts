@@ -131,7 +131,13 @@ export const wordRelationsTable = pgTable(
   (t) => [primaryKey({ columns: [t.wordId, t.relatedWordId] })],
 );
 
-export const srsDeckTypes = ["word", "pronunciation", "meaning", "example"] as const;
+export const srsDeckTypes = [
+  "word",
+  "pronunciation",
+  "meaning",
+  "example",
+  "drawing",
+] as const;
 export type SrsDeckType = (typeof srsDeckTypes)[number];
 
 export const srsCardsTable = pgTable(

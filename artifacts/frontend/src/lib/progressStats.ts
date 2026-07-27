@@ -240,6 +240,7 @@ export const SRS_DECK_CHART_COLORS: Record<SrsDeckType, string> = {
   pronunciation: "var(--main-400)",
   meaning: "var(--main-300)",
   example: "var(--main-200)",
+  drawing: "var(--main-100)",
 };
 
 /** CSS variables — available on first paint, follow theme palette. */

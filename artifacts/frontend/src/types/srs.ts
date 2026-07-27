@@ -1,6 +1,11 @@
 import type { SrsExample } from "../types";
 
-export type SrsDeckType = "word" | "pronunciation" | "meaning" | "example";
+export type SrsDeckType =
+  | "word"
+  | "pronunciation"
+  | "meaning"
+  | "example"
+  | "drawing";
 
 export type SrsSortMode = "due-asc" | "date-asc" | "date-desc";
 

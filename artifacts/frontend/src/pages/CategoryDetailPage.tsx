@@ -4,6 +4,7 @@ import {
   FileText,
   Languages,
   Pencil,
+  PenTool,
   Plus,
   Trash2,
   Waves,
@@ -23,6 +24,7 @@ import { fetchSrsQueue } from "../hooks/useSrs";
 import { startSrsSession } from "../store/srsStore";
 import { srsDeckLabel } from "../i18n/srsDeckLabels";
 import { warmMobileKeyboard } from "../lib/mobileKeyboard";
+import { extractKanjiChars } from "../lib/japaneseScript";
 import type { SrsDeckType } from "../types/srs";
 
 const SRS_DECKS: {
@@ -33,6 +35,7 @@ const SRS_DECKS: {
   { deck: "pronunciation", Icon: Waves },
   { deck: "meaning", Icon: BookOpen },
   { deck: "example", Icon: FileText },
+  { deck: "drawing", Icon: PenTool },
 ];
 
 export function CategoryDetailPage() {
@@ -119,10 +122,15 @@ export function CategoryDetailPage() {
     if (deck === "example") warmMobileKeyboard();
     setStartingDeck(deck);
     try {
-      const items = await fetchSrsQueue(deck, {
+      let items = await fetchSrsQueue(deck, {
         wordIds: category.wordIds,
         sort: "due-asc",
       });
+      if (deck === "drawing") {
+        items = items.filter(
+          (item) => extractKanjiChars(item.word.kanji).length > 0,
+        );
+      }
       if (items.length === 0) {
         alert(t("categories.noSrsCards"));
         return;

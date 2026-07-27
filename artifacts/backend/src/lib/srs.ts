@@ -6,9 +6,20 @@ import {
   generatorParameters,
 } from "ts-fsrs";
 
-export type SrsDeckType = "word" | "pronunciation" | "meaning" | "example";
+export type SrsDeckType =
+  | "word"
+  | "pronunciation"
+  | "meaning"
+  | "example"
+  | "drawing";
 
-export const SRS_DECK_TYPES: SrsDeckType[] = ["word", "pronunciation", "meaning", "example"];
+export const SRS_DECK_TYPES: SrsDeckType[] = [
+  "word",
+  "pronunciation",
+  "meaning",
+  "example",
+  "drawing",
+];
 
 export type SrsCardRow = {
   id: number;

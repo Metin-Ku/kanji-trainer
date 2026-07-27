@@ -95,7 +95,7 @@ export const tr: Messages = {
     settingsTarget: "Günlük kelime hedefi",
     settingsTargetDeck: "{deck} günlük hedefi",
     settingsHint:
-      "SRS (kelime/okunuş/anlam): yalnızca sonraki aralık en az 1 gün olduğunda sayılır. Örnek deste: doğru cevap. Flashcard: sağ kaydır veya seviye kaydı.",
+      "SRS (kelime/okunuş/anlam/yazım): yalnızca sonraki aralık en az 1 gün olduğunda sayılır. Örnek deste: doğru cevap. Flashcard: sağ kaydır veya seviye kaydı.",
     byDeck: "Deste bazında",
     noDeckTargets: "En az bir deste için 0'dan büyük hedef belirleyin.",
     off: "Kapalı",
@@ -186,6 +186,7 @@ export const tr: Messages = {
       pronunciation: { title: "Okunuş", subtitle: "Pronunciation" },
       meaning: { title: "Anlam", subtitle: "Meaning" },
       example: { title: "Örnek", subtitle: "Example sentences" },
+      drawing: { title: "Yazım", subtitle: "Kanjiyi çiz" },
     },
     sort: {
       dueAsc: "Tekrar tarihi",
@@ -204,6 +205,16 @@ export const tr: Messages = {
         hard: "Hard",
         good: "Good",
         easy: "Easy",
+      },
+      draw: {
+        clear: "Temizle",
+        undo: "Geri al",
+        grid: "Grid",
+        fuzzy: "Fuzzy",
+        offby1: "±1 stroke",
+        match: "Eşleşti",
+        noMatch: "Çizmeye devam et…",
+        noKanji: "Bu kelimede çizilecek kanji yok.",
       },
     },
     example: {

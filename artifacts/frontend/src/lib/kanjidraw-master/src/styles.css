@@ -1,0 +1,60 @@
+:root {
+  font-family: system-ui, sans-serif;
+}
+
+body, html, #root {
+  min-height: 100%;
+  margin: 0;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.toolbar button,
+.toolbar label {
+  font-size: 14px;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.draw-canvas {
+  border: 1px solid #999;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.results {
+  padding: 12px;
+  border: 1px solid #999;
+  border-radius: 8px;
+}
+
+.results h2 {
+  margin-top: 0;
+}
+
+.results ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.results li {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
