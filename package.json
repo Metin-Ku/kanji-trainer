@@ -5,6 +5,13 @@
   "scripts": {
     "preinstall": "node -e \"const ua=process.env.npm_config_user_agent||''; if(!ua.includes('pnpm')){console.error('Use pnpm instead'); process.exit(1)} const fs=require('fs'); for (const f of ['package-lock.json','yarn.lock']) { try { fs.unlinkSync(f) } catch {} }\"",
     "dev": "node scripts/dev.mjs",
+    "mobile": "pnpm --filter @workspace/mobile run start",
+    "mobile:clear": "pnpm --filter @workspace/mobile run start:clear",
+    "mobile:tunnel": "pnpm --filter @workspace/mobile run start:tunnel",
+    "mobile:dev-client": "pnpm --filter @workspace/mobile run start:dev-client",
+    "expo": "pnpm --filter @workspace/mobile exec expo",
+    "mobile:update": "pnpm --filter @workspace/mobile run update",
+    "mobile:eas:init": "pnpm --filter @workspace/mobile run eas:init",
     "db:migrate-auth": "pnpm --filter @workspace/db run migrate-auth",
     "db:assign-owner": "pnpm --filter @workspace/db run assign-owner",
     "db:migrate-srs-user": "pnpm --filter @workspace/db run migrate-srs-user",

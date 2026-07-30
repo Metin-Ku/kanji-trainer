@@ -76,6 +76,15 @@ router.get("/srs/queue", async (req, res, next) => {
     const sort = (req.query.sort as SrsSortMode | undefined) ?? "due-asc";
     const jlptMin = req.query.jlptMin ? String(req.query.jlptMin) : null;
     const jlptMax = req.query.jlptMax ? String(req.query.jlptMax) : null;
+    const jlptLevelsRaw = req.query.jlptLevels
+      ? String(req.query.jlptLevels)
+      : "";
+    const jlptLevels = jlptLevelsRaw
+      ? jlptLevelsRaw
+          .split(",")
+          .map((s) => s.trim())
+          .filter((l) => ["N5", "N4", "N3", "N2", "N1"].includes(l))
+      : undefined;
     const wordIdsRaw = req.query.wordIds ? String(req.query.wordIds) : "";
     const wordIds = wordIdsRaw
       ? wordIdsRaw
@@ -89,6 +98,7 @@ router.get("/srs/queue", async (req, res, next) => {
     const queue = await getReviewQueue(deckType, {
       jlptMin,
       jlptMax,
+      jlptLevels,
       sort,
       wordIds,
       ignoreDue,

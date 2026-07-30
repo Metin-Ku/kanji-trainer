@@ -1,0 +1,9 @@
+../frontend/**
+../backend/**
+../../scripts/**
+../../artifacts/frontend/**
+../../artifacts/backend/**
+.expo-test-export/**
+**/*.md
+**/.env
+**/.env.*

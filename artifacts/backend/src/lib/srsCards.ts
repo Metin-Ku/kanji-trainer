@@ -150,13 +150,19 @@ function jlptRank(level: string | null | undefined): number {
   return JLPT_RANK[level] ?? 99;
 }
 
-export type SrsSortMode = "due-asc" | "date-asc" | "date-desc";
+export type SrsSortMode =
+  | "due-asc"
+  | "date-asc"
+  | "date-desc"
+  | "jlpt-asc"
+  | "jlpt-desc";
 
 export async function getReviewQueue(
   deckType: SrsDeckType,
   options: {
     jlptMin?: string | null;
     jlptMax?: string | null;
+    jlptLevels?: string[] | null;
     sort?: SrsSortMode;
     limit?: number;
     wordIds?: number[];
@@ -169,6 +175,10 @@ export async function getReviewQueue(
   const now = new Date();
   const minRank = options.jlptMin ? jlptRank(options.jlptMin) : 1;
   const maxRank = options.jlptMax ? jlptRank(options.jlptMax) : 5;
+  const jlptLevelSet =
+    options.jlptLevels && options.jlptLevels.length > 0
+      ? new Set(options.jlptLevels)
+      : null;
   const sort = options.sort ?? "due-asc";
   const limit = options.limit ?? 200;
   const wordIdSet =
@@ -198,7 +208,11 @@ export async function getReviewQueue(
   const filtered = rows.filter(({ card, word }) => {
     if (wordIdSet && !wordIdSet.has(word.id)) return false;
     const rank = jlptRank(word.jlptLevel);
-    if (rank !== 99 && (rank < minRank || rank > maxRank)) return false;
+    if (jlptLevelSet) {
+      if (!word.jlptLevel || !jlptLevelSet.has(word.jlptLevel)) return false;
+    } else if (rank !== 99 && (rank < minRank || rank > maxRank)) {
+      return false;
+    }
     if (deckType === "example" && !hasSrsExamples(word)) return false;
     return true;
   });
@@ -222,6 +236,16 @@ export async function getReviewQueue(
     }
     if (sort === "date-desc") {
       return b.word.createdAt.getTime() - a.word.createdAt.getTime();
+    }
+    if (sort === "jlpt-asc") {
+      const d = jlptRank(a.word.jlptLevel) - jlptRank(b.word.jlptLevel);
+      if (d !== 0) return d;
+      return ca.due.getTime() - cb.due.getTime();
+    }
+    if (sort === "jlpt-desc") {
+      const d = jlptRank(b.word.jlptLevel) - jlptRank(a.word.jlptLevel);
+      if (d !== 0) return d;
+      return ca.due.getTime() - cb.due.getTime();
     }
 
     if (aNew && !bNew) return 1;
