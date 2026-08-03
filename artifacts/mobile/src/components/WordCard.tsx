@@ -353,7 +353,7 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
   return StyleSheet.create({
     card: {
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.appBorder,
+      borderBottomColor: theme.appBorderStrong,
       backgroundColor: theme.appSurface,
     },
     cardPinned: {
@@ -370,6 +370,8 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       backgroundColor: theme.appMuted,
     },
     index: {
+      marginBottom: 1,
+      alignSelf: "flex-end",
       width: 20,
       textAlign: "right",
       fontSize: 14,

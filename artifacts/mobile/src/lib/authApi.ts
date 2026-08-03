@@ -56,3 +56,13 @@ export async function logout(): Promise<void> {
   });
   await clearSessionToken();
 }
+
+export function membershipYear(createdAt: string): number {
+  return new Date(createdAt).getFullYear();
+}
+
+export function yearRange(fromYear: number, toYear: number): number[] {
+  const years: number[] = [];
+  for (let y = toYear; y >= fromYear; y--) years.push(y);
+  return years;
+}

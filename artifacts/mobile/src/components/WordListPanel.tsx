@@ -27,10 +27,12 @@ import { useTranslation } from "@/i18n/I18nProvider";
 import { useTheme } from "@/theme/ThemeProvider";
 import { ListSortSheet } from "./ListSortSheet";
 import { LoadingSpinner } from "./LoadingSpinner";
+import { LoadingPlaceholder } from "./LoadingPlaceholder";
 import { SearchBar } from "./SearchBar";
 import { SelectActionBar } from "./SelectActionBar";
 import { WordCard, type WordCardMode } from "./WordCard";
 import { WordFormModal, type WordFormSaveData } from "./WordFormModal";
+import { ColorScheme } from "@/settings/appSettings";
 
 type Props = {
   title: string;
@@ -105,9 +107,9 @@ export function WordListPanel({
   allWords: allWordsProp,
 }: Props) {
   const { t } = useTranslation();
-  const { theme } = useTheme();
+  const { theme, colorScheme } = useTheme();
   const router = useRouter();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const styles = useMemo(() => createStyles(theme, colorScheme), [theme, colorScheme]);
 
   const isWordsMode = mode === "words";
   const allWords = allWordsProp ?? words;
@@ -397,9 +399,7 @@ export function WordListPanel({
       ) : isLoading ? (
         <>
           {listHeader}
-          <View style={styles.center}>
-            <LoadingSpinner size={32} color={theme.main500} />
-          </View>
+          <LoadingPlaceholder padding="lg" style={styles.center} />
         </>
       ) : displayed.length === 0 ? (
         <>
@@ -431,7 +431,7 @@ export function WordListPanel({
           renderItem={renderItem}
           ListHeaderComponent={listHeader}
           stickyHeaderIndices={[0]}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="never"
           style={styles.list}
           contentContainerStyle={selectMode ? styles.listWithBar : undefined}
           onEndReached={() => {
@@ -504,7 +504,8 @@ export function WordListPanel({
   );
 }
 
-function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
+function createStyles(theme: ReturnType<typeof useTheme>["theme"], colorScheme: ColorScheme) {
+  const isDark = colorScheme === "dark";
   return StyleSheet.create({
     safe: {
       flex: 1,
@@ -519,7 +520,7 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
     headerBlock: {
       backgroundColor: theme.appSurface,
       borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.appBorder,
+      borderBottomColor: theme.appBorderStrong,
       paddingHorizontal: 16,
       paddingTop: 16,
       paddingBottom: 16,
@@ -566,7 +567,7 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       fontWeight: "600",
       letterSpacing: 1.5,
       textTransform: "uppercase",
-      color: theme.main400,
+      color: isDark ? theme.main600 : theme.main500,
     },
     toolbarRow: {
       flexDirection: "row",

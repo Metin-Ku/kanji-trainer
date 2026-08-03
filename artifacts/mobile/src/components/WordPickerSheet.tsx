@@ -58,7 +58,7 @@ export function WordPickerSheet({
       <FlatList
         data={filtered}
         keyExtractor={(item) => String(item.id)}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="never"
         style={styles.list}
         renderItem={({ item }) => {
           const selected = selectedIds.has(item.id);

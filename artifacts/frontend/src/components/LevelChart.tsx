@@ -12,7 +12,7 @@ interface Props {
 const HEIGHTS = [28, 42, 56, 72, 88];
 
 function getLevelColor(bar: number, level: number): string {
-  if (bar > level) return "#e5e7eb";
+  if (bar > level) return "var(--app-border-strong)";
   return themeVars.level(bar);
 }
 
@@ -121,8 +121,7 @@ export function LevelChart({
                   ? themeVars.star
                   : starEnabled
                     ? themeVars.star
-                    : "#e5e7eb",
-                color: starred
+                    : "var(--app-border-strong)",                color: starred
                   ? "white"
                   : starEnabled
                     ? themeVars.star

@@ -23,6 +23,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { DailyGoalCard } from "@/components/DailyGoalCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import { fetchSrsQueue, useSrsDecks, useSrsSync } from "@/hooks/useSrs";
 import { useTroubleWordCount } from "@/hooks/useTroubleWords";
 import { srsDeckLabel } from "@/i18n/srsDeckLabels";
@@ -216,9 +217,7 @@ export default function SrsHubScreen() {
         </View>
 
         {isLoading ? (
-          <View style={styles.center}>
-            <LoadingSpinner size={32} color={theme.main500} />
-          </View>
+          <LoadingPlaceholder padding="lg" style={styles.center} />
         ) : (
           <View style={styles.deckList}>
             {SRS_DECK_ORDER.map((deck) => {

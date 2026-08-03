@@ -4,6 +4,7 @@ import { useRouter, type Href } from "expo-router";
 import { ArrowLeft, ChevronRight } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import {
   fetchTroubleSrsQueue,
   useDismissTroubleWord,
@@ -59,9 +60,7 @@ export default function TroubleWordsScreen() {
       </View>
 
       {isLoading ? (
-        <View style={styles.center}>
-          <LoadingSpinner size={32} color={theme.main500} />
-        </View>
+        <LoadingPlaceholder style={styles.center} />
       ) : (
         <FlatList
           data={items}

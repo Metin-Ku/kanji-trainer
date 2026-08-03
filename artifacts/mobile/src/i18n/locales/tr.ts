@@ -59,6 +59,7 @@ export const tr: Messages = {
     themes: "Temalar",
     srs: "SRS",
     decks: "Desteler",
+    progress: "İlerleme",
   },
   home: {
     appSubtitle: "Japonca Kelime Defteri",
@@ -293,6 +294,8 @@ export const tr: Messages = {
   },
   a11y: {
     settings: "Ayarlar",
+    srs: "SRS desteleri",
+    progress: "İlerleme",
     changeLevel: "Seviyeyi değiştir",
     markLearned: "Öğrenildi olarak işaretle",
     unmarkLearned: "Öğrenilenlerden çıkar",
@@ -431,6 +434,52 @@ export const tr: Messages = {
     roleAdmin: "Yönetici",
     roleModerator: "Moderatör",
     roleUser: "Kullanıcı",
+  },
+  progress: {
+    title: "İlerleme",
+    subtitle: "Çalışma aktivitesi, seviyeler ve JLPT kapsamı",
+    sections: {
+      studiedWords: "Çalışılan kelimeler",
+      heatmap: "Çalışma takvimi",
+      deckActivity: "Deste aktivitesi",
+      levelDistribution: "Seviye dağılımı",
+      jlpt: "JLPT tamamlanma",
+    },
+    studiedWords: {
+      empty: "Bu aralıkta çalışılan kelime yok.",
+      startDate: "Başlangıç",
+      endDate: "Bitiş",
+      presets: {
+        today: "Bugün",
+        yesterday: "Dün",
+        twoDaysAgo: "2 gün önce",
+        lastWeek: "Son 1 hafta",
+      },
+    },
+    heatmap: {
+      year: "Yıl",
+      tooltip: "{date} · {count} kelime çalışıldı",
+      hint: "Günler üzerinde basılı tutup kaydırın",
+      less: "Az",
+      more: "Çok",
+    },
+    miniHeatmap: {
+      title: "Bu yıl",
+    },
+    deckChart: {
+      weekTotal: "Bu hafta {count}",
+      empty: "Henüz çalışma kaydı yok.",
+    },
+    levelMode: {
+      word: "Kelime",
+      pron: "Okunuş",
+      meaning: "Anlam",
+    },
+    jlpt: {
+      untagged: "Etiketsiz",
+      noWords: "Kelime yok",
+      count: "{learned} / {total} öğrenildi",
+    },
   },
   dates: {
     monthsFull: [

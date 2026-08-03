@@ -88,7 +88,7 @@ export function WordCard({
         >
           {selectMode ? (
             <div
-              className={`border-app-border-strong flex h-4.5 w-4.5 mt-[2px] shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
+              className={`border-app-border-strong mt-[2px] flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isSelected ? "border-main-500 bg-main-500" : "transparent"}`}
             >
               {isSelected && (
                 <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -140,7 +140,7 @@ export function WordCard({
           </span>
 
           {word.jlptLevel && !selectMode && (
-            <span className="bg-app-muted text-app-text-secondary shrink-0 rounded-md px-1.5 py-[3px] text-[10px] leading-none font-semibold">
+            <span className="bg-app-muted text-app-text-secondary shrink-0 rounded px-1.5 py-[3px] text-[10px] leading-none font-semibold">
               {word.jlptLevel}
             </span>
           )}
@@ -149,18 +149,18 @@ export function WordCard({
 
           {!selectMode && (
             <div
-              className="flex shrink-0 gap-0.5"
+              className="flex shrink-0 gap-1"
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-blue-400"
+                className="text-app-text-muted bg-app-muted rounded-md p-1.5 transition-colors hover:text-blue-400"
                 onClick={() => onEdit(word)}
                 aria-label={t("a11y.edit")}
               >
                 <Pencil size={14} />
               </button>
               <button
-                className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-red-400"
+                className="text-app-text-muted bg-app-muted rounded-md p-1.5 transition-colors hover:text-red-400"
                 onClick={() => onDelete(word.id)}
                 aria-label={t("common.delete")}
               >
@@ -170,17 +170,17 @@ export function WordCard({
           )}
           {selectMode && (
             <div
-              className="invisible flex shrink-0 gap-0.5"
+              className="invisible flex shrink-0 gap-1"
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-blue-400"
+                className="text-app-text-muted bg-app-muted rounded-md p-1.5 transition-colors hover:text-blue-400"
                 disabled
               >
                 <Pencil size={14} />
               </button>
               <button
-                className="text-app-text-muted rounded-lg p-1.5 transition-colors hover:text-red-400"
+                className="text-app-text-muted bg-app-muted rounded-md p-1.5 transition-colors hover:text-red-400"
                 disabled
               >
                 <Trash2 size={14} />

@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import {
-  Animated,
   Pressable,
   StyleSheet,
   Text,
@@ -10,6 +9,7 @@ import {
 import { Search, X } from "lucide-react-native";
 import { useTranslation } from "@/i18n/I18nProvider";
 import { useTheme } from "@/theme/ThemeProvider";
+import { useInputFocusRing } from "@/components/FocusRingInput";
 import { LoadingSpinner } from "./LoadingSpinner";
 
 type Props = {
@@ -30,50 +30,36 @@ export function SearchBar({
   onWordCountClick,
 }: Props) {
   const { t } = useTranslation();
-  const { theme } = useTheme();
+  const { theme, colorScheme } = useTheme();
   const inputRef = useRef<TextInput>(null);
-  const [focused, setFocused] = useState(false);
-  const ringOpacity = useRef(new Animated.Value(0)).current;
+  const { focused, focusAccent, ringElement, onFocus, onBlur, borderColor } =
+    useInputFocusRing(8);
 
-  useEffect(() => {
-    Animated.timing(ringOpacity, {
-      toValue: focused ? 1 : 0,
-      duration: 150,
-      useNativeDriver: true,
-    }).start();
-  }, [focused, ringOpacity]);
+  const countBg = colorScheme === "dark" ? theme.main600 : theme.main500;
+  const countText = colorScheme === "dark" ? theme.appText : theme.white;
 
   return (
     <View style={styles.wrap}>
       <Search
         size={17}
-        color={focused ? theme.main400 : theme.appTextSecondary}
+        color={focused ? focusAccent : theme.appTextSecondary}
         style={styles.searchIcon}
       />
-      <Animated.View
-        pointerEvents="none"
-        style={[
-          styles.focusRing,
-          {
-            opacity: ringOpacity,
-            borderColor: theme.main400,
-          },
-        ]}
-      />
+      {ringElement}
       <TextInput
         ref={inputRef}
         value={value}
         onChangeText={onChange}
         placeholder={placeholder}
         placeholderTextColor={theme.appTextMuted}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
+        onFocus={onFocus}
+        onBlur={onBlur}
         style={[
           styles.input,
           {
             backgroundColor: theme.inputBg,
             color: theme.appText,
-            borderColor: focused ? theme.main400 : theme.appBorderStrong,
+            borderColor,
           },
         ]}
       />
@@ -83,14 +69,14 @@ export function SearchBar({
           disabled={wordCountLoading}
           style={({ pressed }) => [
             styles.countBadge,
-            { backgroundColor: theme.main500 },
+            { backgroundColor: countBg },
             pressed && styles.countBadgePressed,
           ]}
         >
           {wordCountLoading ? (
-            <LoadingSpinner size={14} color={theme.white} />
+            <LoadingSpinner size={14} color={countText} />
           ) : (
-            <Text style={[styles.countBadgeText, { color: theme.white }]}>
+            <Text style={[styles.countBadgeText, { color: countText }]}>
               {t("common.wordCount", { count: wordCount })}
             </Text>
           )}
@@ -124,12 +110,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 10,
     zIndex: 2,
-  },
-  focusRing: {
-    ...StyleSheet.absoluteFillObject,
-    borderWidth: 2,
-    borderRadius: 8,
-    zIndex: 1,
   },
   input: {
     borderWidth: 1,

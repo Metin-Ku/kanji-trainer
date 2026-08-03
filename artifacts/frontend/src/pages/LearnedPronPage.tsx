@@ -366,7 +366,7 @@ export function LearnedPronPage() {
             <div className="relative shrink-0" ref={sortMenuRef}>
               <button
                 onClick={() => setShowSortMenu((v) => !v)}
-                className="text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900 flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors"
+                className="text-main-400 dark:text-main-500 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900 flex items-center gap-1 rounded-md px-2 py-1.5 transition-colors"
               >
                 <ArrowUpDown size={14} strokeWidth={2} />
                 <span className="text-xs font-medium">{t("common.sort")}</span>

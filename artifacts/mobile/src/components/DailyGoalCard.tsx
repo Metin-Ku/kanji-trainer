@@ -6,6 +6,7 @@ import { useDailyGoal } from "@/hooks/useDailyGoal";
 import { srsDeckLabel } from "@/i18n/srsDeckLabels";
 import { useTheme } from "@/theme/ThemeProvider";
 import type { DeckDailyProgress } from "@/lib/dailyGoal";
+import { ColorScheme } from "@/settings/appSettings";
 
 type Props = {
   variant?: "card" | "banner";
@@ -43,8 +44,8 @@ function ProgressBar({
 
 export function DailyGoalCard({ variant = "card" }: Props) {
   const { t } = useTranslation();
-  const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const { theme, colorScheme } = useTheme();
+  const styles = useMemo(() => createStyles(theme, colorScheme), [theme, colorScheme]);
   const { count, target, remaining, goalMet, streak, progressRatio, decks } =
     useDailyGoal();
   const [expanded, setExpanded] = useState(false);
@@ -125,13 +126,14 @@ export function DailyGoalCard({ variant = "card" }: Props) {
   );
 }
 
-function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
+function createStyles(theme: ReturnType<typeof useTheme>["theme"], colorScheme: ColorScheme) {
+  const isDark = colorScheme === "dark";
   return StyleSheet.create({
     shell: {
       marginTop: 12,
-      borderRadius: 12,
+      borderRadius: 8,
       borderWidth: 1,
-      borderColor: theme.main200 ?? theme.appBorder,
+      borderColor: isDark ? theme.main900 : theme.main200,
       backgroundColor: theme.appAccent,
       paddingHorizontal: 16,
       paddingVertical: 16,

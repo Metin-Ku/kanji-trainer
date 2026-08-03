@@ -3,7 +3,7 @@ import { FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import { WordCard } from "@/components/WordCard";
 import { WordPickerSheet } from "@/components/WordPickerSheet";
 import { confirmAsync } from "@/lib/confirm";
@@ -65,9 +65,7 @@ export default function ThemeDetailScreen() {
   if (isLoading) {
     return (
       <SafeAreaView style={styles.safe}>
-        <View style={styles.center}>
-          <LoadingSpinner size={32} color={colors.main500} />
-        </View>
+        <LoadingPlaceholder padding="lg" style={styles.center} />
       </SafeAreaView>
     );
   }

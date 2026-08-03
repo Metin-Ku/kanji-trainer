@@ -19,7 +19,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { CategoryIconField } from "@/components/CategoryIconField";
 import { CategoryTitle } from "@/components/CategoryIcon";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import { SearchBar } from "@/components/SearchBar";
 import { SlideUpModal } from "@/components/SlideUpModal";
 import { useCategories } from "@/hooks/useCategories";
@@ -148,9 +148,7 @@ export default function CategoriesHubScreen() {
         ]}
       >
         {isLoading ? (
-          <View style={styles.center}>
-            <LoadingSpinner size={32} color={theme.main500} />
-          </View>
+          <LoadingPlaceholder padding="lg" style={styles.center} />
         ) : categories.length === 0 ? (
           <Text style={styles.empty}>{t("categories.empty")}</Text>
         ) : filtered.length === 0 ? (

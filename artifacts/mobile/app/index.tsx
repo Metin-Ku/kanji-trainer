@@ -1,23 +1,27 @@
 import { useCallback, useMemo, useState } from "react";
 import {
-  FlatList,
   KeyboardAvoidingView,
   Platform,
   Pressable,
-  ScrollView,
+  StatusBar as RNStatusBar,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import {
+  FlatList,
+  ScrollView,
+} from "react-native-gesture-handler";
 import { useRouter, type Href } from "expo-router";
-import { BookOpen, Settings, Waves } from "lucide-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Settings, Layers, BarChart2 } from "lucide-react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { DailyGoalCard } from "@/components/DailyGoalCard";
+import { MiniHeatmapStrip } from "@/components/progress/MiniHeatmapStrip";
 import { BulkImportModal } from "@/components/BulkImportModal";
 import { SearchBar } from "@/components/SearchBar";
 import { SearchResultItem } from "@/components/SearchResultItem";
 import { StudyLinkRow } from "@/components/StudyLinkRow";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import { WordAddFab } from "@/components/WordAddFab";
 import {
   WordFormModal,
@@ -27,6 +31,7 @@ import { confirmAsync } from "@/lib/confirm";
 import { useTranslation } from "@/i18n/I18nProvider";
 import { filterWords } from "@/lib/filterWords";
 import { useCategories } from "@/hooks/useCategories";
+import { useStudyActivity } from "@/hooks/useStudyActivity";
 import { useThemes } from "@/hooks/useThemes";
 import { useWords } from "@/hooks/useWords";
 import { useTheme } from "@/theme/ThemeProvider";
@@ -36,16 +41,111 @@ import {
   buildStudyCounts,
   studyCountLabel,
 } from "@/lib/studyLinks";
+import { ColorScheme } from "@/settings/appSettings";
+
+function HomeHeader({
+  styles,
+  theme,
+  colorScheme,
+  topInset,
+  t,
+  formatToday,
+  router,
+  query,
+  setQuery,
+  words,
+  isLoading,
+  isSearching,
+  activityByDate,
+  activityLoading,
+}: {
+  styles: ReturnType<typeof createStyles>;
+  theme: ReturnType<typeof useTheme>["theme"];
+  colorScheme: ColorScheme;
+  topInset: number;
+  t: ReturnType<typeof useTranslation>["t"];
+  formatToday: ReturnType<typeof useTranslation>["formatToday"];
+  router: ReturnType<typeof useRouter>;
+  query: string;
+  setQuery: (v: string) => void;
+  words: Word[];
+  isLoading: boolean;
+  isSearching: boolean;
+  activityByDate: ReturnType<typeof useStudyActivity>["activityByDate"];
+  activityLoading: boolean;
+}) {
+  return (
+    <View style={[styles.header, { paddingTop: topInset + 12 }]}>
+      <View style={styles.headerTop}>
+        <Text style={styles.subtitle}>{t("home.appSubtitle")}</Text>
+        <View style={styles.headerActions}>
+          <Pressable
+            onPress={() => router.push("/srs")}
+            style={({ pressed }) => [
+              styles.headerIconBtn,
+              pressed && { opacity: 0.7 },
+            ]}
+            accessibilityLabel={t("a11y.srs")}
+          >
+            <Layers size={20} color={theme.appTextMuted} strokeWidth={2} />
+          </Pressable>
+          <Pressable
+            onPress={() => router.push("/progress" as Href)}
+            style={({ pressed }) => [
+              styles.headerIconBtn,
+              pressed && { opacity: 0.7 },
+            ]}
+            accessibilityLabel={t("a11y.progress")}
+          >
+            <BarChart2 size={20} color={theme.appTextMuted} strokeWidth={2} />
+          </Pressable>
+          <Pressable
+            onPress={() => router.push("/settings")}
+            style={({ pressed }) => [
+              styles.headerIconBtn,
+              pressed && { opacity: 0.7 },
+            ]}
+            accessibilityLabel={t("a11y.settings")}
+          >
+            <Settings size={20} color={theme.appTextMuted} strokeWidth={2} />
+          </Pressable>
+        </View>
+      </View>
+      <Text style={styles.title}>{formatToday()}</Text>
+      <SearchBar
+        value={query}
+        onChange={setQuery}
+        placeholder={t("home.searchPlaceholder")}
+        wordCount={words.length}
+        wordCountLoading={isLoading}
+        onWordCountClick={() =>
+          router.push({ pathname: "/words", params: { all: "1" } })
+        }
+      />
+      {!isSearching ? (
+        <>
+          <DailyGoalCard />
+          <MiniHeatmapStrip
+            activityByDate={activityByDate}
+            isActivityLoading={activityLoading}
+          />
+        </>
+      ) : null}
+    </View>
+  );
+}
 
 export default function HomeScreen() {
   const { t, formatToday } = useTranslation();
   const router = useRouter();
-  const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const insets = useSafeAreaInsets();
+  const { theme, colorScheme } = useTheme();
+  const styles = useMemo(() => createStyles(theme, colorScheme), [theme, colorScheme]);
   const { words, isLoading, addWord, updateWord, deleteWord, bulkCreate } =
     useWords();
   const { data: categories = [], isLoading: categoriesLoading } = useCategories();
   const { themes, isLoading: themesLoading } = useThemes();
+  const { activityByDate, isLoading: activityLoading } = useStudyActivity();
   const studyCounts = useMemo(
     () => buildStudyCounts(words, themes, categories),
     [words, themes, categories],
@@ -113,52 +213,53 @@ export default function HomeScreen() {
     setBulkVisible(true);
   }, []);
 
+  const headerProps = {
+    styles,
+    theme,
+    colorScheme,
+    topInset: insets.top,
+    t,
+    formatToday,
+    router,
+    query,
+    setQuery,
+    words,
+    isLoading,
+    isSearching,
+    activityByDate,
+    activityLoading,
+  };
+
   return (
-    <SafeAreaView style={styles.safe} edges={["top"]}>
+    <View style={styles.root}>
+      {Platform.OS === "android" ? (
+        <RNStatusBar
+          backgroundColor={theme.appSurface}
+          barStyle={colorScheme === "dark" ? "light-content" : "dark-content"}
+        />
+      ) : null}
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <Text style={styles.subtitle}>{t("home.appSubtitle")}</Text>
-            <Pressable
-              onPress={() => router.push("/settings")}
-              style={({ pressed }) => [
-                styles.settingsBtn,
-                pressed && { opacity: 0.7 },
-              ]}
-              accessibilityLabel={t("a11y.settings")}
-            >
-              <Settings size={20} color={theme.appTextMuted} strokeWidth={2} />
-            </Pressable>
-          </View>
-          <Text style={styles.title}>{formatToday()}</Text>
-          <SearchBar
-            value={query}
-            onChange={setQuery}
-            placeholder={t("home.searchPlaceholder")}
-            wordCount={words.length}
-            wordCountLoading={isLoading}
-            onWordCountClick={() =>
-              router.push({ pathname: "/words", params: { all: "1" } })
-            }
-          />
-          {!isSearching ? <DailyGoalCard /> : null}
-        </View>
+        <HomeHeader {...headerProps} />
 
         {isSearching ? (
           isLoading ? (
-            <View style={styles.center}>
-              <LoadingSpinner size={32} color={theme.main500} />
-            </View>
+            <LoadingPlaceholder style={styles.flex} />
           ) : results.length === 0 ? (
-            <View style={styles.center}>
-              <Text style={styles.emptyIcon}>?</Text>
-              <Text style={styles.emptyText}>
-                {t("common.noResultsForQuery", { query: query.trim() })}
-              </Text>
-            </View>
+            <ScrollView
+              keyboardShouldPersistTaps="never"
+              style={styles.flex}
+              contentContainerStyle={styles.flexGrow}
+            >
+              <View style={styles.center}>
+                <Text style={styles.emptyIcon}>?</Text>
+                <Text style={styles.emptyText}>
+                  {t("common.noResultsForQuery", { query: query.trim() })}
+                </Text>
+              </View>
+            </ScrollView>
           ) : (
             <FlatList
               data={results}
@@ -194,35 +295,38 @@ export default function HomeScreen() {
                   onDelete={handleDelete}
                 />
               )}
-              keyboardShouldPersistTaps="handled"
+              keyboardShouldPersistTaps="never"
               style={styles.flex}
+              contentContainerStyle={styles.listContent}
             />
           )
         ) : (
           <ScrollView
-            style={styles.studyScroll}
-            contentContainerStyle={styles.linksContent}
-            keyboardShouldPersistTaps="handled"
+            keyboardShouldPersistTaps="never"
+            style={styles.flex}
+            contentContainerStyle={styles.homeScrollContent}
           >
-            <Text style={styles.sectionLabel}>{t("home.studySection")}</Text>
-            <View style={styles.links}>
-              {STUDY_LINKS.map(({ path, Icon, titleKey }) => {
-                const count = studyCounts[titleKey];
-                const linkLoading =
-                  isLoading ||
-                  (titleKey === "nav.categories" && categoriesLoading) ||
-                  (titleKey === "nav.themes" && themesLoading);
-                return (
-                  <StudyLinkRow
-                    key={path}
-                    Icon={Icon}
-                    title={t(titleKey)}
-                    subtitle={studyCountLabel(titleKey, count, t)}
-                    loading={linkLoading}
-                    onPress={() => router.push(path as Href)}
-                  />
-                );
-              })}
+            <View style={styles.linksSection}>
+              <Text style={styles.sectionLabel}>{t("home.studySection")}</Text>
+              <View style={styles.links}>
+                {STUDY_LINKS.map(({ path, Icon, titleKey }) => {
+                  const count = studyCounts[titleKey];
+                  const linkLoading =
+                    isLoading ||
+                    (titleKey === "nav.categories" && categoriesLoading) ||
+                    (titleKey === "nav.themes" && themesLoading);
+                  return (
+                    <StudyLinkRow
+                      key={path}
+                      Icon={Icon}
+                      title={t(titleKey)}
+                      subtitle={studyCountLabel(titleKey, count, t)}
+                      loading={linkLoading}
+                      onPress={() => router.push(path as Href)}
+                    />
+                  );
+                })}
+              </View>
             </View>
           </ScrollView>
         )}
@@ -249,29 +353,35 @@ export default function HomeScreen() {
         onClose={() => setBulkVisible(false)}
         onImport={bulkCreate}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
-function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
+function createStyles(theme: ReturnType<typeof useTheme>["theme"], colorScheme: ColorScheme) {
+  const isDark = colorScheme === "dark";
   return StyleSheet.create({
-    safe: {
+    root: {
       flex: 1,
       backgroundColor: theme.appBg,
     },
     flex: {
       flex: 1,
     },
-    studyScroll: {
-      flex: 1,
-      backgroundColor: theme.appBg,
+    flexGrow: {
+      flexGrow: 1,
+    },
+    homeScrollContent: {
+      flexGrow: 1,
+      paddingBottom: 100,
+    },
+    listContent: {
+      paddingBottom: 32,
     },
     header: {
       backgroundColor: theme.appSurface,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: theme.appBorderStrong,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.appBorder,
       paddingHorizontal: 20,
-      paddingTop: 12,
       paddingBottom: 20,
     },
     headerTop: {
@@ -286,13 +396,17 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       fontWeight: "600",
       letterSpacing: 1.5,
       textTransform: "uppercase",
-      color: theme.main400,
+      color: isDark ? theme.main500 : theme.main400,
     },
-    settingsBtn: {
-      padding: 8,
-      borderRadius: 12,
+    headerActions: {
+      flexDirection: "row",
+      alignItems: "center",
       marginRight: -8,
       marginTop: -4,
+    },
+    headerIconBtn: {
+      padding: 8,
+      borderRadius: 12,
     },
     title: {
       fontSize: 20,
@@ -300,10 +414,10 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       color: theme.appText,
       marginBottom: 12,
     },
-    linksContent: {
+    linksSection: {
+      backgroundColor: theme.appBg,
       paddingHorizontal: 20,
       paddingTop: 20,
-      paddingBottom: 100,
     },
     sectionLabel: {
       fontSize: 12,
@@ -322,6 +436,8 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       alignItems: "center",
       justifyContent: "center",
       paddingHorizontal: 32,
+      backgroundColor: theme.appBg,
+      minHeight: 240,
     },
     emptyIcon: {
       fontSize: 36,
@@ -340,6 +456,7 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       paddingHorizontal: 20,
       paddingTop: 12,
       paddingBottom: 4,
+      backgroundColor: theme.appBg,
     },
   });
 }

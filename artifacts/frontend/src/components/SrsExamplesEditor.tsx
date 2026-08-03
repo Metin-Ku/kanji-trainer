@@ -317,7 +317,7 @@ export function SrsExamplesEditor({
                       linkingIndex === exIndex ||
                       allWords.length === 0
                     }
-                    className="bg-app-surface border-app-border-strong text-app-text-secondary hover:border-main-300 inline-flex items-center gap-1 rounded-lg border px-2.5 py-1 text-xs font-semibold disabled:opacity-40"
+                    className="bg-app-surface border-app-border-strong text-app-text-secondary hover:border-main-300 inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-semibold disabled:opacity-40"
                   >
                     {linkingIndex === exIndex ? (
                       <LoadingSpinner size={12} />

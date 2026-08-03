@@ -238,7 +238,7 @@ export function BulkImportModal({ visible, allWords, onClose, onImport }: Props)
         <ScrollView
           style={styles.flex}
           contentContainerStyle={styles.content}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="never"
         >
           {result ? (
             <View style={styles.resultBox}>

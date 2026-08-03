@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ArrowLeft } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HintLinesDisplay } from "@/components/HintLinesEditor";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import { useTheme } from "@/hooks/useThemes";
 import { useTranslation } from "@/i18n/I18nProvider";
 import { useTheme as useAppTheme } from "@/theme/ThemeProvider";
@@ -43,9 +43,7 @@ export default function ThemeQuizStudyScreen() {
   if (isLoading || !theme) {
     return (
       <SafeAreaView style={styles.safe}>
-        <View style={styles.center}>
-          <LoadingSpinner size={32} color={colors.main500} />
-        </View>
+        <LoadingPlaceholder padding="lg" style={styles.center} />
       </SafeAreaView>
     );
   }

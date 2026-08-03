@@ -33,7 +33,22 @@ type Props = {
   /** Overlay inside parent (e.g. above SRS rating bar) instead of RN Modal. */
   inline?: boolean;
   scrollable?: boolean;
+  /** Give the sheet an explicit height (from maxHeight) so flex children can fill it. */
+  expanded?: boolean;
 };
+
+function resolveSheetHeight(
+  maxHeight: ViewStyle["maxHeight"],
+  bottomInset: number,
+): number | undefined {
+  const available = SCREEN_HEIGHT - bottomInset;
+  if (typeof maxHeight === "string" && maxHeight.endsWith("%")) {
+    const pct = parseFloat(maxHeight) / 100;
+    if (!Number.isNaN(pct)) return available * pct;
+  }
+  if (typeof maxHeight === "number") return maxHeight;
+  return undefined;
+}
 
 export function SlideUpModal({
   visible,
@@ -44,6 +59,7 @@ export function SlideUpModal({
   bottomInset = 0,
   inline = false,
   scrollable = false,
+  expanded = false,
 }: Props) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
@@ -52,6 +68,8 @@ export function SlideUpModal({
   const [mounted, setMounted] = useState(visible);
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const backdropOpacity = useSharedValue(0);
+
+  const sheetPixelHeight = resolveSheetHeight(maxHeight, bottomInset);
 
   const finishHide = useCallback(() => {
     setMounted(false);
@@ -116,13 +134,13 @@ export function SlideUpModal({
     <ScrollView
       style={styles.scroll}
       contentContainerStyle={styles.scrollContent}
-      keyboardShouldPersistTaps="handled"
+      keyboardShouldPersistTaps="never"
       showsVerticalScrollIndicator={false}
     >
       {children}
     </ScrollView>
   ) : (
-    children
+    <View style={expanded ? styles.bodyExpanded : styles.body}>{children}</View>
   );
 
   const sheet = (
@@ -130,11 +148,12 @@ export function SlideUpModal({
       style={[
         styles.sheet,
         sheetStyle,
-        {
-          maxHeight,
-          paddingBottom: Math.max(insets.bottom, 12),
-          marginBottom: bottomInset,
-        },
+        expanded && sheetPixelHeight != null
+          ? { height: sheetPixelHeight }
+          : sheetPixelHeight != null
+            ? { maxHeight: sheetPixelHeight }
+            : { maxHeight },
+        { paddingBottom: Math.max(insets.bottom, 12) },
       ]}
     >
       <GestureDetector gesture={panGesture}>
@@ -150,7 +169,14 @@ export function SlideUpModal({
   );
 
   const backdrop = (
-    <Animated.View style={[styles.backdrop, backdropStyle]} pointerEvents="auto">
+    <Animated.View
+      style={[
+        styles.backdrop,
+        backdropStyle,
+        bottomInset > 0 && { bottom: bottomInset },
+      ]}
+      pointerEvents="auto"
+    >
       <Pressable style={StyleSheet.absoluteFill} onPress={requestClose} />
     </Animated.View>
   );
@@ -158,13 +184,11 @@ export function SlideUpModal({
   if (inline) {
     return (
       <View style={styles.inlineRoot} pointerEvents="box-none">
-        <Animated.View
-          style={[styles.backdrop, backdropStyle, bottomInset > 0 && { bottom: bottomInset }]}
-          pointerEvents="auto"
+        {backdrop}
+        <View
+          style={[styles.inlineSheetHost, { bottom: bottomInset }]}
+          pointerEvents="box-none"
         >
-          <Pressable style={StyleSheet.absoluteFill} onPress={requestClose} />
-        </Animated.View>
-        <View style={[styles.inlineSheetHost, { bottom: bottomInset }]} pointerEvents="box-none">
           {sheet}
         </View>
       </View>
@@ -175,7 +199,10 @@ export function SlideUpModal({
     <Modal visible={mounted} transparent animationType="none" onRequestClose={requestClose}>
       <View style={styles.modalRoot}>
         {backdrop}
-        <View style={styles.sheetHost} pointerEvents="box-none">
+        <View
+          style={[styles.sheetHost, bottomInset > 0 && { bottom: bottomInset }]}
+          pointerEvents="box-none"
+        >
           {sheet}
         </View>
       </View>
@@ -199,8 +226,10 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       backgroundColor: "rgba(0,0,0,0.4)",
     },
     sheetHost: {
-      flex: 1,
-      justifyContent: "flex-end",
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
     },
     inlineSheetHost: {
       position: "absolute",
@@ -236,8 +265,16 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       paddingHorizontal: 20,
       paddingBottom: 8,
     },
+    body: {
+      flexShrink: 1,
+    },
+    bodyExpanded: {
+      flex: 1,
+      minHeight: 0,
+    },
     scroll: {
-      flexGrow: 0,
+      flex: 1,
+      minHeight: 0,
     },
     scrollContent: {
       paddingBottom: 8,

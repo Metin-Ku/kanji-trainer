@@ -13,6 +13,7 @@ const LIGHT = {
   appBg: "#f9fafb",
   appSurface: "#ffffff",
   appMuted: "#f3f4f6",
+  appHeatmapAlternative: "#f9fafb",
   appBorder: "#f3f4f6",
   appBorderStrong: "#e5e7eb",
   appText: "#111827",
@@ -28,6 +29,7 @@ const DARK = {
   appBg: "#0f1117",
   appSurface: "#181b24",
   appMuted: "#1f2430",
+  appHeatmapAlternative: "hsl(223, 22%, 14%)",
   appBorder: "#252a36",
   appBorderStrong: "#323845",
   appText: "#f3f4f6",
@@ -56,6 +58,7 @@ export type AppTheme = {
   appBg: string;
   appSurface: string;
   appMuted: string;
+  appHeatmapAlternative: string;
   appBorder: string;
   appBorderStrong: string;
   appText: string;

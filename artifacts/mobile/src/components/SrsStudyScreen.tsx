@@ -280,6 +280,7 @@ export function SrsStudyScreen() {
         onClose={() => setShowDetails(false)}
         onSave={handleSaveWord}
         bottomInset={ratingBarHeight}
+        deck={deck}
       />
 
       {showStroke && item.word.kanji ? (

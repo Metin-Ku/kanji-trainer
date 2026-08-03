@@ -12,7 +12,7 @@ import { ArrowLeft, Plus, Trash2 } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { ThemeQuizQuestion } from "@workspace/api-client-react";
 import { HintLinesEditor } from "@/components/HintLinesEditor";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import {
   defaultChoices,
   emptyQuestion,
@@ -69,9 +69,7 @@ export default function ThemeQuizEditorScreen() {
   if (isLoading || !theme) {
     return (
       <SafeAreaView style={styles.safe}>
-        <View style={styles.center}>
-          <LoadingSpinner size={32} color={colors.main500} />
-        </View>
+        <LoadingPlaceholder padding="lg" style={styles.center} />
       </SafeAreaView>
     );
   }

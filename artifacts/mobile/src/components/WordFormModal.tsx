@@ -183,6 +183,7 @@ export function WordFormModal({ visible, initial, allWords = [], onSave, onClose
       onClose={onClose}
       title={t(isEdit ? "wordForm.editTitle" : "wordForm.addTitle")}
       maxHeight="92%"
+      expanded
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -213,7 +214,7 @@ export function WordFormModal({ visible, initial, allWords = [], onSave, onClose
         <ScrollView
           style={styles.flex}
           contentContainerStyle={styles.form}
-          keyboardShouldPersistTaps="handled"
+          keyboardShouldPersistTaps="never"
         >
           {tab === "general" ? (
             <>

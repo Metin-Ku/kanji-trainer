@@ -2,7 +2,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import "react-native-gesture-handler";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -10,6 +11,7 @@ import "react-native-reanimated";
 
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
 import { I18nProvider } from "@/i18n/I18nProvider";
+import { DismissKeyboardView } from "@/components/DismissKeyboardView";
 import { ensureApiClientConfigured } from "@/lib/configureApiClient";
 import { defaultTheme } from "@/theme/buildTheme";
 import { ThemeProvider } from "@/theme/ThemeProvider";
@@ -47,7 +49,7 @@ function AuthGate({ children }: { children: React.ReactNode }) {
   if (loading) {
     return (
       <View style={styles.boot}>
-        <ActivityIndicator size="large" color={defaultTheme.main500} />
+        <LoadingPlaceholder padding="md" />
       </View>
     );
   }
@@ -68,15 +70,18 @@ export default function RootLayout() {
             <I18nProvider>
               <AuthProvider>
                 <AuthGate>
-                  <Stack screenOptions={{ headerShown: false }}>
+                  <DismissKeyboardView style={{ flex: 1 }}>
+                    <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="index" />
                     <Stack.Screen name="login" />
                     <Stack.Screen name="settings" />
+                    <Stack.Screen name="progress" />
                     <Stack.Screen name="words" />
                     <Stack.Screen name="pronunciation" />
                     <Stack.Screen name="meaning" />
                     <Stack.Screen name="study" />
-                  </Stack>
+                    </Stack>
+                  </DismissKeyboardView>
                 </AuthGate>
               </AuthProvider>
             </I18nProvider>

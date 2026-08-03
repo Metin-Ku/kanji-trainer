@@ -11,7 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { ArrowLeft, ChevronRight, Plus } from "lucide-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import { WordPickerSheet } from "@/components/WordPickerSheet";
 import { useThemes } from "@/hooks/useThemes";
 import { useWords } from "@/hooks/useWords";
@@ -73,9 +73,7 @@ export default function ThemesHubScreen() {
       <Text style={styles.subtitle}>{t("themes.subtitle")}</Text>
 
       {isLoading ? (
-        <View style={styles.center}>
-          <LoadingSpinner size={32} color={theme.main500} />
-        </View>
+        <LoadingPlaceholder padding="lg" style={styles.center} />
       ) : (
         <FlatList
           data={themes}

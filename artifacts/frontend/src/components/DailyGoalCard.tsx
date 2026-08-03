@@ -145,7 +145,7 @@ export function DailyGoalCard({ variant = "card" }: DailyGoalCardProps) {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {streak > 0 ? (
-              <div className="bg-app-surface/80 border-main-100 inline-flex items-center gap-1 rounded-lg border px-2 py-1">
+              <div className="bg-app-surface/80 border-main-100 inline-flex items-center gap-1 rounded-md border px-2 py-1">
                 <Flame
                   size={variant === "banner" ? 14 : 16}
                   className="text-main-500 dark:text-main-600"

@@ -22,6 +22,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CategoryIcon } from "@/components/CategoryIcon";
 import { CategoryIconField } from "@/components/CategoryIconField";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { LoadingPlaceholder } from "@/components/LoadingPlaceholder";
 import { SlideUpModal } from "@/components/SlideUpModal";
 import { WordListPanel } from "@/components/WordListPanel";
 import { WordPickerSheet } from "@/components/WordPickerSheet";
@@ -208,9 +209,7 @@ export default function CategoryDetailScreen() {
 
   if (isLoading || !category) {
     return (
-      <View style={[styles.center, { backgroundColor: theme.appSurface, flex: 1 }]}>
-        <LoadingSpinner size={32} color={theme.main500} />
-      </View>
+      <LoadingPlaceholder padding="lg" style={[styles.center, { backgroundColor: theme.appSurface, flex: 1 }]} />
     );
   }
 

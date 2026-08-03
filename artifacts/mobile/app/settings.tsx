@@ -43,6 +43,7 @@ import {
   SHADES,
   type PaletteName,
 } from "@/theme/palettes";
+import { ColorScheme } from "@/settings/appSettings";
 
 type Section = "styling" | "srs" | "database" | "language" | "account";
 
@@ -67,7 +68,8 @@ export default function SettingsScreen() {
   const { settings, patchSettings } = useAppSettings();
   const { decks, setDeckTarget } = useDailyGoal();
   const { words, updateWordAsync } = useWords();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  const styles = useMemo(() => createStyles(theme, colorScheme), [theme, colorScheme]);
+  const isDark = colorScheme === "dark";
 
   const [section, setSection] = useState<Section>("styling");
   const [relinkBusy, setRelinkBusy] = useState(false);
@@ -189,7 +191,7 @@ export default function SettingsScreen() {
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="never"
       >
         {section === "styling" ? (
           <>
@@ -220,7 +222,7 @@ export default function SettingsScreen() {
                     style={({ pressed }) => [
                       styles.paletteCard,
                       {
-                        borderColor: selected ? theme.main400 : theme.appBorderStrong,
+                        borderColor: selected ? isDark ? theme.main600 : theme.main500 : theme.appBorderStrong,
                       },
                       selected && styles.paletteCardSelected,
                       pressed && { opacity: 0.95 },
@@ -406,14 +408,6 @@ export default function SettingsScreen() {
                     ]}
                   >
                     <Text style={styles.languageLabel}>{t(labelKey)}</Text>
-                    {selected ? (
-                      <View style={styles.selectedRow}>
-                        <Check size={14} color={theme.main500} strokeWidth={2.5} />
-                        <Text style={styles.selectedText}>
-                          {t("settings.styling.selected")}
-                        </Text>
-                      </View>
-                    ) : null}
                   </Pressable>
                 );
               })}
@@ -481,7 +475,8 @@ export default function SettingsScreen() {
   );
 }
 
-function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
+function createStyles(theme: ReturnType<typeof useTheme>["theme"], colorScheme: ColorScheme) {
+  const isDark = colorScheme === "dark";
   return StyleSheet.create({
     safe: { flex: 1, backgroundColor: theme.appBg },
     topBar: {
@@ -505,7 +500,7 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       fontWeight: "600",
       letterSpacing: 1.5,
       textTransform: "uppercase",
-      color: theme.main400,
+      color: isDark ? theme.main600 : theme.main500,
     },
     sectionNav: {
       flexGrow: 0,
@@ -689,7 +684,7 @@ function createStyles(theme: ReturnType<typeof useTheme>["theme"]) {
       gap: 8,
     },
     languageCardSelected: {
-      borderColor: theme.main400,
+      borderColor: isDark ? theme.main600 : theme.main500,
       borderWidth: 2,
     },
     languageLabel: { fontSize: 14, fontWeight: "600", color: theme.appText },

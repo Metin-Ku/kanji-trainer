@@ -367,7 +367,7 @@ export function WordListPanel({
       <div className="relative shrink-0" ref={sortMenuRef}>
         <button
           onClick={() => setShowSortMenu((v) => !v)}
-          className={`flex items-center gap-1 rounded-lg px-2 py-1.5 transition-colors ${activeSortCount > 0 ? "text-main-400 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900" : "text-app-text-muted hover:text-app-text-secondary hover:bg-app-muted"}`}
+          className={`flex items-center gap-1 rounded-md px-2 py-1.5 transition-colors ${activeSortCount > 0 ? "text-main-400 dark:text-main-500 bg-main-50 hover:bg-main-100 dark:bg-main-950 dark:hover:bg-main-900" : "text-app-text-muted hover:text-app-text-secondary hover:bg-app-muted"}`}
         >
           <ArrowUpDown size={14} strokeWidth={2} />
           <span className="text-xs font-medium">

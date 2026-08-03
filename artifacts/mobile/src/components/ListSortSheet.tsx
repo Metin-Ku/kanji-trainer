@@ -107,7 +107,7 @@ export function ListSortSheet(props: ListSortSheetProps) {
       title={t("common.sort")}
       maxHeight="75%"
     >
-      <ScrollView style={styles.scroll} keyboardShouldPersistTaps="handled">
+      <ScrollView style={styles.scroll} keyboardShouldPersistTaps="never">
         {showPageSize && onPageSizeChange ? (
           <View style={styles.group}>
             <Text style={styles.groupLabel}>{t("words.filters.pageSize")}</Text>
